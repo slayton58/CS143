@@ -7,10 +7,15 @@
  *  output, so headers and global definitions are placed here to be visible
  * to the code in the file.  Don't remove anything that was here initially
  */
+
+%option yylineno
 %{
 #include <cool-parse.h>
 #include <stringtab.h>
 #include <utilities.h>
+
+
+
 
 /* The compiler assumes these identifiers. */
 #define yylval cool_yylval
@@ -38,6 +43,7 @@ extern int curr_lineno;
 extern int verbose_flag;
 
 extern YYSTYPE cool_yylval;
+int comment_depth=0;
 
 /*
  *  Add Your own definitions here
@@ -45,11 +51,23 @@ extern YYSTYPE cool_yylval;
 
 %}
 
+
+
+
+
 /*
  * Define names for regular expressions here.
  */
+ALPHA [A-Za-z]
+UPPER [A-Z]
+LOWER [a-z]
+DIGIT [0-9]
+WHITE_SPACE [ \n\f\r\t\v]
 
-DARROW          =>
+INTEGER {DIGIT}+
+
+
+DARROW  =>
 
 %%
 
@@ -62,6 +80,11 @@ DARROW          =>
   *  The multiple-character operators.
   */
 {DARROW}		{ return (DARROW); }
+\n              {}
+{INTEGER}       { cool_yylval.symbol = inttable.add_string(yytext);                  
+                  printf("line is:%d ", yylineno);
+                  return INT_CONST;
+                }                   
 
  /*
   * Keywords are case-insensitive except for the values true and false,
@@ -77,4 +100,14 @@ DARROW          =>
   */
 
 
+
 %%
+static void DoBeforeEachAction()
+{
+	cout<<"lalala";
+}
+
+
+
+
+
