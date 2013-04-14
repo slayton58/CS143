@@ -48,7 +48,7 @@ extern YYSTYPE cool_yylval;
 %option  yylineno
 %option  case-insensitive
 
-%x  COMMENT
+%x  COMMENT STRING
 
 
 /*
@@ -97,7 +97,11 @@ NEWLINE        "\n"
 <COMMENT>\n     curr_lineno++;
 <COMMENT>"*"+"/"  { printf("end comment!\n");  BEGIN(INITIAL);}
 
-
+<INITIAL>\"     {string_buf[]=""; BEGIN(STRING);}
+<STRING>\"      {BEGIN(INITIAL); 
+                 curr_lineno=yylineno;
+				 cool_yylval.symbol = stringtable.add_string(string_buf_ptr);
+				 return STR_CONST;}
  
 \n              {} 
 {NEWLINE}       {}	
