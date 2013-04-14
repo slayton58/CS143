@@ -233,6 +233,7 @@ OBJECTID       [a-z]({CHAR}|{DIGIT}|_)*
                                     }                                 
                                     strcat(string_buf, yytext);
                                  }
+
  
 \n              {} 
 {NEWLINE}       {}	
