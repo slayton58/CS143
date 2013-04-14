@@ -49,7 +49,7 @@ int comment_level = 0;
 %option  yylineno
 %option  case-insensitive
 
-%x  COMMENT
+%x  COMMENT COMMENT_DASH
 
 
 /*
@@ -92,12 +92,45 @@ OBJECTID       [a-z]({CHAR}|{DIGIT}|_)*
  /*
   *  Nested comments
   */
-"/*"          BEGIN(COMMENT);
-<COMMENT>[^*\n]* {}
-<COMMENT>"*"+[^*/\n]*  {}
-<COMMENT>\n     curr_lineno++;
-<COMMENT>"*"+"/"  { printf("end comment!\n");  BEGIN(INITIAL);}
+<INITIAL>--             {BEGIN(COMMENT_DASH);}
+<COMMENT_DASH>.*$       { curr_lineno = yylineno; 
+                          BEGIN(INITIAL);
+                          printf("--comment at line %d\n", curr_lineno);
+                        }
+<COMMENT_DASH><<EOF>>    { curr_lineno = yylineno; 
+                          printf("--comment at eof %d\n", curr_lineno);
+                          yyterminate();
+                        }                        
+<INITIAL>"(*"           { BEGIN(COMMENT);
+                          comment_level++;
+                          printf("start comment at line%d\n", yylineno);
+                          printf("comment level++, =%d\n", comment_level);
+                        }
+<INITIAL>"*)"           {
+                          curr_lineno = yylineno;
+                          cool_yylval.error_msg = "Unmatched *)";
+                          printf("error begin\n");
+                          return ERROR;
+                        }
 
+<COMMENT>"("+"*"        {  comment_level++;
+                           printf("comment level++, =%d\n", comment_level);
+                        }
+<COMMENT>"*"+")"        {  comment_level--;
+                           printf("comment level--, =%d\n", comment_level);
+                           if (comment_level==0)
+                           {
+                              printf("end comment!\n");  
+                              BEGIN(INITIAL);
+                           }
+                        }
+<COMMENT>[^*(]|"("[^*]|"*"[^)]     {printf("skipping one\n");}
+<COMMENT><<EOF>>        {
+                            curr_lineno = yylineno;
+                            cool_yylval.error_msg = "EOF in comment";
+                            BEGIN(INITIAL);
+                            return ERROR;
+                        }
  /*
   *  The multiple-character operators.
   */
