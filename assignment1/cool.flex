@@ -184,9 +184,83 @@ OBJECTID       [a-z]({CHAR}|{DIGIT}|_)*
 				  return BOOL_CONST;
                 }
 		
-{DARROW}		{ curr_lineno = yylineno;
+{DARROW}		{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
 				  return (DARROW);  
-				 }					
+				 }	
+ 				 
+"<-"		     { cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return ASSIGN;
+				 } 	
+"+" 			 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('+');
+				 }
+"/"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('/');
+				 }
+"-"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('-');
+				 }
+"*"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('*');
+				 }
+"="				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('=');
+				 }
+"<"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('<');
+				 }
+"<="			{cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return LE;
+				 }
+"."				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('.');
+				 }
+"~"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('~');
+				 }
+","				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int(',');
+				 }
+";"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int(';');
+				 }
+":"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int(':');
+				 }
+"("				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('(');
+				 }
+")"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int(')');
+				 }
+"@"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('@');
+				 }
+"{"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('{');
+				 }
+"}"				 {cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return int('}');
+				 }
 {CHAR}+         { 
                   cool_yylval.symbol = inttable.add_string(yytext); 
                   curr_lineno = yylineno;
