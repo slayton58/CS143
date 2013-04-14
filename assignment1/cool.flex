@@ -102,9 +102,7 @@ NEWLINE        "\n"
                  curr_lineno=yylineno;
 				 cool_yylval.symbol = stringtable.add_string(string_buf_ptr);
 				 return STR_CONST;}
-<STRING>\\\\    {*string_buf_ptr="\\";
-                  string_buf_ptr++;
-				  if(strlen(*string_buf_ptr))}				 
+<STRING>\\\\    {}				 
  
 \n              {} 
 {NEWLINE}       {}	
