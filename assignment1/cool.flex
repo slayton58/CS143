@@ -8,14 +8,10 @@
  * to the code in the file.  Don't remove anything that was here initially
  */
 
-%option yylineno
 %{
 #include <cool-parse.h>
 #include <stringtab.h>
 #include <utilities.h>
-
-
-
 
 /* The compiler assumes these identifiers. */
 #define yylval cool_yylval
@@ -43,32 +39,47 @@ extern int curr_lineno;
 extern int verbose_flag;
 
 extern YYSTYPE cool_yylval;
-int comment_depth=0;
 
 /*
  *  Add Your own definitions here
  */
 
 %}
+%option  yylineno
+%option  case-insensitive
 
-
-
+%x  COMMENT
 
 
 /*
  * Define names for regular expressions here.
  */
-ALPHA [A-Za-z]
-UPPER [A-Z]
-LOWER [a-z]
-DIGIT [0-9]
-WHITE_SPACE [ \n\f\r\t\v]
-
-INTEGER {DIGIT}+
 
 
-DARROW  =>
-
+CLASS          ?i:class
+ELSE           ?i:else
+FI             ?i:fi
+IF             (?i:if)
+IN             ?i:in
+INHERITS       ?i:inherits
+LET            ?i:let
+LOOP           ?i:loop
+POOL           ?i:pool
+THEN           ?i:then
+WHILE          ?i:while
+CASE           ?i:case
+ESAC           ?i:esac
+OF             ?i:of
+DARROW          =>
+NEW            ?i:new
+ISVOID         ?i:isvoid
+CHAR           [A-Za-z]
+DIGIT          [0-9]
+NOT            ?i:not
+TRUE           (?-i:t)(?i:rue)
+FALSE          (?-i:f)(?i:alse)
+BOOL           {TRUE}|{FALSE}
+NEWLINE        "\n"
 %%
 
  /*
@@ -79,13 +90,105 @@ DARROW  =>
  /*
   *  The multiple-character operators.
   */
-{DARROW}		{ return (DARROW); }
-\n              {}
-{INTEGER}       { cool_yylval.symbol = inttable.add_string(yytext);                  
-                  printf("line is:%d ", yylineno);
-                  return INT_CONST;
-                }                   
+  
+"/*"          BEGIN(COMMENT);
+<COMMENT>[^*\n]* {}
+<COMMENT>"*"+[^*/\n]*  {}
+<COMMENT>\n     curr_lineno++;
+<COMMENT>"*"+"/"  { printf("end comment!\n");  BEGIN(INITIAL);}
 
+
+ 
+\n              {} 
+{NEWLINE}       {}	
+		   
+		
+{CLASS}         { cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno; 
+				  return CLASS;
+                }	
+{ELSE}          { cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return ELSE;
+                }				
+{FI}    		{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return FI;
+                }	
+{IF}            { cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+                  return IF;
+                }				
+{IN}		   	{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return IN;
+                }	
+{INHERITS}		{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return INHERITS;
+                }	
+	
+{LET}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                 curr_lineno = yylineno;
+				  return LET;
+                }
+{LOOP}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return LOOP;
+                }	
+{POOL}      	{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return POOL;
+                }	
+{THEN}        	{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return THEN;
+                }					
+{WHILE}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return WHILE;
+                }	
+{CASE}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return CASE;
+                }	
+{ESAC}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return ESAC;
+                }	
+{NEW}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return NEW;
+                }
+{ISVOID}		{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return ISVOID;
+                }				
+{OF}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return OF;
+                }	
+{NOT}           { cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return NOT;
+                }
+{BOOL}			{ cool_yylval.symbol = inttable.add_string(yytext);
+                  curr_lineno = yylineno;
+				  return BOOL_CONST;
+                }
+		
+{DARROW}		{ curr_lineno = yylineno;
+				  return (DARROW);  
+				 }					
+{CHAR}+         { 
+                  cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;
+                  return STR_CONST;
+				}
+{DIGIT}+        { cool_yylval.symbol = inttable.add_string(yytext); 
+                  curr_lineno = yylineno;                 
+                  return INT_CONST;
+				}				
  /*
   * Keywords are case-insensitive except for the values true and false,
   * which must begin with a lower-case letter.
@@ -100,14 +203,4 @@ DARROW  =>
   */
 
 
-
 %%
-static void DoBeforeEachAction()
-{
-	cout<<"lalala";
-}
-
-
-
-
-
