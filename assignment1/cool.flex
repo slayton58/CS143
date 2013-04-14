@@ -33,7 +33,7 @@ extern FILE *fin; /* we read from this file */
 		YY_FATAL_ERROR( "read() in flex scanner failed");
 
 char string_buf[MAX_STR_CONST]; /* to assemble string constants */
-char *string_buf_ptr;
+char *string_buf_ptr=string_buf;
 
 extern int curr_lineno;
 extern int verbose_flag;
@@ -80,6 +80,15 @@ TRUE           (?-i:t)(?i:rue)
 FALSE          (?-i:f)(?i:alse)
 BOOL           {TRUE}|{FALSE}
 NEWLINE        "\n"
+CAPITAL        [A-Z]
+LOWER          [a-z]
+WHITESPACE     [ \n\f\r\t\v]
+
+OBJECTID       {LOWER}({CHAR}|{DIGIT}|"_")*
+TYPEID         {CAPITAL}({CHAR}|{DIGIT}|"_")*
+SELFID         "self"
+SELF_TYPEID    "SELF_TYPE"
+IDENTIFIER     {TYPEID}|{OBJECTID}|{SELFID}|{SELF_TYPEID}
 %%
 
  /*
@@ -97,177 +106,83 @@ NEWLINE        "\n"
 <COMMENT>\n     curr_lineno++;
 <COMMENT>"*"+"/"  { printf("end comment!\n");  BEGIN(INITIAL);}
 
-<INITIAL>\"     {string_buf[0]='\0'; BEGIN(STRING);}
+<INITIAL>\"     {printf("current string length = %d\n", (int)strlen(string_buf_ptr));
+                 string_buf[0]='\0';  
+				 BEGIN(STRING);}
 <STRING>\"      {BEGIN(INITIAL); 
                  curr_lineno=yylineno;
+				 printf("current string length = %d\n", (int)strlen(string_buf_ptr));
 				 cool_yylval.symbol = stringtable.add_string(string_buf_ptr);
 				 return STR_CONST;}
-<STRING>\\\\    {}				 
+<STRING>\\\\    {}	
+<STRING>([^\""\\\n\t\b\f\000])+ {}			 
  
-\n              {} 
-{NEWLINE}       {}	
+
 		   
 		
-{CLASS}         { cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno; 
-				  return CLASS;
-                }	
-{ELSE}          { cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return ELSE;
-                }				
-{FI}    		{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return FI;
-                }	
-{IF}            { cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-                  return IF;
-                }				
-{IN}		   	{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return IN;
-                }	
-{INHERITS}		{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return INHERITS;
-                }	
-	
-{LET}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                 curr_lineno = yylineno;
-				  return LET;
-                }
-{LOOP}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return LOOP;
-                }	
-{POOL}      	{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return POOL;
-                }	
-{THEN}        	{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return THEN;
-                }					
-{WHILE}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return WHILE;
-                }	
-{CASE}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return CASE;
-                }	
-{ESAC}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return ESAC;
-                }	
-{NEW}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return NEW;
-                }
-{ISVOID}		{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return ISVOID;
-                }				
-{OF}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return OF;
-                }	
-{NOT}           { cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return NOT;
-                }
-{BOOL}			{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return BOOL_CONST;
-                }
-		
-{DARROW}		{ cool_yylval.symbol = inttable.add_string(yytext);
-                  curr_lineno = yylineno;
-				  return (DARROW);  
-				 }	
+<INITIAL>{CLASS}         {  curr_lineno = yylineno;  return CLASS; }	
+<INITIAL>{ELSE}          {  curr_lineno = yylineno;  return ELSE;  }				
+<INITIAL>{FI}    		 {  curr_lineno = yylineno;  return FI;    }	
+<INITIAL>{IF}            {  curr_lineno = yylineno;  return IF;    }				
+<INITIAL>{IN}		   	 {  curr_lineno = yylineno;  return IN;    }	
+<INITIAL>{INHERITS}		 {  curr_lineno = yylineno;  return INHERITS;  }		
+<INITIAL>{LET}			 {  curr_lineno = yylineno;  return LET;   }
+<INITIAL>{LOOP}			 {  curr_lineno = yylineno;  return LOOP;  }	
+<INITIAL>{POOL}      	 {  curr_lineno = yylineno;  return POOL;  }	
+<INITIAL>{THEN}        	 {  curr_lineno = yylineno;  return THEN;  }					
+<INITIAL>{WHILE}		 {  curr_lineno = yylineno;  return WHILE; }	
+<INITIAL>{CASE}			 {  curr_lineno = yylineno;  return CASE;  }	
+<INITIAL>{ESAC}			 {  curr_lineno = yylineno;  return ESAC;  }	
+<INITIAL>{NEW}			 {  curr_lineno = yylineno;  return NEW;   }
+<INITIAL>{ISVOID}		 {  curr_lineno = yylineno;  return ISVOID;} 				
+<INITIAL>{OF}			 {  curr_lineno = yylineno;  return OF;    }	
+<INITIAL>{NOT}           {  curr_lineno = yylineno;  return NOT;   }
+<INITIAL>{FALSE}	     { cool_yylval.boolean = false;
+                           curr_lineno = yylineno;
+				           return BOOL_CONST;                      }
+<INITIAL>{TRUE}			{  cool_yylval.boolean = true;
+                           curr_lineno = yylineno;
+				           return BOOL_CONST;                      }	
+						   
+<INITIAL>{DARROW}		{  curr_lineno = yylineno;  return DARROW;    }	
  				 
-"<-"		     { cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return ASSIGN;
-				 } 	
-"+" 			 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('+');
-				 }
-"/"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('/');
-				 }
-"-"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('-');
-				 }
-"*"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('*');
-				 }
-"="				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('=');
-				 }
-"<"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('<');
-				 }
-"<="			{cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return LE;
-				 }
-"."				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('.');
-				 }
-"~"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('~');
-				 }
-","				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int(',');
-				 }
-";"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int(';');
-				 }
-":"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int(':');
-				 }
-"("				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('(');
-				 }
-")"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int(')');
-				 }
-"@"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('@');
-				 }
-"{"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('{');
-				 }
-"}"				 {cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return int('}');
-				 }
-{CHAR}+         { 
-                  cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;
-                  return STR_CONST;
-				}
-{DIGIT}+        { cool_yylval.symbol = inttable.add_string(yytext); 
-                  curr_lineno = yylineno;                 
-                  return INT_CONST;
-				}				
+<INITIAL>"<-"		    {  curr_lineno = yylineno;  return ASSIGN;    } 	
+<INITIAL>"+" 			{  curr_lineno = yylineno;  return int('+');  }
+<INITIAL>"/"		    {  curr_lineno = yylineno;  return int('/');  }
+<INITIAL>"-"			{  curr_lineno = yylineno;  return int('-');  }
+<INITIAL>"*"			{  curr_lineno = yylineno;  return int('*');  }
+<INITIAL>"="		    {  curr_lineno = yylineno;  return int('=');  }
+<INITIAL>"<"		    {  curr_lineno = yylineno;  return int('<');  }
+<INITIAL>"<="			{  curr_lineno = yylineno;  return LE;        }
+<INITIAL>"."		    {  curr_lineno = yylineno;  return int('.');  }
+<INITIAL>"~"			{  curr_lineno = yylineno;  return int('~');  }
+<INITIAL>","			{  curr_lineno = yylineno;  return int(',');  }
+<INITIAL>";"			{  curr_lineno = yylineno;  return int(';');  }
+<INITIAL>":"			{  curr_lineno = yylineno;  return int(':');  }
+<INITIAL>"("			{  curr_lineno = yylineno;  return int('(');  }
+<INITIAL>")"		    { curr_lineno = yylineno;   return int(')');  }
+<INITIAL>"@"			{ curr_lineno = yylineno;   return int('@');  }
+<INITIAL>"{"			{ curr_lineno = yylineno;   return int('{');  }
+<INITIAL>"}"			{ curr_lineno = yylineno;   return int('}');  }
+
+<INITIAL>{DIGIT}+       { cool_yylval.symbol = inttable.add_string(yytext); 
+                          curr_lineno = yylineno;                 
+                          return INT_CONST;
+				        }	
+<INITIAL>{TYPEID}       { cool_yylval.symbol = stringtable.add_string(yytext); 
+                          curr_lineno = yylineno;                 
+                          return TYPEID;
+				         }	
+<INITIAL>{OBJECTID}     { cool_yylval.symbol = stringtable.add_string(yytext); 
+                          curr_lineno = yylineno;                 
+                          return TYPEID;
+				        }
+<INITIAL>{NEWLINE}      {}					
+<INITIAL>{WHITESPACE}	{}
+
+<INITIAL>.              { cool_yylval.error_msg = yytext;
+				          return ERROR;
+				        }			
  /*
   * Keywords are case-insensitive except for the values true and false,
   * which must begin with a lower-case letter.
