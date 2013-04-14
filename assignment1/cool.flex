@@ -43,6 +43,7 @@ extern YYSTYPE cool_yylval;
 /*
  *  Add Your own definitions here
  */
+int comment_level = 0;
 
 %}
 %option  yylineno
@@ -70,32 +71,38 @@ WHILE          ?i:while
 CASE           ?i:case
 ESAC           ?i:esac
 OF             ?i:of
-DARROW          =>
 NEW            ?i:new
 ISVOID         ?i:isvoid
-CHAR           [A-Za-z]
-DIGIT          [0-9]
 NOT            ?i:not
 TRUE           (?-i:t)(?i:rue)
 FALSE          (?-i:f)(?i:alse)
+DARROW          =>
 BOOL           {TRUE}|{FALSE}
+CHAR           [A-Za-z]
+DIGIT          [0-9]
+
+INTEGER        {DIGIT}+
 NEWLINE        "\n"
+TYPEID         [A-Z]({CHAR}|{DIGIT}|_)*
+OBJECTID       [a-z]({CHAR}|{DIGIT}|_)*
+
+
 %%
 
  /*
   *  Nested comments
   */
-
-
- /*
-  *  The multiple-character operators.
-  */
-  
 "/*"          BEGIN(COMMENT);
 <COMMENT>[^*\n]* {}
 <COMMENT>"*"+[^*/\n]*  {}
 <COMMENT>\n     curr_lineno++;
 <COMMENT>"*"+"/"  { printf("end comment!\n");  BEGIN(INITIAL);}
+
+ /*
+  *  The multiple-character operators.
+  */
+  
+
 
 
  
@@ -185,7 +192,7 @@ NEWLINE        "\n"
                   curr_lineno = yylineno;
                   return STR_CONST;
 				}
-{DIGIT}+        { cool_yylval.symbol = inttable.add_string(yytext); 
+{INTEGER}        { cool_yylval.symbol = inttable.add_string(yytext); 
                   curr_lineno = yylineno;                 
                   return INT_CONST;
 				}				
