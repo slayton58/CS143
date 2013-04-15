@@ -118,4 +118,84 @@ Instructions
 
 Write-up for PA1
 ----------------
+=======================================================================
+                       Overall structure
+=======================================================================
+The lexical units of Cool are integers, type identifiers, object 
+identifiers, special notaitons, strings, keywords and white space.
+
+Our lexer has three states which is COMMENT, COMMENT_DASH,
+STRING STRERROR and INITIAL state.
+The five states handle the below different lexical units respectively.
+  COMMENT ---- any comments inside (* *)
+  COMMENT_DASH ---- any comments between -- and a new line character
+  STRING  ---- strings
+  STRERROR ---- strings encountered errors (e.g. contains null)  
+  INITIAL  ---- integers, type identifiers, object identifiers, 
+                special notaitons, keywords and white space.
+
+The order we used to analysis those units is:
+1. comments, we need to remove any contents inside the comment first, 
+   because anything inside the comment will not be passed to parser.
+2. strings, strings begin with ", when input stream encountered ", it 
+   will jump to string state. 
+3. keywords, we need to match keywords before identifiers, because if 
+   we change this order, we may end up with matching some keywords to 
+   identifiers, which is obviously wrong.
+4. special notaitons
+5. identifiers
+6. integers
+7. white space, We give white space the lowest priority, because if we
+   put white space before identifiers or keywords, this may remove 
+   white space too early, resulting in reading modified tokens.(e.g. 
+   if then become ifthen, two keywords become an identifier) 
+======================================================================
+                        Design rules
+======================================================================
+-------------------design rules for comments -------------------------
+
+-------------------design rules for strings---------------------------
+
+-------------------design rules for keywords--------------------------
+All the keywords except true and false, are all case insensitive, so 
+we active the case insensitive option, and make the following 
+definitions for keywords:
+CLASS          ?i:class
+
+And for true and false whose first character is case sensitive and must
+be lowere case, we use the following definitions:
+TRUE           (?-i:t)(?i:rue)
+FALSE          (?-i:f)(?i:alse)
+
+------------------ design rules for identifiers-----------------------
+Type identifiers begin with a capital letter, object identifiers begin
+with a lower case letter, so we first build a capital and a lower group
+for all characters, 
+CAPITAL        [A-Z]
+LOWER          [a-z]
+then make the following definitions for type identifiers and object 
+identifiers:
+OBJECTID       {LOWER}({CHAR}|{DIGIT}|"_")*
+TYPEID         {CAPITAL}({CHAR}|{DIGIT}|"_")*
+For the two special identifiers self and SELF_TYPE, we just use:
+SELFID         "self"
+SELF_TYPEID    "SELF_TYPE"
+
+-------------------design rules for others----------------------------
+For integers, we use:
+DIGIT          [0-9]
+INTEGER       {DIGIT}+
+
+For special notaitons, It is a "feature" of flex that single character 
+tokens may use their ASCII code as their token ID, and aren't typically
+given #define's for their token value. (This is also why the numeric 
+values for multi-character tokens traditionally start at 256, one more
+than the largest 8-bit ASCII value.) So when we return the token ID 
+for special notaitons, we just use their ASCII value.
+
+If an input cannot be matched to any of the above rules, an error 
+message will be generated. 
+======================================================================
+                            Test
+======================================================================
 
