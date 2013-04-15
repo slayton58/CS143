@@ -41,7 +41,7 @@ submit: lexer
 	$(CLASSDIR)/bin/pa_submit PA1 .
 
 clean:
-	rm -f lexer ${OBJS} cool-lex.cc
+	rm -f lexer ${OBJS} cool-lex.cc *.txt diff_result final_result
 
 # build rules
 

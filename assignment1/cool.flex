@@ -102,14 +102,13 @@ SELF_TYPEID    "SELF_TYPE"
   *  Nested comments
   */
 <INITIAL>--             {BEGIN(COMMENT_DASH);}
-<COMMENT_DASH>.*$       { curr_lineno = yylineno; 
-                          BEGIN(INITIAL);
-                          //printf("--comment at line %d\n", curr_lineno);
-                        }
-<COMMENT_DASH><<EOF>>    { curr_lineno = yylineno; 
-                          //printf("--comment at eof %d\n", curr_lineno);
+<COMMENT_DASH><<EOF>>   { curr_lineno = yylineno;
                           yyterminate();
-                        }                        
+                        }
+<COMMENT_DASH>[\n]      { curr_lineno = yylineno;
+                          BEGIN(INITIAL);
+                        }
+<COMMENT_DASH>[^\n]     {}
 <INITIAL>"(*"           { BEGIN(COMMENT);
                           comment_level++;
                           //printf("start comment at line%d\n", yylineno);
@@ -202,7 +201,13 @@ SELF_TYPEID    "SELF_TYPE"
                         return ERROR;
                     }                                 
                     strcat(string_buf, "\f");
-                }   
+                }
+<STRING>\\\x00  {
+                    BEGIN(STRERROR);
+                    curr_lineno=yylineno;
+                    cool_yylval.error_msg = "String contains escaped null character.";
+                    return ERROR;
+                }
 <STRING>\\.     { 
                     curr_lineno=yylineno;
                     if(strlen(string_buf) + 1 + 1 > MAX_STR_CONST)
@@ -249,9 +254,10 @@ SELF_TYPEID    "SELF_TYPE"
                                 }                                 
                                 strcat(string_buf, yytext);
                             }
-<STRERROR>\n    {BEGIN(INITIAL);}
-<STRERROR>\"    {BEGIN(INITIAL);}
+<STRERROR>[^\\]\n    {BEGIN(INITIAL);}
+<STRERROR>\"         {BEGIN(INITIAL);}
 <STRERROR>.     {}
+<STRERROR>\n    {}
 <STRING><<EOF>> {
                     curr_lineno = yylineno;
                     cool_yylval.error_msg = "EOF in string constant";
