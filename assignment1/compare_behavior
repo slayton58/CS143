@@ -1,0 +1,13 @@
+#
+# usage:
+#     ./compare_diff tests/<test_file_name>
+#     less diff_result
+#
+
+rm -rf diff_result 1.txt 2.txt
+make clean && make lexer
+./lexer $1 > 1.txt
+./lexer_ref $1 > 2.txt
+diff 1.txt 2.txt > diff_result
+echo '\n\n'
+cat diff_result
