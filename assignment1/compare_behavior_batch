@@ -1,0 +1,18 @@
+#!/bin/bash
+# usage:
+#     ./compare_diff tests/<test_file_name>
+#     less diff_result
+#
+
+make clean &&  make lexer
+for file in $1/*
+do
+  echo -e '['$file']\n'
+  rm -rf diff_result 1.txt 2.txt
+  ./lexer $file > 1.txt
+  ./lexer_ref $file > 2.txt
+  diff 1.txt 2.txt >> diff_result
+  echo -e '\n'
+  cat diff_result
+  cat diff_result >> final_result
+done
