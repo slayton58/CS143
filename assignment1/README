@@ -38,8 +38,36 @@ The order we used to analysis those units is:
                         Design rules
 ======================================================================
 -------------------design rules for comments -------------------------
+There are three states for comments: INITIAL, COMMENT, COMMENT_DASH.
+1. When at the INITIAL condition, if "--" is encountered, it means dashed
+comment begins, so COMMENT_DASH state is entered. If EOF is encountered
+in COMMENT_DASH stated, terminate the program. If \n is encountered, 
+just stop the COMMENT_DASH state and return to INITIAL state. Otherwise
+do nothing.
+2. When "(*" is encountered during INITIAL state, the COMMENT state is 
+entered. A variable 'comment level' is maintained to keep track of the 
+comment level. When not*( or "("followed by not"*" or "*"followed by not")"
+, do nothing. When EOF is encountered in COMMENT state, report error. 
+
 
 -------------------design rules for strings---------------------------
+There are three states related to strings: INITIAL, STRING and STRERROR
+1. When " is encountered in the INITIAL state, the string_buf is reset to
+empty and the STRING state starts. When " is encountered in the STRING 
+state, return back to INITIAL state. 
+2. In the STRING state, string length is checked whenever new piece of
+string is added to string_buf. Report error if overflow.
+3. Replace \n, \t, \b, \f with a single char which corresponds to their
+escaped meaning
+4. Report error if null character is encountered
+5. for \c where c doesn't equal to n,t,b,f, return c itself
+6. When an escape is followed by a new line, just add a \n to the string_buf
+7. When a new line is encountered without an escape, report error
+8. For characters other than " \ \n 0x00, concatinate it to string_buf
+9. Inside STRERROR state, either a new line starts without escape, or a "
+is encountered, return to the INITIAL state. If EOF is encountered, return
+error. Otherwise stay in the STRERROR state. 
+
 
 -------------------design rules for keywords--------------------------
 All the keywords except true and false, are all case insensitive, so 
@@ -81,6 +109,11 @@ for special notaitons, we just use their ASCII value.
 If an input cannot be matched to any of the above rules, an error 
 message will be generated. 
 ======================================================================
-                            Test
+                            Testing
 ======================================================================
+We first did testing for each individual parts, the comments, strings, 
+keywords, identifiers and others. It turned out that the comments and 
+strings are the most vulnerable. Then we did separate testing for EOF
+since one test file has only one EOF. Finally we tried real programs to
+test. 
 
