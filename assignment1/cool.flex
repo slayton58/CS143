@@ -111,29 +111,22 @@ SELF_TYPEID    "SELF_TYPE"
 <COMMENT_DASH>[^\n]     {}
 <INITIAL>"(*"           { BEGIN(COMMENT);
                           comment_level++;
-                          //printf("start comment at line%d\n", yylineno);
-                          //printf("comment level++, =%d\n", comment_level);
                         }
 <INITIAL>"*)"           {
                           curr_lineno = yylineno;
                           cool_yylval.error_msg = "Unmatched *)";
-                          //printf("error begin\n");
                           return ERROR;
                         }
 
 <COMMENT>"("+"*"        {  comment_level++;
-                           //printf("comment level++, =%d\n", comment_level);
                         }
 <COMMENT>"*"+")"        {  comment_level--;
-                           //printf("comment level--, =%d\n", comment_level);
                            if (comment_level==0)
                            {
-                              //printf("end comment!\n");  
                               BEGIN(INITIAL);
                            }
                         }
-<COMMENT>[^*(]|"("[^*]|"*"[^)]     {//printf("skipping one\n");
-                                   }
+<COMMENT>[^*(]|"("[^*]|"*"[^)] {}
 <COMMENT><<EOF>>        {
                             curr_lineno = yylineno;
                             cool_yylval.error_msg = "EOF in comment";
@@ -145,11 +138,14 @@ SELF_TYPEID    "SELF_TYPE"
 
 
 
- /*
-  *  The multiple-character operators.
-  */
 
-  	 
+
+ /*
+  *  String constants (C syntax)
+  *  Escape sequence \c is accepted for all characters c. Except for 
+  *  \n \t \b \f, the result is c.
+  *
+  */  	 
 
 <INITIAL>\"     {
                     strcpy(string_buf, "");
@@ -266,7 +262,10 @@ SELF_TYPEID    "SELF_TYPE"
                 }
 
 
-		
+ /*
+  * Keywords are case-insensitive except for the values true and false,
+  * which must begin with a lower-case letter.
+  */		
 <INITIAL>{CLASS}        {  curr_lineno = yylineno;  return CLASS; }	
 <INITIAL>{ELSE}         {  curr_lineno = yylineno;  return ELSE;  }				
 <INITIAL>{FI}    		{  curr_lineno = yylineno;  return FI;    }	
@@ -284,13 +283,16 @@ SELF_TYPEID    "SELF_TYPE"
 <INITIAL>{ISVOID}		{  curr_lineno = yylineno;  return ISVOID;} 				
 <INITIAL>{OF}			{  curr_lineno = yylineno;  return OF;    }	
 <INITIAL>{NOT}          {  curr_lineno = yylineno;  return NOT;   }
-<INITIAL>{FALSE}	    { cool_yylval.boolean = false;
+<INITIAL>{FALSE}	    {  cool_yylval.boolean = false;
                            curr_lineno = yylineno;
 				           return BOOL_CONST;                      }
 <INITIAL>{TRUE}			{  cool_yylval.boolean = true;
                            curr_lineno = yylineno;
 				           return BOOL_CONST;                      }	
-						   
+
+ /*
+  *  Operators.
+  */						   
 <INITIAL>{DARROW}		{  curr_lineno = yylineno;  return DARROW;    }	
 <INITIAL>"<-"		    {  curr_lineno = yylineno;  return ASSIGN;    } 	
 <INITIAL>"+" 			{  curr_lineno = yylineno;  return int('+');  }
@@ -306,45 +308,34 @@ SELF_TYPEID    "SELF_TYPE"
 <INITIAL>";"			{  curr_lineno = yylineno;  return int(';');  }
 <INITIAL>":"			{  curr_lineno = yylineno;  return int(':');  }
 <INITIAL>"("			{  curr_lineno = yylineno;  return int('(');  }
-<INITIAL>")"		    { curr_lineno = yylineno;   return int(')');  }
-<INITIAL>"@"			{ curr_lineno = yylineno;   return int('@');  }
-<INITIAL>"{"			{ curr_lineno = yylineno;   return int('{');  }
-<INITIAL>"}"			{ curr_lineno = yylineno;   return int('}');  }
+<INITIAL>")"		    {  curr_lineno = yylineno;  return int(')');  }
+<INITIAL>"@"			{  curr_lineno = yylineno;  return int('@');  }
+<INITIAL>"{"			{  curr_lineno = yylineno;  return int('{');  }
+<INITIAL>"}"			{  curr_lineno = yylineno;  return int('}');  }
 
-<INITIAL>{DIGIT}+       { cool_yylval.symbol = inttable.add_string(yytext); 
-                          curr_lineno = yylineno;                 
-                          return INT_CONST;
-				        }	
-<INITIAL>{TYPEID}       { cool_yylval.symbol = stringtable.add_string(yytext); 
-                          curr_lineno = yylineno;                 
-                          return TYPEID;
-				         }	
-<INITIAL>{OBJECTID}     { cool_yylval.symbol = stringtable.add_string(yytext); 
-                          curr_lineno = yylineno;                 
-                          return OBJECTID;
+<INITIAL>{DIGIT}+       {  cool_yylval.symbol = inttable.add_string(yytext); 
+                           curr_lineno = yylineno;                 
+                           return INT_CONST;
 				        }
+ /*
+ *  Identifiers
+ */                        
+<INITIAL>{TYPEID}       {  cool_yylval.symbol = stringtable.add_string(yytext); 
+                           curr_lineno = yylineno;                 
+                           return TYPEID;
+				        } 	
+<INITIAL>{OBJECTID}     {  cool_yylval.symbol = stringtable.add_string(yytext); 
+                           curr_lineno = yylineno;                 
+                           return OBJECTID;
+				        }
+                        
 <INITIAL>{NEWLINE}      {}					
 <INITIAL>{WHITESPACE}	{}
 
 <INITIAL>.              { 
-                          curr_lineno = yylineno;
-                          cool_yylval.error_msg = yytext;
-				          return ERROR;
-				        }			
-			
-
- /*
-  * Keywords are case-insensitive except for the values true and false,
-  * which must begin with a lower-case letter.
-  */
-
-
- /*
-  *  String constants (C syntax)
-  *  Escape sequence \c is accepted for all characters c. Except for 
-  *  \n \t \b \f, the result is c.
-  *
-  */
-
+                           curr_lineno = yylineno;
+                           cool_yylval.error_msg = yytext;
+				           return ERROR;
+				        }						
 
 %%
