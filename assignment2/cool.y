@@ -151,7 +151,16 @@
 	%type <symbol> symbol
     /* Precedence declarations go here. */
     
-    
+	%right ASSIGN
+	%left NOT
+	%nonassoc '<' '=' LE
+	%left '+' '-'
+    %left '*' '/'
+	%left ISVOID
+	%left NEG
+	%left '@'
+	%left '.'
+	
     %%
     /* 
     Save the root of the abstract syntax tree in a global variable.
@@ -179,9 +188,9 @@
     /* Feature list may be empty, but no empty features in list. */
     feature_list : /* empty */
 	{ $$ = nil_Features(); }
-	|feature
+	| feature
 	{ $$ = single_Features($1); }
-	|feature_list feature
+	| feature_list feature
 	{ $$ = append_Features($1, single_Features($2));}
 	;
 	
@@ -190,7 +199,7 @@
 	{ $$ =  $1}
 	| attr
 	{ $$ =  $1}
-	| error ';'
+	| ERROR ';'
 	 ;
 	 
 	 method : OBJECTID '(' optional_formal_list')' ':' TYPEID '{' expression '}' ';'
@@ -211,7 +220,7 @@
 	 { $$ = single_Formals($1);}
 	 | formal_list formal
 	 { $$ = append_Formals($1, single_Formals($2));}
-	 | error
+	 | ERROR
 	 ;
 	 
 	 optional_assign : /*empty*/
@@ -228,44 +237,136 @@
 	 /*case_list cannot be empty*/
 	 case_list : case
 	 { $$ = single_Cases($1); }
-	 |case_list case
+	 | case_list case
 	 { $$ = append_Cases($1, single_Cases($2)); }
 	 ;
 	 
 	 case : OBJECTID ':' 'TYPEID' DARROW expression ';'
 	 { $$ = branch($1, $3, $5);}
 	 ;
+	 
+	 lets : LET OBJECTID ':' TYPEID IN expression
+     { $$ = let($2, $4, no_expr(), $6); }	
+     | LET OBJECTID ':' TYPEID ASSIGN expression IN expression
+     { $$ = let($2, $4, $6, $8); }
+     | LET OBJECTID ':' TYPEID lets 
+     { $$ = let($2, $4, no_expr(), $7); }
+     | LET OBJECTID ':' TYPEID ASSIGN expression lets
+     { $$ = let($2, $4, $6, $7);}
+     | ',' OBJECTID ':' TYPEID IN expression
+     { $$ = let($2, $4, no_expr(), $6); }
+     | ',' OBJECTID ':' TYPEID ASSIGN expression IN expression
+     { $$ = let($2, $4, $6, $8); }	 
+	 | ',' OBJECTID ':' TYPEID lets
+	 { $$ = let($2, $4, no_expr(), $5); }
+	 | ',' OBJECTID ':' TYPEID ASSIGN expression lets
+	 { $$ = let($2, $4, $6, $7); }
+	 | LET ERROR 
+	 | LET OBJECTID ':' ERROR 
+	 | LET OBJECTID ':' TYPEID ERROR
+	 | LET OBJECTID ':' TYPEID ASSIGN ERROR
+	 | LET OBJECTID ':' TYPEID ASSIGN expression IN ERROR
+	 | ',' ERROR 
+	 | ',' OBJECTID ':' ERROR 
+	 | ',' OBJECTID ':' TYPEID ERROR
+	 | ',' OBJECTID ':' TYPEID ASSIGN ERROR
+	 | ',' OBJECTID ':' TYPEID ASSIGN expression IN ERROR
+	 
+	 
 	 /*exporession_list cannot be empty, used for dispatch and static dispatch */
 	 expression_list : expression
 	 { $$ = single_Expressions($1);}
-	 |expression_list ',' expression
+	 | expression_list ',' expression
 	 { $$ = append_Expressions($1, single_Expressions($2));}
 	 ;
 	 /*multi_exporession cannot be empty, used for block of exporessions */
 	 multi_expression : expression ';'
 	 { $$ = single_Expressions($1);}
-	 |multi_expression expression ';'
+	 | multi_expression expression ';'
 	 { $$ = append_Expressions($1, single_Expressions($2));}
-	 | error ';'
+	 | ERROR ';'
 	 ;
 	 
 	 expression : OBJECTID ASSIGN expression
-	 { $$ = assign($1, $3);}
-	 |expression '.' OBJECTID '(' ')'
+	 { $$ = assign($1, $3);}              /*assignment*/
+	 /*dispatch*/
+	 | expression '.' OBJECTID '(' ')'
 	 { $$ = dispatch($1, $3, nil_Expressions());}
-	 |expression '.' OBJECTID '(' exporession_list ')'
+	 | expression '.' OBJECTID '(' expression_list ')'
 	 { $$ = dispatch($1, $3, $5)}
-	 |expression '@' TYPEID '.' OBJECTID '(' ')'
-	 { $$ = static_dispatch($1, $3, $5, nil_Expressions());}
-	 |exporession '@' TYPEID '.' OBJECTID '(' exporession_list ')'
-	 { $$ = static_dispatch($1, $3, $5, $7);}
 	 | OBJECTID '(' ')'
 	 { $$ = dispatch(idtable.add_string("self"), $1, nil_Expressions());}
 	 | OBJECTID '(' exporession_list ')'
-	 { $$ = dispatch(idtable.add_string("self"), $1, $3);}
+	 { $$ = dispatch(idtable.add_string("self"), $1, $3);}	 
+	 
+	 /*static dispatch*/
+	 | expression '@' TYPEID '.' OBJECTID '(' ')'
+	 { $$ = static_dispatch($1, $3, $5, nil_Expressions());}
+	 | expression '@' TYPEID '.' OBJECTID '(' expression_list ')'
+	 { $$ = static_dispatch($1, $3, $5, $7);}
+	 
+      /*if-else condition*/
 	 | IF expression THEN expression ELSE expression FI
 	 { $$= cond($2, $4, $6);}
-	 | WHILE 
+	 | IF ERROR
+	 | IF expression THEN ERROR
+	 | IF expression THEN expression ELSE ERROR
+	 
+	 /*while loop*/
+	 | WHILE expression LOOP expression POOL
+	 { $$ = loop($2, $4);}
+	 
+	 /*block expressions*/
+	 | '{' multi_expression '}'
+	 { $$ = block($2);}
+	 
+	 /*let statements*/
+	 | lets
+	 { $$ = $1;}
+	 
+	 /*case statements*/
+	 | CASE expression OF case_list ESAC
+	 { $$ = typcase($2, $4);}
+	 
+	 | NEW TYPEID
+	 { $$ = new_($2);}
+	 | ISVOID expression
+	 { $$ = isvoid($2);}
+	 
+	 /*arithmetic operations*/
+	 | expression '+' expression
+	 { $$ = plus($1, $3);}
+	 | expression '-' expression
+	 { $$ = sub($1, $3); }
+	 | expression '*' expression
+	 { $$ = mul($1, $3); }
+     | expression '/' expression
+     { $$ = divide($1, $3); }	
+     | '~' expression 
+     { $$ = neg($2);}	
+	 
+	 /*comparisons*/
+	 | expression '<' expression
+	 { $$ = lt($1, $3);}
+	 | expression LE expression
+	 { $$ = leq($1, $3);}
+	 | expression '=' expression
+	 { $$ = eq($1, $3);}
+	 
+	 | NOT expression
+	 { $$ = comp($2);}
+	 | '(' expression ')'
+	 { $$ = $2;}
+	 | OBJECTID
+	 { $$ = object($1);}
+	 | INT_CONST
+	 { $$ = int_const($1); }
+	 | STR_CONST
+	 { $$ = string_const($1); }
+	 | BOOL_CONST
+	 { $$ = bool_const($1); }
+	 | ERROR
+	 
     /* end of grammar */
     %%
     
