@@ -133,10 +133,22 @@
     %type <program> program
     %type <classes> class_list
     %type <class_> class
+
+	
     
     /* You will want to change the following line. */
-    %type <features> dummy_feature_list
-    
+    %type <feature> feature
+	%type <features> feature_list
+	%type <feature> method
+	%type <feature> attr
+    %type <formal> formal
+	%type <formals> formal_list
+	%type <expression> expression
+	%type <expressions> expression_list
+	%type <case_> case
+	%type <cases> case_list
+	%type <boolean> boolean
+	%type <symbol> symbol
     /* Precedence declarations go here. */
     
     
@@ -157,18 +169,103 @@
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
-    class	: CLASS TYPEID '{' dummy_feature_list '}' ';'
+    class	: CLASS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,idtable.add_string("Object"),$4,
     stringtable.add_string(curr_filename)); }
-    | CLASS TYPEID INHERITS TYPEID '{' dummy_feature_list '}' ';'
+    | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
     ;
     
     /* Feature list may be empty, but no empty features in list. */
-    dummy_feature_list:		/* empty */
-    {  $$ = nil_Features(); }
-    
-    
+    feature_list : /* empty */
+	{ $$ = nil_Features(); }
+	|feature
+	{ $$ = single_Features($1); }
+	|feature_list feature
+	{ $$ = append_Features($1, single_Features($2));}
+	;
+	
+	/*feature -> method | attr | error; */
+    feature  :  method
+	{ $$ =  $1}
+	| attr
+	{ $$ =  $1}
+	| error ';'
+	 ;
+	 
+	 method : OBJECTID '(' optional_formal_list')' ':' TYPEID '{' expression '}' ';'
+	 { $$ = method($1, $3, $6, $8); }
+	 ;
+	 
+	 attr : OBJECTID ':' TYPEID optional_assign ';'
+	 { $$ = attr($1, $3, $5);}
+	 ;
+	 
+	 optional_formal_list : /*empty*/
+	 { $$ = nil_Formals(); }
+	 | formal_list
+	 { $$ = $1}
+	 ;
+	 /*formal_list cannot be empty*/
+	 formal_list : formal
+	 { $$ = single_Formals($1);}
+	 | formal_list formal
+	 { $$ = append_Formals($1, single_Formals($2));}
+	 | error
+	 ;
+	 
+	 optional_assign : /*empty*/
+	 { $$ = nil_Expression(); }
+	 | ASSIGN expression
+	 { $$ = $2}
+	 ;
+	 
+	 formal : OBJECTID ':' TYPEID
+	 { $$ = formal($1, $3); }
+	 ;
+	 
+	 
+	 /*case_list cannot be empty*/
+	 case_list : case
+	 { $$ = single_Cases($1); }
+	 |case_list case
+	 { $$ = append_Cases($1, single_Cases($2)); }
+	 ;
+	 
+	 case : OBJECTID ':' 'TYPEID' DARROW expression ';'
+	 { $$ = branch($1, $3, $5);}
+	 ;
+	 /*exporession_list cannot be empty, used for dispatch and static dispatch */
+	 expression_list : expression
+	 { $$ = single_Expressions($1);}
+	 |expression_list ',' expression
+	 { $$ = append_Expressions($1, single_Expressions($2));}
+	 ;
+	 /*multi_exporession cannot be empty, used for block of exporessions */
+	 multi_expression : expression ';'
+	 { $$ = single_Expressions($1);}
+	 |multi_expression expression ';'
+	 { $$ = append_Expressions($1, single_Expressions($2));}
+	 | error ';'
+	 ;
+	 
+	 expression : OBJECTID ASSIGN expression
+	 { $$ = assign($1, $3);}
+	 |expression '.' OBJECTID '(' ')'
+	 { $$ = dispatch($1, $3, nil_Expressions());}
+	 |expression '.' OBJECTID '(' exporession_list ')'
+	 { $$ = dispatch($1, $3, $5)}
+	 |expression '@' TYPEID '.' OBJECTID '(' ')'
+	 { $$ = static_dispatch($1, $3, $5, nil_Expressions());}
+	 |exporession '@' TYPEID '.' OBJECTID '(' exporession_list ')'
+	 { $$ = static_dispatch($1, $3, $5, $7);}
+	 | OBJECTID '(' ')'
+	 { $$ = dispatch(idtable.add_string("self"), $1, nil_Expressions());}
+	 | OBJECTID '(' exporession_list ')'
+	 { $$ = dispatch(idtable.add_string("self"), $1, $3);}
+	 | IF expression THEN expression ELSE expression FI
+	 { $$= cond($2, $4, $6);}
+	 | WHILE 
     /* end of grammar */
     %%
     
