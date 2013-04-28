@@ -143,11 +143,15 @@
 	%type <feature> attr
     %type <formal> formal
 	%type <formals> formal_list
+	%type <formals> optional_formal_list
 	%type <expression> expression
+	%type <expression> optional_assign
     %type <expression> lets
-	%type <expressions> expression_list    
+	%type <expressions> expression_list   
+    %type <expressions> multi_expression
 	%type <case_> case
 	%type <cases> case_list
+
     
     
     
@@ -195,9 +199,9 @@
 	
 	/*feature -> method | attr | error; */
     feature  :  method
-	{ $$ =  $1}
+	{ $$ =  $1;}
 	| attr
-	{ $$ =  $1}
+	{ $$ =  $1;}
 	| ERROR ';'
 	 ;
 	 
@@ -206,13 +210,13 @@
 	 ;
 	 
 	 attr : OBJECTID ':' TYPEID optional_assign ';'
-	 { $$ = attr($1, $3, $5);}
+	 { $$ = attr($1, $3, $4);}
 	 ;
 	 
 	 optional_formal_list : /*can be empty*/
 	 { $$ = nil_Formals(); }
 	 | formal_list
-	 { $$ = $1}
+	 { $$ = $1;}
 	 ;
      
 	 /*formal_list cannot be empty*/
@@ -224,9 +228,9 @@
 	 ;
 	 
 	 optional_assign : /*empty*/
-	 { $$ = nil_Expression(); }
+	 { $$ = no_expr(); }
 	 | ASSIGN expression
-	 { $$ = $2}
+	 { $$ = $2;}
 	 ;
 	 
 	 formal : OBJECTID ':' TYPEID
@@ -241,7 +245,7 @@
 	 { $$ = append_Cases($1, single_Cases($2)); }
 	 ;
 	 
-	 case : OBJECTID ':' 'TYPEID' DARROW expression ';'
+	 case : OBJECTID ':' TYPEID DARROW expression ';'
 	 { $$ = branch($1, $3, $5);}
 	 ;
 	 
@@ -250,7 +254,7 @@
      | LET OBJECTID ':' TYPEID ASSIGN expression IN expression
      { $$ = let($2, $4, $6, $8); }
      | LET OBJECTID ':' TYPEID lets 
-     { $$ = let($2, $4, no_expr(), $7); }
+     { $$ = let($2, $4, no_expr(), $5); }
      | LET OBJECTID ':' TYPEID ASSIGN expression lets
      { $$ = let($2, $4, $6, $7);}
      | ',' OBJECTID ':' TYPEID IN expression
@@ -278,7 +282,7 @@
 	 expression_list : expression
 	 { $$ = single_Expressions($1);}
 	 | expression_list ',' expression
-	 { $$ = append_Expressions($1, single_Expressions($2));}
+	 { $$ = append_Expressions($1, single_Expressions($3));}
 	 ;
      
 	 /*multi_exporession cannot be empty, used for block of expressions */
@@ -295,11 +299,11 @@
 	 | expression '.' OBJECTID '(' ')'
 	 { $$ = dispatch($1, $3, nil_Expressions());}
 	 | expression '.' OBJECTID '(' expression_list ')'
-	 { $$ = dispatch($1, $3, $5)}
+	 { $$ = dispatch($1, $3, $5);}
 	 | OBJECTID '(' ')'
-	 { $$ = dispatch(idtable.add_string("self"), $1, nil_Expressions());}
+	 { $$ = dispatch(idtable.add_string("Self"), $1, nil_Expressions());}
 	 | OBJECTID '(' expression_list ')'
-	 { $$ = dispatch(idtable.add_string("self"), $1, $3);}	     	 
+	 { $$ = dispatch(idtable.add_string("Self"), $1, $3);}	     	 
 	 
      /*static dispatch*/
 	 | expression '@' TYPEID '.' OBJECTID '(' ')'
