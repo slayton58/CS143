@@ -144,11 +144,13 @@
     %type <formal> formal
 	%type <formals> formal_list
 	%type <expression> expression
-	%type <expressions> expression_list
+    %type <expression> lets
+	%type <expressions> expression_list    
 	%type <case_> case
 	%type <cases> case_list
-	%type <boolean> boolean
-	%type <symbol> symbol
+    
+    
+    
     /* Precedence declarations go here. */
     
 	%right ASSIGN
@@ -170,17 +172,14 @@
     
     class_list
     : class			/* single class */
-    { $$ = single_Classes($1);
-    parse_results = $$; }
+    { $$ = single_Classes($1); parse_results = $$; }    
     | class_list class	/* several classes */
-    { $$ = append_Classes($1,single_Classes($2)); 
-    parse_results = $$; }
+    { $$ = append_Classes($1,single_Classes($2)); parse_results = $$; }
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
     class	: CLASS TYPEID '{' feature_list '}' ';'
-    { $$ = class_($2,idtable.add_string("Object"),$4,
-    stringtable.add_string(curr_filename)); }
+    { $$ = class_($2,idtable.add_string("Object"),$4,stringtable.add_string(curr_filename)); }
     | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
     ;
@@ -210,11 +209,12 @@
 	 { $$ = attr($1, $3, $5);}
 	 ;
 	 
-	 optional_formal_list : /*empty*/
+	 optional_formal_list : /*can be empty*/
 	 { $$ = nil_Formals(); }
 	 | formal_list
 	 { $$ = $1}
 	 ;
+     
 	 /*formal_list cannot be empty*/
 	 formal_list : formal
 	 { $$ = single_Formals($1);}
@@ -271,6 +271,7 @@
 	 | ',' OBJECTID ':' TYPEID ERROR
 	 | ',' OBJECTID ':' TYPEID ASSIGN ERROR
 	 | ',' OBJECTID ':' TYPEID ASSIGN expression IN ERROR
+     ;
 	 
 	 
 	 /*exporession_list cannot be empty, used for dispatch and static dispatch */
@@ -279,7 +280,8 @@
 	 | expression_list ',' expression
 	 { $$ = append_Expressions($1, single_Expressions($2));}
 	 ;
-	 /*multi_exporession cannot be empty, used for block of exporessions */
+     
+	 /*multi_exporession cannot be empty, used for block of expressions */
 	 multi_expression : expression ';'
 	 { $$ = single_Expressions($1);}
 	 | multi_expression expression ';'
@@ -288,7 +290,7 @@
 	 ;
 	 
 	 expression : OBJECTID ASSIGN expression
-	 { $$ = assign($1, $3);}              /*assignment*/
+	 { $$ = assign($1, $3);} /*assignment*/
 	 /*dispatch*/
 	 | expression '.' OBJECTID '(' ')'
 	 { $$ = dispatch($1, $3, nil_Expressions());}
@@ -296,10 +298,10 @@
 	 { $$ = dispatch($1, $3, $5)}
 	 | OBJECTID '(' ')'
 	 { $$ = dispatch(idtable.add_string("self"), $1, nil_Expressions());}
-	 | OBJECTID '(' exporession_list ')'
-	 { $$ = dispatch(idtable.add_string("self"), $1, $3);}	 
+	 | OBJECTID '(' expression_list ')'
+	 { $$ = dispatch(idtable.add_string("self"), $1, $3);}	     	 
 	 
-	 /*static dispatch*/
+     /*static dispatch*/
 	 | expression '@' TYPEID '.' OBJECTID '(' ')'
 	 { $$ = static_dispatch($1, $3, $5, nil_Expressions());}
 	 | expression '@' TYPEID '.' OBJECTID '(' expression_list ')'
@@ -366,6 +368,7 @@
 	 | BOOL_CONST
 	 { $$ = bool_const($1); }
 	 | ERROR
+     
 	 
     /* end of grammar */
     %%
