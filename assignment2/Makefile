@@ -6,7 +6,7 @@ AR= gar
 ARCHIVE_NEW= -cr
 RANLIB= gar -qs
 
-SRC= cool.y cool-tree.handcode.h good.cl bad.cl README
+SRC= banben.y cool-tree.handcode.h good.cl bad.cl README
 CSRC= parser-phase.cc utilities.cc stringtab.cc dumptype.cc \
       tree.cc cool-tree.cc tokens-lex.cc  handle_flags.cc 
 TSRC= myparser mycoolc cool-tree.aps
@@ -52,7 +52,7 @@ submit: parser
 	$(CLASSDIR)/bin/pa_submit PA2 .
 
 clean:
-	rm -f parser ${OBJS} cool-parse.cc cool.tab.h
+	rm -f parser ${OBJS} cool-parse.cc cool.tab.h *.txt *.bak *.out lala* *.output
 
 # build rules
 
