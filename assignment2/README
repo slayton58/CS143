@@ -136,3 +136,119 @@ Instructions
 
 Write-up for PA2
 ----------------
+************************************************************************
+                       1 Overal Structure
+************************************************************************
+
+parser consumes the output of lexers and does the syntactic analysis. Our 
+parser is based on Bison. The main analysis flow is as following. The 
+parsing status starts from program. A program is composed of several classes,
+where each class may have one or more features. There are two types of features,
+attribute and method. The term expression is used as sub-elements for these 
+two types. Expressions have several different forms as listed in Figure 1 in
+Cool Manual. We implemented the whole Cool syntax in cool.y. The
+specifications are described as below. 
+
+************************************************************************
+                      2 Implementation AST
+************************************************************************
+
+------------------------------------------------------------------------
+                             2.1 Type	
+------------------------------------------------------------------------
+We complete all types of all non-terminals, e.g. class, feature, formal, 
+expression, case. List is special, because it is a sequence of non-terminals,
+which is very useful to construct parse tree, such as class_list, feature_list,
+formal_list, etc. We construct list using recursive method as below.
+
+   /* Feature list may be empty, but no empty features in list. */
+    feature_list : /* empty */
+	{ $$ = nil_Features(); }
+	| feature
+	{ $$ = single_Features($1); }
+	| feature_list feature
+	{ $$ = append_Features($1, single_Features($2));}
+	;	
+
+And because formal_list cannot be empty, so we also construct a optional_formal_list
+than can be empty. And for expression, we construct a expression_list for 
+dispatch and static dispatch, and a multi_expression, which is also a expression 
+list, but use for block of expressions.
+Because method and attribute all belong to feature, so they all have
+the type feature.
+
+------------------------------------------------------------------------
+                              2.2 lets
+------------------------------------------------------------------------
+Lets can be regard as a complicated kind of expression.  Becasue it can 
+have optional assign expression and also can be nested, we used a recursive
+method to implement it. 
+The actual codes are as below:
+ 	lets : LET OBJECTID ':' TYPEID IN expression
+     { $$ = let($2, $4, no_expr(), $6); }	
+     | LET OBJECTID ':' TYPEID ASSIGN expression IN expression
+     { $$ = let($2, $4, $6, $8); }
+     | LET OBJECTID ':' TYPEID lets 
+     { $$ = let($2, $4, no_expr(), $5); }
+     | LET OBJECTID ':' TYPEID ASSIGN expression lets
+     { $$ = let($2, $4, $6, $7);}
+     | ',' OBJECTID ':' TYPEID IN expression
+     { $$ = let($2, $4, no_expr(), $6); }
+     | ',' OBJECTID ':' TYPEID ASSIGN expression IN expression
+     { $$ = let($2, $4, $6, $8); }	 
+	 | ',' OBJECTID ':' TYPEID lets
+	 { $$ = let($2, $4, no_expr(), $5); }
+	 | ',' OBJECTID ':' TYPEID ASSIGN expression lets
+	 { $$ = let($2, $4, $6, $7); }	
+------------------------------------------------------------------------
+                              2.3 precedence
+------------------------------------------------------------------------							 
+According to the cool manul, the precedence of infix binary and prefix unary
+operations, from highest to lowest, is given by:
+. 
+@ 
+~
+isvoid
+* /
++ -
+<= <  =
+not
+<-  
+These operations are all left associative, but for assign, it
+is right associative, and its precedence is lowest. Also we cannot have 
+more than 1 '<' '<=' '=' in a row, therefore the code from precedence 
+declarations are as below:
+	%right ASSIGN
+	%left NOT
+	%nonassoc '<' '=' LE
+	%left '+' '-'
+    %left '*' '/'
+	%left ISVOID
+	%left '~'
+	%left '@'
+	%left '.'
+	
+***************************************************************************
+                            3 Error Handling
+***************************************************************************
+
+***************************************************************************
+                                4 Test
+***************************************************************************
+First, we generated good.cl which contains all legal grammars to test each 
+production unit, e.g. class, class_list,feature, feature_list, etc. By comparing
+output and error message of our parser with the reference parser, we can test
+the functional correctness of our design. In that file, we also wrote a sequence
+of expressions to test the precedence.
+
+In order to apply more test to our parser and expose it to the real Cool code,
+we ran it againes all the Cool source code in examples folder, as well as those 
+test cases provided for PA1.
+
+To test whether our error handling can work correctly, we wrote bad.cl which
+contains some invalid Cool codes, e.g. add errors in class declaration and following 
+class definition, multiple errors inside a block and immediately after the block. 
+We found our parser can produce error messages and also recover smoothly after error
+found.
+
+  								
