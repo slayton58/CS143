@@ -186,8 +186,7 @@ class	: CLASS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,idtable.add_string("Object"),$4,stringtable.add_string(curr_filename)); }
     | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
-    | CLASS  TYPEID error '{'
-    //| CLASS TYPEID INHERITS error '{'    
+    | CLASS  TYPEID error '{'    
     | error ';'
     ;
     

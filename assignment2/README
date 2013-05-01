@@ -231,6 +231,15 @@ declarations are as below:
 ***************************************************************************
                             3 Error Handling
 ***************************************************************************
+We did error handling in class, feature, case, let expression, if-else 
+condition. The basic idea is finding the border for each cases:
+In class, we handle the error by recovering from { or ;
+In features, we handle the error by recovering from ;
+In case, we handle the error by recovering from ESAC
+In let expression, the error handling is a bit complecated. There are many 
+keyword terminals, we recover by coming across the terminal that directly 
+follows the error. If-else condition is handled similarly.
+In multiple expressions, we handle the error by recovering from ;
 
 ***************************************************************************
                                 4 Test

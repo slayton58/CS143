@@ -1,16 +1,3 @@
--- test inherits
-class A { };
-class AA inherits A { };
-
--- test no inherits
-class NoInherit {
-    mint : Int;
-    mint1 : Int <- 1234321;
-};
-
-
--- test empty feature list
-class EmptyFeature { };
 
 -- test feature list: attributes
 class FeatureAttributes {
@@ -19,9 +6,8 @@ class FeatureAttributes {
     mbool0 : Bool;
     mbool1 : Bool <- true;
     mstring0 : String;
-    mstring1 : String <- "hello";
-    mOtherClass0 : EmptyFeature;
-    mOtherClass1 : EmptyFeature <- new EmptyFeature;
+    mstring1 : String <- "hi";
+
 };
 
 -- test feature list: methods
@@ -30,138 +16,7 @@ class FeatureMethods {
     mFormal0(varInt:Int):Bool { true };
     mFormal1(varInt:Int, varString:String):Bool { true };
     mFormal2(varInt:Int, varString:String, var:FeatureMethods):Bool { true };
-};
-
--- test feature list: mixed
-class FeatureMixed {
-    mint0 : Int;
-    mint1 : Int <- 1;
-    mbool0 : Bool;
-    mbool1 : Bool <- true;
-   
-    mNoFormal():Int { 0 };
-    mFormal0(varInt:Int):Bool { true };
-    mFormal1(varInt:Int, varString:String):Bool { true };
-    mFormal2(varInt:Int, varString:String, var:FeatureMethods):Bool { true };
-    
-    mstring0 : String;
-    mstring1 : String <- "hello";
-    mOtherClass0 : EmptyFeature;
-    mOtherClass1 : EmptyFeature <- new EmptyFeature;
-};
-
--- test expressions
-Class TestExpression inherits FeatureMixed {
-    mlist : List;
-    mstring : String <- "hello";
-    mint : Int;
-    
-    init(tempList : List, tempString : String) : TestExpression {
-        {
-        mlist <- tempList;
-        mstring <- tempString;
-        self;
-        }
-    };
-
-    testAssign() : Bool {
-        {
-            mint <- 10;
-            mstring <- "ten";
-            mlist <- new List;
-        }
-    };
-
-    testDispatch(varInt:Int, varBool:Bool) : Bool {
-        {
-            obj <- new TestExpression;
-
-            -- dispacth
-            obj.testDispatch(10, true);
-
-            -- static dispacth
-            obj@FeatureMixed.mFormal0(12321);
-
-            -- internal method dispatch
-            testDispach(varInt, varBool);
-
-            -- exercise expression list matching
-            testDispatch(
-                {
-                    123;
-                    321;
-                },
-                false);
-
-            testDispatch(10,
-                testDispatch(10,
-                    testDispatch(10,
-                        testDispatch(10, true))));
-        }
-    };
-
-    testIf() : Bool {
-        {
-            -- test standard form
-            if true then
-                mint <- 1
-            else
-                mint <- ~1
-            fi;
-    
-            -- test embedded form
-            if true then
-                mint <- 1 + 2
-            else
-                {
-                if false then
-                    mint <- 12 * 3
-                else
-                    mint <- 12 / 4
-                fi;
-                mint <- 1 - 2;
-                }
-
-
-
-
-            fi;
-
-            -- test embedded form
-            if true then
-                if true then
-                    if true then
-                        mint <- 10
-                    else
-                        mint <- ~10
-                    fi
-                else
-                    mint <- ~20
-                fi
-            else
-                if false then
-                    mint <- ~30
-                else
-                    mint <- 40
-                fi
-            fi;
-
-            -- test other forms for condition
-            if if true then true else varBool<-false fi then
-                mint<-3
-            else
-                mint <-4
-            fi;
-
-            if { true; false; true; } then
-                mint <- 3
-            else
-                mint <- 2
-            fi;
-        }
-    };
-
-    testWhile() : Bool {
+	testWhile() : Bool {
         {
         mint <- 1;
         while mint < 10 loop
@@ -179,7 +34,6 @@ Class TestExpression inherits FeatureMixed {
         pool;
         }
     };
-
     testBlock() : Bool {
         {
             true;
@@ -189,12 +43,13 @@ Class TestExpression inherits FeatureMixed {
             { { { true; }; }; { false; }; };
         }
     };
-
-    testLet(): Bool {
-        (* TODO *)
-        false
+	testAssign() : Bool {
+        {
+            mint <- 10;
+            mstring <- "ten";
+            mlist <- new List;
+        }
     };
-
     testCases() : Bool {
         {
             -- standard form
@@ -210,114 +65,21 @@ Class TestExpression inherits FeatureMixed {
             esac;
         }
     };
-
-    testNew() : Bool {
-        {
-            new A;
-            new Int;
-            new String;
-        }
-    };
-
-    testIsvoid() : Bool {
-        isvoid (mint + 1)
-    };
-
-    testArithmetic() : Bool {
-        {
-            (* complex arithmetic will be tested
-               together with precedence *)
-            mint <- 1 + 2;
-            mint <- 1 - 2;
-            mint <- 1 * 2;
-            mint <- 1 / 2;
-            mint <- ~2;
-            1 + 2 * 3;
-            1 / 3 + 2;
-        }
-    };
-
-    testComparison() : Bool {
-        {
-            10 < 12;
-            10 <= 8;
-            10 = 10;
-            10 = 9;
-        }
-    };
-
-    testComp() : Bool {
-        {
-            not true;
-            not 1;
-        }
-    };
-
-    testParentheses() : Int {
-        (true)
-    };
-
 };
 
-class TestPrecedence {
-    mint : Int;
+-- test inherits
+class X { };
+class X inherits X { };
 
-    testComplexArithmetic() : Bool {
-        {
-            1 + 2 + 3;
-            1 + 2 * 3;
-            1 + 2 / (3 - 4 * 5);
-            1 / 2 / 3 / 4;
-
-            1 + ~2;
-            1 * 2 + 3 / ~6;
-            1 * (2 - 3 / ~6 / ~2) - 5 / 6;
-        }
-    };
-
-    testMix() : Bool {
-        {
-            mint <- 1 - 2;
-            1 <= 2;
-            1+2 <= 3;
-        }
-    };
-
-    testAssociative() : Bool {
-        {
-            a <- b <- c <- d;
-            a + b + c + d;
-            a * b + c;
-            a + b * c;
-            a * (b + c);
-        }
-    };
-
-    testAmbiguousLet() : Bool {
-        {
-            let x:Int <-1 in let x:Int <- 2 in let x:Int <- 3 in x+x;
-            let x:Int <-1 in (let x:Int <- 2 in let x:Int <- 3 in x)+x;
-            let x:Int <-1 in let x:Int <- 2 in (let x:Int <- 3 in x)+x;
-
-            let x:Int <- 1, y:Int <- 2, z:Int <- 2 in x+y+z;
-            let x:Int <- 1, y:Int <- 2, z:Int <- 2 in let y:Int <- 3 in x+y+z;
-            let x:Int <- 1, y:Int <- 2, z:Int <- 2 in let y:Int <- 3, z:Int in let z:Int <- 4 in x+y+z;
-
-            let x:Int <- 1, y:Int <- 2, z:Int <- 2 in
-            let x:Int <- 1, y:Int <- 2, z:Int <- 2 in let y:Int <- 3 in
-            let x:Int <- 1, y:Int <- 2, z:Int <- 2 in let y:Int <- 3, z:Int in let z:Int <- 4 in x+y+z;
-        }
-    };
+-- test no inherits
+class X {
+    a : Int;
+    b : Int <- 1;
 };
 
 
 (* all the exmaples code *)
 
-(*
- *  A contribution from Anne Sheets (sheets@cory)
- *
- *  Tests the arithmetic operations and various other things
- *)
 
 class A {
 
@@ -453,7 +215,7 @@ class E inherits D {
 
 };
 
-(* The following code is from atoi.cl in ~cs164/examples *)
+
 
 (*
    The class A2I provides integer-to-string and string-to-integer
