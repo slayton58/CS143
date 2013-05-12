@@ -84,9 +84,18 @@ static void initialize_constants(void)
 
 
 ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) {
+  cout<<"calling class table constructor"<<endl;
+  install_basic_classes();
+  install_user_classes(classes);
+  install_class_map(classes);
+  install_function_map();
+  print_inherit_map();
 
-    /* Fill this in */
-
+  if (check_cycle())
+  {
+    cerr<<"Circle found!"<<endl;
+    semant_errors++;
+  }
 }
 
 void ClassTable::install_basic_classes() {
@@ -188,6 +197,26 @@ void ClassTable::install_basic_classes() {
 						      Str, 
 						      no_expr()))),
 	       filename);
+
+    //add these basic class names:
+    basic_class_set.insert(Object);
+    basic_class_set.insert(IO);
+    basic_class_set.insert(Int);
+    basic_class_set.insert(Bool);
+    basic_class_set.insert(Str);
+    basic_class_set.insert(SELF_TYPE);
+    //add these class mapping from name to class:
+    class_map.insert(std::make_pair(Object, Object_class));
+    class_map.insert(std::make_pair(IO, IO_class));
+    class_map.insert(std::make_pair(Int, Int_class));
+    class_map.insert(std::make_pair(Bool, Bool_class));
+    class_map.insert(std::make_pair(Str, Str_class));
+    //populate the inherit graph with the basic classes:
+    inherit_graph[No_class].insert(Object);
+    inherit_graph[Object].insert(IO);
+    inherit_graph[Object].insert(Int);
+    inherit_graph[Object].insert(Bool);
+    inherit_graph[Object].insert(Str);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -224,6 +253,46 @@ ostream& ClassTable::semant_error()
 
 
 
+
+void ClassTable::print_inherit_map()
+{
+  std::map<Symbol, std::set<Symbol> > ::iterator iter1;
+  std::set<Symbol>::iterator iter2;
+  for (iter1=inherit_graph.begin(); iter1!=inherit_graph.end(); ++iter1)
+  {
+    cout<<"Parent: "<<iter1->first<<" -> ";
+    for (iter2=iter1->second.begin(); iter2!=iter1->second.end(); ++iter2)
+    {
+      cout<<(*iter2)<<", " ;
+    }
+    cout<<endl;
+    
+  }    
+}
+
+void ClassTable::install_user_classes( Classes classes )
+{
+  //throw std::exception("The method or operation is not implemented.");
+}
+
+void ClassTable::install_class_map( Classes classes )
+{
+  //throw std::exception("The method or operation is not implemented.");
+}
+
+void ClassTable::install_function_map()
+{
+  //throw std::exception("The method or operation is not implemented.");
+}
+
+bool ClassTable::check_cycle()
+{
+  //throw std::exception("The method or operation is not implemented.");
+  return false;
+}
+
+
+
 /*   This is the entry point to the semantic checker.
 
      Your checker should do the following two things:
@@ -247,8 +316,8 @@ void program_class::semant()
     /* some semantic analysis code may go here */
 
     if (classtable->errors()) {
-	cerr << "Compilation halted due to static semantic errors." << endl;
-	exit(1);
+	    cerr << "Compilation halted due to static semantic errors." << endl;
+	    exit(1);
     }
 }
 

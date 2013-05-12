@@ -2,11 +2,15 @@
 #define SEMANT_H_
 
 #include <assert.h>
-#include <iostream>  
+#include <iostream>
 #include "cool-tree.h"
 #include "stringtab.h"
 #include "symtab.h"
 #include "list.h"
+#include <map>
+#include <set>
+#include <vector>
+
 
 #define TRUE 1
 #define FALSE 0
@@ -23,7 +27,22 @@ class ClassTable {
 private:
   int semant_errors;
   void install_basic_classes();
+  void install_user_classes(Classes);
+  void install_class_map(Classes);
+  void install_function_map();
+  bool check_cycle();
+
   ostream& error_stream;
+
+  //map from class name to class
+  std::map<Symbol, Class_> class_map;
+  //map from class name and function name to function
+  std::map<Symbol, std::map<Symbol, method_class> > function_map;
+  //inheritance map
+  std::map<Symbol, std::set<Symbol> > inherit_graph;
+  //class set
+  std::set<Symbol> basic_class_set;
+  std::set<Symbol> user_class_set;
 
 public:
   ClassTable(Classes);
@@ -31,6 +50,15 @@ public:
   ostream& semant_error();
   ostream& semant_error(Class_ c);
   ostream& semant_error(Symbol filename, tree_node *t);
+ 
+  bool is_child (Symbol c1, Symbol c2);
+  Symbol least_upper_bound(Symbol c1, Symbol c2);
+  class__class get_parent();
+  std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
+  method_class get_method(Symbol class_name, Symbol method_name);
+  void print_inherit_map();
+  
+
 };
 
 
