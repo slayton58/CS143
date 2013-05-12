@@ -42,7 +42,7 @@ private:
   std::map<Symbol, std::set<Symbol> > inherit_graph;
   //class set
   std::set<Symbol> basic_class_set;
-  std::set<Symbol> user_class_set;
+ 
 
 public:
   ClassTable(Classes);
