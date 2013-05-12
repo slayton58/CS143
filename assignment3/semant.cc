@@ -299,7 +299,8 @@ void ClassTable::install_user_classes( Classes classes )
   for (int i = classes->first(); classes->more(i); i = classes->next(i))
   {
     class__class * cls = (class__class *) classes->nth(i);
-    //Symbol parent = 
+    Symbol parent = cls->get_parent();
+    inherit_graph[parent].insert(cls->get_name());
   }
 
 
