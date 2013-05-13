@@ -5,11 +5,11 @@
 #include <stdarg.h>
 #include "semant.h"
 #include "utilities.h"
-<<<<<<< HEAD
+
 #include "typeinfo"
-=======
+
 #include <queue>
->>>>>>> c88115a2202747ffc9ea67b146084e063e3fa119
+
 
 
 extern int semant_debug;
@@ -312,7 +312,7 @@ void ClassTable::install_function_map()
     Symbol c = q.front();
     q.pop();
     // for each class, get the features
-    Features features = class_map[c].getFeatures();    
+    Features features = class_map[c]->get_features();
     for(int i = features->first(); features->more(i); i = features->next(i))
     {
       Feature f = features->nth(i);
@@ -320,11 +320,11 @@ void ClassTable::install_function_map()
       {
         method_class m = (method_class)f;
         verify_signature(class_map[c], m);
-        method_map[c][m.getName()]=m;  //TODO
-        if (c==Main && m.getName()==main_meth)
+        method_map[c][m.get_name()]=m;  //TODO
+        if (c==Main && m.get_name()==main_meth)
         {
           main_found = true;
-          if (m.getFormals().get_length()>0)//TODO
+          if (m.get_formals()->len()>0)//TODO
             main_has_formal = true;          
         }
       }
@@ -332,7 +332,7 @@ void ClassTable::install_function_map()
 
     //also add features from parent class:
     std::map<Symbol, method_class> parent_methods = 
-      method_map[class_map[c].getParent()]; //TODO
+      method_map[class_map[c].get_parent()]; //TODO
     std::map<Symbol, method_class>::iterator iter;
     for (iter=parent_methods.begin(); iter!=parent_methods.end(); ++iter)
     {
@@ -539,23 +539,23 @@ void ClassTable::fatal()
 
 void ClassTable::verify_signature( class__class cls, method_class m )
 {
-  Formals formals = m.getFormals();
+  Formals formals = m.get_formals();
   // iterater through the formal list to check each can't be self or SELF_TYPE
   for (int i = formals->first(); formals->more(i); i = formals->next(i))
   {
     formal_class* fm = (formal_class *) formals->nth(i);
     
     //formal list shouldn't have self
-    if(fm->getName() == self)
+    if(fm->get_name() == self)
       semant_error(cls.get_filename(), m)<<"formal list shouldn't have self "<<endl;
 
     //formal list shouldn't have SELF_TYPE
-    if(fm->getName() == SELF_TYPE)
+    if(fm->get_name() == SELF_TYPE)
       semant_error(cls.get_filename(), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
   }
   //check the return type should be an already defined class
-  if (class_map[m.getReturn_type()] == NULL && m.getReturn_type != SELF_TYPE)
-    semant_error(cls.get_filename(), m)<<" return type not defined in method "<<m.getName<<endl;      
+  if (class_map[m.get_return_type()] == NULL && m.get_return_type != SELF_TYPE)
+    semant_error(cls.get_filename(), m)<<" return type not defined in method "<<m.get_name<<endl;
 
 
 }
@@ -641,7 +641,7 @@ void semanVisitor::visit(Expression e) {
 	else if(typeid(*e) == typeid(dispatch_class)) {
         dispatch_class* node = (dispatch_class*) (e);
         visit(node);
-
+	}
 	else if(typeid(*e) == typeid(cond_class)) {
 		cond_class* node = (cond_class*) (e);
 		visit(node);
@@ -737,7 +737,7 @@ void semanVisitor::visit(program_class* prg) {
 
 void semanVisitor::visit(class__class* cl) {
 	currentClass = cl;
-	Features features = cl->getFeatures();
+	Features features = cl->get_features();
 	Features parent_feature_list = cl->parent_feature_list;
 
 	for(int i=0; i < features->len(); i++) {
@@ -747,26 +747,26 @@ void semanVisitor::visit(class__class* cl) {
 		for(int j=0; j < parent_feature_list->len(); j++) {
 			Feature ft2 = (Feature) parent_feature_list->nth(j);
 			if(typeid(*ft1)==typeid(attr_class) && typeid(*ft2)==typeid(attr_class) //do I need * ?
-				&& (((attr_class*)ft1)->getName()->get_string() == ((attr_class*)ft2)->getName()->get_string())){
+				&& (((attr_class*)ft1)->get_name()->get_string() == ((attr_class*)ft2)->get_name()->get_string())){
 				conflictWithParents = true;
 
 				classTable->semant_error(currentClass->get_filename(), ft1); //how about the error information?
 				break;
 			}
 			else if(typeid(*ft1)==typeid(method_class) && typeid(*ft2)==typeid(method_class)
-					&& ((method_class*)ft1)->getName()->get_string() == ((method_class*)ft2)->getName()->get_string()){
+					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string()){
 				method_class* mt1 =((method_class*)ft1);
 				method_class* mt2 =((method_class*)ft2);
 
 				//check return_type
-				if(mt1->getReturn_type()->get_string()!=mt2->getReturn_type()->get_string()){
+				if(mt1->get_return_type()->get_string()!=mt2->get_return_type()->get_string()){
 					classTable->semant_error(currentClass->get_filename(), ft1);
 					break;
 				}
 
 				bool sameFormalsLength = false;
-				Formals fms1 = mt1->getFormals();
-				Formals fms2 = mt2->getFormals();
+				Formals fms1 = mt1->get_formals();
+				Formals fms2 = mt2->get_formals();
 				if(fms1->len() == fms2->len()) {
 					sameFormalsLength = true;
 				}
@@ -780,7 +780,7 @@ void semanVisitor::visit(class__class* cl) {
 						formal_class* fm1 = (formal_class*)fms1->nth(i);
 						formal_class* fm2 = (formal_class*)fms2->nth(i);
 
-						if(fm1->getType_decl()->get_string() != fm2->getType_decl()->get_string()) {
+						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) {
 							classTable->semant_error(currentClass->get_filename(), ft1);
 						    break;
 						}
@@ -794,12 +794,12 @@ void semanVisitor::visit(class__class* cl) {
 				Feature ft3 = (Feature) features->nth(k);
 
 				if(typeid(*ft1)==typeid(attr_class) && typeid(*ft3)==typeid(attr_class)
-						&& ((attr_class*)ft1)->getName()->get_string()== ((attr_class*)ft3)->getName()->get_string()) {
+						&& ((attr_class*)ft1)->get_name()->get_string()== ((attr_class*)ft3)->get_name()->get_string()) {
 					classTable->semant_error(currentClass->get_filename(), ft1);
 					break;
 				}
 				else if(typeid(*ft1)==typeid(method_class) && typeid(*ft3)==typeid(method_class)
-						&& ((method_class*)ft1)->getName()->get_string()== ((method_class*)ft3)->getName()->get_string()) {
+						&& ((method_class*)ft1)->get_name()->get_string()== ((method_class*)ft3)->get_name()->get_string()) {
 					classTable->semant_error(currentClass->get_filename(), ft1);
 					break;
 				}

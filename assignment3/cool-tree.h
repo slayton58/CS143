@@ -12,11 +12,9 @@
 #include "typeinfo"
 #include "tree.h"
 #include "cool-tree.handcode.h"
-<<<<<<< HEAD
 #include "symtab.h"
-=======
 #include <algorithm>
->>>>>>> c88115a2202747ffc9ea67b146084e063e3fa119
+
 
 
 
@@ -180,18 +178,15 @@ public:
    Features parent_feature_list;
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
-<<<<<<< HEAD
+
    Symbol get_name() {return name;}
    Symbol get_parent() {return parent;}
    Features get_features() {return features;}
    void accept(Visitor *v);
    void add_parentMembers(Visitor *v, Features features);
-=======
-   Symbol get_name(){return name;}
-   Symbol get_parent(){return parent;}
-   Features get_features(){return features;}
+
    Features parent_feature_list;
->>>>>>> c88115a2202747ffc9ea67b146084e063e3fa119
+
 
 #ifdef Class__SHARED_EXTRAS
    Class__SHARED_EXTRAS
@@ -274,6 +269,7 @@ public:
    Formal copy_Formal();
    void dump(ostream& stream, int n);
    void accept(Visitor *v);
+   Symbol get_name() {return name;}
    Symbol get_type_decl() {return type_decl;}
 
 #ifdef Formal_SHARED_EXTRAS
