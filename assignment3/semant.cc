@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include "semant.h"
 #include "utilities.h"
+#include <queue>
 
 
 extern int semant_debug;
@@ -296,7 +297,32 @@ void ClassTable::install_user_classes( Classes classes )
 
 void ClassTable::install_function_map()
 {
-  //throw std::exception("The method or operation is not implemented.");
+  std::queue<Symbol> q;
+  q.push(Object);
+  while ( ! q.empty())
+  {
+    Symbol c = q.front();
+    q.pop();
+    Features features = class_map[c].getFeatures();
+    for(int i = features->first(); features->more(i); i = features->next(i))
+    {
+      Feature f = features->nth(i);
+      if (typeid(f) == typeid(method_class *))  //TODO
+      {
+        method_class m = (method_class)f;
+        verify_signature(class_map[c], m);
+        method_map[c][m.getName()]=m;  //TODO
+      }
+    } 
+
+
+
+
+
+  }
+  
+
+  
 }
 
 
@@ -479,6 +505,30 @@ void ClassTable::fatal()
   cerr<<"Compilation halted due to static semantic errors."<<endl;
   exit(1);
 }
+
+void ClassTable::verify_signature( class__class cls, method_class m )
+{
+  Formals formals = m.getFormals();
+  // iterater through the formal list to check each can't be self or SELF_TYPE
+  for (int i = formals->first(); formals->more(i); i = formals->next(i))
+  {
+    formal_class* fm = (formal_class *) formals->nth(i);
+    
+    //formal list shouldn't have self
+    if(fm->getName() == self)
+      semant_error(cls->get_filename(), m)<<"formal list shouldn't have self "<<endl;
+
+    //formal list shouldn't have SELF_TYPE
+    if(fm->getName() == SELF_TYPE)
+      semant_error(cls->get_filename(), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
+  }
+  //check the return type should be an already defined class
+  if (class_map[m.getReturn_type()] == NULL && m.getReturn_type != SELF_TYPE)
+    semant_error(cls->get_filename(), m)<<" return type not defined in method "<<m.getName<<endl;      
+
+
+}
+
 
 
 

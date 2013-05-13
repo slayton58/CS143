@@ -43,7 +43,7 @@ private:
   //map from class name to class
   std::map<Symbol, Class_> class_map;
   //map from class name and function name to function
-  std::map<Symbol, std::map<Symbol, method_class> > function_map;
+  std::map<Symbol, std::map<Symbol, method_class> > method_map;
   //inheritance map
   std::map<Symbol, std::set<Symbol> > inherit_graph;
   //class set
@@ -62,6 +62,7 @@ public:
   Class_ get_parent(Symbol);
   method_class get_method(Symbol class_name, Symbol method_name);
   std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
+  void verify_signature( class__class cls, method_class m );
 
 
 };
