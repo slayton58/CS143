@@ -276,6 +276,22 @@ void ClassTable::install_user_classes( Classes classes )
     // Finally add the child to the parent key in the inherit graph
     inherit_graph[parent].insert(cls->get_name());
   }
+  //To debug least upper bound:
+  //Symbol c1, c2, common;
+  //for (int i = classes->first(); classes->more(i); i = classes->next(i))
+  //{
+  //  class__class * cls = (class__class *) classes->nth(i);
+  //  // To debug is_child:
+  //  // cout<<cls->get_name()<<" is child of Oject: "<<is_child(cls->get_name(), Object)<<endl;
+  //  if (!strcmp(cls->get_name()->get_string(),"D7"))
+  //    c1=cls->get_name();
+  //  if (!strcmp(cls->get_name()->get_string(),"D5"))
+  //    c2=cls->get_name();
+  //}
+  //common = least_upper_bound(c1, c2);
+  //cout<<c1<<" and "<<c2<<" is commoned at "<<common<<endl;
+
+
 }
 
 void ClassTable::install_function_map()
@@ -292,7 +308,7 @@ Class_ ClassTable::get_parent( Symbol class_name )
 
 bool ClassTable::is_child (Symbol c, Symbol p)
 {
-  cout<<"is child called"<<endl;
+  //cout<<"is child called"<<endl;
   bool c_is_child = false;
   std::map<Symbol, int> visited_map;
   std::map<Symbol, std::set<Symbol> > ::iterator iter;
@@ -332,7 +348,6 @@ void ClassTable::DFS_is_child(std::map<Symbol, int> visited_map, Symbol c, Symbo
 void ClassTable::check_cycle()
 {
   cycle_found = false;
-  cout<<"checking cycle"<<endl;
   std::map<Symbol, int> visited_map;
   std::map<Symbol, std::set<Symbol> > ::iterator iter;
   std::set<Symbol>::iterator iter2;
@@ -347,9 +362,8 @@ void ClassTable::check_cycle()
 
   for (iter = inherit_graph.begin(); iter != inherit_graph.end(); ++iter)
   {
-    cout<<"checking node "<<iter->first<<endl;
     DFS_has_cycle(visited_map, iter->first);
-    if (cycle_found)
+    if (cycle_found) 
       break;    
   }
 }
@@ -358,7 +372,7 @@ void ClassTable::DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c)
 {
   
   visited_map[c] = -1;
-  cout<<"  visiting "<<c<<endl;
+  //cout<<"  visiting "<<c<<endl;
   for (std::set<Symbol>::iterator iter = inherit_graph[c].begin(); iter != inherit_graph[c].end(); ++iter)
   {
     if(visited_map[*iter] == -1)
@@ -372,8 +386,24 @@ void ClassTable::DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c)
 
 
 Symbol ClassTable::least_upper_bound(Symbol c1, Symbol c2)
-{
-
+{                                                             
+  bool is_upper_bound = true;
+  Symbol head = Object;
+  std::set<Symbol>::iterator iter;
+  while (is_upper_bound == true)
+  {
+    is_upper_bound = false;
+    for (iter = inherit_graph[head].begin(); iter != inherit_graph[head].end(); ++iter)
+    {
+      if ( is_child(c1, *iter) && is_child(c2, *iter))
+      {
+        is_upper_bound = true;
+        head = *iter;
+        break;
+      }
+    }
+  }
+  return head;
 }
 
 method_class ClassTable::get_method(Symbol class_name, Symbol method_name)
