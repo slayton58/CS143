@@ -297,13 +297,18 @@ void ClassTable::install_user_classes( Classes classes )
 
 void ClassTable::install_function_map()
 {
+  bool main_found = false;
+  bool main_has_formal = false;
   std::queue<Symbol> q;
   q.push(Object);
+  
+  // BFS all the classes 
   while ( ! q.empty())
   {
     Symbol c = q.front();
     q.pop();
-    Features features = class_map[c].getFeatures();
+    // for each class, get the features
+    Features features = class_map[c].getFeatures();    
     for(int i = features->first(); features->more(i); i = features->next(i))
     {
       Feature f = features->nth(i);
@@ -312,16 +317,38 @@ void ClassTable::install_function_map()
         method_class m = (method_class)f;
         verify_signature(class_map[c], m);
         method_map[c][m.getName()]=m;  //TODO
+        if (c==Main && m.getName()==main_meth)
+        {
+          main_found = true;
+          if (m.getFormals().get_length()>0)//TODO
+            main_has_formal = true;          
+        }
       }
     } 
 
+    //also add features from parent class:
+    std::map<Symbol, method_class> parent_methods = 
+      method_map[class_map[c].getParent()]; //TODO
+    std::map<Symbol, method_class>::iterator iter;
+    for (iter=parent_methods.begin(); iter!=parent_methods.end(); ++iter)
+    {
+      if (method_map[c].count(iter->first) == 0 )
+        method_map[c][iter->first]=iter->second;
+    }
 
-
-
+    std::set<Symbol> child_class = inherit_graph[c];
+    std::set<Symbol>::iterator iter2;
+    for(iter2= child_class.begin(); iter2!= child_class.end(); ++iter2)
+    {
+      q.push(*iter2) ;
+    }
 
   }
   
-
+  if (!main_found)
+    semant_error(class_map[c].get_filename(), class_map[c])<<" No Main class and main method found"<<endl;
+  if (main_has_formal)
+    semant_error(class_map[c].get_filename(), class_map[c])<<" main method shouldn't have formals"<<endl;
   
 }
 
@@ -516,15 +543,15 @@ void ClassTable::verify_signature( class__class cls, method_class m )
     
     //formal list shouldn't have self
     if(fm->getName() == self)
-      semant_error(cls->get_filename(), m)<<"formal list shouldn't have self "<<endl;
+      semant_error(cls.get_filename(), m)<<"formal list shouldn't have self "<<endl;
 
     //formal list shouldn't have SELF_TYPE
     if(fm->getName() == SELF_TYPE)
-      semant_error(cls->get_filename(), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
+      semant_error(cls.get_filename(), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
   }
   //check the return type should be an already defined class
   if (class_map[m.getReturn_type()] == NULL && m.getReturn_type != SELF_TYPE)
-    semant_error(cls->get_filename(), m)<<" return type not defined in method "<<m.getName<<endl;      
+    semant_error(cls.get_filename(), m)<<" return type not defined in method "<<m.getName<<endl;      
 
 
 }
