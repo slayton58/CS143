@@ -12,7 +12,11 @@
 #include "typeinfo"
 #include "tree.h"
 #include "cool-tree.handcode.h"
+<<<<<<< HEAD
 #include "symtab.h"
+=======
+#include <algorithm>
+>>>>>>> c88115a2202747ffc9ea67b146084e063e3fa119
 
 
 
@@ -176,11 +180,18 @@ public:
    Features parent_feature_list;
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
-   Symbol getName() {return name;}
-   Symbol getParent() {return parent;}
-   Features getFeatures() {return features;}
+<<<<<<< HEAD
+   Symbol get_name() {return name;}
+   Symbol get_parent() {return parent;}
+   Features get_features() {return features;}
    void accept(Visitor *v);
-   void addParentMembers(Visitor *v, Features features);
+   void add_parentMembers(Visitor *v, Features features);
+=======
+   Symbol get_name(){return name;}
+   Symbol get_parent(){return parent;}
+   Features get_features(){return features;}
+   Features parent_feature_list;
+>>>>>>> c88115a2202747ffc9ea67b146084e063e3fa119
 
 #ifdef Class__SHARED_EXTRAS
    Class__SHARED_EXTRAS
@@ -208,9 +219,9 @@ public:
    Feature copy_Feature();
    void dump(ostream& stream, int n);
    void accept(Visitor *v);
-   Symbol getName() {return name;}
-   Formals getFormals() {return formals;}
-   Symbol getReturn_type() {return return_type;}
+   Symbol get_name() {return name;}
+   Formals get_formals() {return formals;}
+   Symbol get_return_type() {return return_type;}
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -237,9 +248,9 @@ public:
    void dump(ostream& stream, int n);
    void accept(Visitor *v);
 
-   Symbol getName() {return name;}
-   Symbol getType_decl() {return type_decl;}
-   Expression getInit() {return init;}
+   Symbol get_name() {return name;}
+   Symbol get_type_decl() {return type_decl;}
+   Expression get_init() {return init;}
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -263,7 +274,7 @@ public:
    Formal copy_Formal();
    void dump(ostream& stream, int n);
    void accept(Visitor *v);
-   Symbol getType_decl() {return type_decl;}
+   Symbol get_type_decl() {return type_decl;}
 
 #ifdef Formal_SHARED_EXTRAS
    Formal_SHARED_EXTRAS

@@ -1,3 +1,6 @@
+user: songhan
+user: xuany
+
 README file for Programming Assignment 2 (C++ edition)
 ======================================================
 
@@ -247,11 +250,10 @@ In multiple expressions, we handle the error by recovering from ;
 First, we generated good.cl which contains all legal grammars to test each 
 production unit, e.g. class, class_list,feature, feature_list, etc. By comparing
 output and error message of our parser with the reference parser, we can test
-the functional correctness of our design. In that file, we also wrote a sequence
-of expressions to test the precedence.
+the functional correctness of our design. 
 
 In order to apply more test to our parser and expose it to the real Cool code,
-we ran it againes all the Cool source code in examples folder, as well as those 
+we ran it against all the Cool source code in examples folder, as well as those 
 test cases provided for PA1.
 
 To test whether our error handling can work correctly, we wrote bad.cl which
