@@ -10,6 +10,7 @@ class C {
 	};
 };
 
+class X {};
 class D inherits C {
     d : Int;
     methodD() : Bool { true };

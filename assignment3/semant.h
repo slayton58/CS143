@@ -26,11 +26,17 @@ typedef ClassTable *ClassTableP;
 class ClassTable {
 private:
   int semant_errors;
+  bool cycle_found;
   void install_basic_classes();
   void install_user_classes(Classes);
-  void install_class_map(Classes);
   void install_function_map();
-  bool check_cycle();
+  void check_cycle();
+  void DFS_is_child(std::map<Symbol, int> visited_map, Symbol c, Symbol p, bool &);
+  void DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c);
+  
+  void print_inherit_map();
+  void print_class_map();
+  void fatal();
 
   ostream& error_stream;
 
@@ -53,11 +59,10 @@ public:
  
   bool is_child (Symbol c1, Symbol c2);
   Symbol least_upper_bound(Symbol c1, Symbol c2);
-  class__class get_parent();
-  std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
+  Class_ get_parent(Symbol);
   method_class get_method(Symbol class_name, Symbol method_name);
-  void print_inherit_map();
-  
+  std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
+
 
 };
 
