@@ -122,16 +122,16 @@ std::vector<Symbol> ClassTable::get_signature(Symbol class_name, Symbol method_n
     semant_error()<<" No method_name found"<<endl;
   else
   {
-    method_class m = method_map[class_name][method_name];
-    Formals formals = m.getFormals();
+    method_class* m = method_map[class_name][method_name];
+    Formals formals = m->get_formals();
     //add formals' types:
     for(int i = formals->first(); formals->more(i); i = formals->next(i))
     {
       formal_class *fm = (formal_class *)formals->nth(i);
-      sig.insert(fm->getType_decl);//TODO
+      sig.insert(fm->get_type_decl);//TODO
     }
     // add return type:
-    sig.insert(m.getReturn_type);//TODO
+    sig.insert(m->get_return_type);//TODO
 
   }
 
@@ -891,11 +891,61 @@ void class__class::accept(Visitor *v) {
 	v->enterscope();
 	semanVisitor* sv = (semanVisitor*) v;
 
-	//parent_feature_list = new Features();
+	parent_feature_list = new Features();
 	if( parent != No_class) {
-		//class__class* parentClass__class = sv.classTable->getParent(this->getName());
+		// how to print out symbol table?
+		class__class* parentClass__class = sv->classTable->get_parent(this->get_name());
+		if(parentClass__class != NULL) {
+			parentClass__class->add_parentMembers(v, parent_feature_list);
+		}
+		//how to print out symbol table?
 	}
 
 	v->visit(this);
+
+	for (int i=0; i < features->len(); i++) {
+		Feature ft = (Feature) features->nth(i);
+		if(typeid(*ft) == typeid(method_class)) {
+			method_class* mt = (method_class*) ft;
+			if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
+				sv->addId(mt->get_name(), mt);
+		}
+		else if(typeid(*ft)==typeid(attr_class)){
+			attr_class* at = (attr_class*) ft;
+			if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
+					sv->addId(at->get_name(), at);
+		}
+	}
+
+	for(int i=0; i < parent_feature_list->len(); i++) {
+		Feature ft = (Feature) features->nth(i);
+		if(typeid(*ft) == typeid(method_class)) {
+			method_class* mt = (method_class*) ft;
+			if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
+				sv->addId(mt->get_name(), mt);
+		}
+		else if(typeid(*ft)==typeid(attr_class)){
+			attr_class* at = (attr_class*) ft;
+			if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
+					sv->addId(at->get_name(), at);
+		}
+	}
+
+	for(int i=0; i < features->len(); i++) {
+		Feature ft = (Feature) features->nth(i);
+		if(typeid(*ft) == typeid(method_class)) {
+			method_class* mt = (method_class*) ft;
+			mt->accept(v);
+		}
+		else if(typeid(*ft) == typeid(attr_class)) {
+			attr_class *at = (attr_class*) ft;
+			at->accept(v);
+		}
+	}
 	v->exitscope();
+}
+
+void add_parentMembers(Visitor *v, Features parent_feature_list) {
+	semanVisitor* sv = (semanVisitor*) v;
+
 }
