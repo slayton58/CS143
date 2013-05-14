@@ -864,8 +864,10 @@ void semanVisitor::visit(method_class *mt)
       addId(fm->get_name(),fm);
   }
   this->visit(mt->get_expr());
+  // get method signature
   std::vector<Symbol> signature = classTable->get_signature(currentClass->get_name(), mt->get_name());
-
+  
+  //check whether return type is compatible
   Symbol return_from_method = mt->get_return_type();
   Symbol return_from_expr = mt->get_expr()->get_type();
 
@@ -881,6 +883,52 @@ void semanVisitor::visit(method_class *mt)
   if(case_1 || case_2) {
     classTable->semant_error(currentClass->get_filename(),mt)<<"return type does not match!"<<endl;
   }
+}
+
+void semanVisitor::visit(attr_class *at) {
+    // check self is not the name
+     if(at->get_name() == self) {
+       classTable->semant_error(currentClass->get_filename(), at)
+         << "cannot use \'self\' as the name of an attribute.\n" <<endl;
+     }
+     // check whether type decl is valid
+     if(at->get_type_decl() != SELF_TYPE &&
+       !classTable->class_exist(at->get_type_decl())) {
+        classTable->semant_error(currentClass->get_filename(), at)
+          << "class " << at->get_type_decl()->get_string()
+          << " of attribute "  << at->get_name()->get_string()
+          << " is undefined.\n" <<endl;
+     }
+
+     this->visit(at->get_init());
+
+     if(at->get_init()->get_type()==NULL)
+       return;
+
+     //verif whether type decl is compatible
+     Symbol type_decl = at->get_type_decl();
+     Symbol type_init = at->get_init()->get_type();
+     if(type_init == SELF_TYPE) {
+          type_init = this->currentClass->get_name();
+     }
+     if(!this->classTable->is_child(type_init,type_decl)) {
+        classTable->semant_error(currentClass->get_filename(),at)
+          << "Initialized type "  << type_init->get_string()
+          << " of attribute " << at->get_name()->get_string()
+          << " does not conform to the declared type "
+          << type_decl->get_string() << ".\n" << endl;        
+     }
+}
+
+void semanVisitor::visit(formal_class* fm) {
+  //check whether type_decl is valid
+  if(fm->get_type_decl() != SELF_TYPE &&
+    !classTable->class_exist(fm->get_type_decl())) {
+     classTable->semant_error(currentClass->get_filename(), fm)
+       << "class " << fm->get_type_decl()->get_string()
+       << " of formal " << fm->get_name()->get_string()
+       << " is undefined.\n" << endl;
+  }    
 }
 
 void program_class::accept(Visitor *v) {
@@ -969,4 +1017,213 @@ void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) {
     // printf something?
     parentClass__class->add_parentMembers(v, parent_feature_list);
   }
+}
+
+void method_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+
+  for(int i =formals->first(); formals->more(i); i=formals->next(i)) {
+    formal_class* fm = (formal_class*)formals->nth(i);
+    fm->accept(v);   
+  }
+  v->exitscope();
+}
+
+void attr_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void formal_class::accept(Visitor *v) {
+  v->visit(this);
+}
+
+void branch_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  expr->accept(v);
+  v->exitscope();
+}
+
+void assign_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  expr->accept(v);
+  v->exitscope();
+}
+
+void static_dispatch_class::accept(Visitor *v) {
+  v->enterscope();
+
+  expr->accept(v);
+  v->visit(this);
+  for(int i =actual->first(); actual->more(i); i=actual->next(i)) {
+    Expression_class* ac = (Expression_class*)actual->nth(i);
+    ac->accept(v);   
+  }
+  v->exitscope();
+}
+
+void dispatch_class::accept(Visitor *v) {
+  v->enterscope();
+
+  expr->accept(v);
+  v->visit(this);
+  for(int i =actual->first(); actual->more(i); i=actual->next(i)) {
+    Expression_class* ac = (Expression_class*)actual->nth(i);
+    ac->accept(v);   
+  }
+  v->exitscope();
+}
+
+void cond_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  pred->accept(v);
+  then_exp->accept(v);
+  else_exp->accept(v);
+  v->exitscope();
+}
+
+void loop_class ::accept(Visitor *v) {
+  v->visit(this);
+}
+
+void typcase_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  expr->accept(v);
+
+  for(int i =cases->first(); cases->more(i); i=cases->next(i)) {
+    branch_class* cs = (branch_class*)cases->nth(i);
+    cs->accept(v);   
+  }
+  v->exitscope();
+}
+
+void block_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void let_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void plus_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void sub_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void mul_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void divide_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void neg_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  v->exitscope();
+}
+
+void lt_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void eq_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void leq_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  e2->accept(v);
+  v->exitscope();
+}
+
+void comp_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  v->exitscope();
+}
+
+void int_const_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void bool_const_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void string_const_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void new__class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void isvoid_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  e1->accept(v);
+  v->exitscope();
+}
+
+void no_expr_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
+}
+
+void object_class::accept(Visitor *v) {
+  v->enterscope();
+  v->visit(this);
+  v->exitscope();
 }

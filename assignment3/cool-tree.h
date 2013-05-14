@@ -30,6 +30,7 @@ class Program_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Program(); }
    virtual Program copy_Program() = 0;
+   void accept(Visitor *v);
 
 #ifdef Program_EXTRAS
    Program_EXTRAS
@@ -44,7 +45,7 @@ class Class__class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Class_(); }
    virtual Class_ copy_Class_() = 0;
-
+    void accept(Visitor *v);
 
 #ifdef Class__EXTRAS
    Class__EXTRAS
@@ -59,6 +60,7 @@ class Feature_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+   void accept(Visitor *v);
 
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
@@ -73,6 +75,7 @@ class Formal_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Formal(); }
    virtual Formal copy_Formal() = 0;
+   void accept(Visitor *v);
 
 #ifdef Formal_EXTRAS
    Formal_EXTRAS
@@ -88,6 +91,8 @@ public:
    tree_node *copy()		 { return copy_Expression(); }
    virtual Expression copy_Expression() = 0;
 
+   void accept(Visitor *v);
+
 #ifdef Expression_EXTRAS
    Expression_EXTRAS
 #endif
@@ -101,6 +106,7 @@ class Case_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Case(); }
    virtual Case copy_Case() = 0;
+   void accept(Visitor *v);
 
 #ifdef Case_EXTRAS
    Case_EXTRAS
@@ -347,6 +353,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   Expressions get_actual() {return actual;}
    void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
@@ -397,6 +404,11 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   Expression get_pred() {return pred;}
+   Expression get_then_exp() {return then_exp;}
+   Expression get_else_exp() {return else_exp;}
+
    void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
@@ -443,6 +455,9 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   Expression get_expr() {return expr;}
+   Cases get_cases() {return cases;}
    void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
@@ -514,6 +529,10 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   Expression get_e1() {return e1;}
+   Expression get_e2() {return e2;}
+
    void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
