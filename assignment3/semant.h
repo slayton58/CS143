@@ -61,8 +61,10 @@ public:
   Symbol least_upper_bound(Symbol c1, Symbol c2);
   Class_ get_parent(Symbol);
   method_class get_method(Symbol class_name, Symbol method_name);
-  std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
+  std::vector<Symbol> get_signature(Symbol , Symbol );
   void verify_signature( class__class cls, method_class m );
+  bool class_exist(Symbol c);
+  bool method_exist(Symbol class_name, Symbol method_name);
 
 
 };

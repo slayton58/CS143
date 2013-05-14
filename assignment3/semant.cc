@@ -6,6 +6,7 @@
 #include "semant.h"
 #include "utilities.h"
 #include <queue>
+#include <vector>
 
 
 extern int semant_debug;
@@ -101,6 +102,53 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
 
 
 /* Methods for ClassTable */
+
+
+bool ClassTable::class_exist(Symbol c)
+{
+  return (class_map.count(c) > 0);
+}
+
+std::vector<Symbol> ClassTable::get_signature(Symbol class_name, Symbol method_name)
+{
+  std::vector<Symbol> sig;
+  if (method_map.count(class_name)==0)
+    semant_error()<<" No class_name found"<<endl;
+  else if (method_map[class_name].count(method_name)==0)
+    semant_error()<<" No method_name found"<<endl;
+  else
+  {
+    method_class m = method_map[class_name][method_name];
+    Formals formals = m.getFormals();
+    //add formals' types:
+    for(int i = formals->first(); formals->more(i); i = formals->next(i))
+    {
+      formal_class *fm = (formal_class *)formals->nth(i);
+      sig.insert(fm->getType_decl);//TODO
+    }
+    // add return type:
+    sig.insert(m.getReturn_type);//TODO
+
+  }
+
+  return sig;
+}
+
+bool ClassTable::method_exist(Symbol class_name, Symbol method_name)
+{
+  bool exist=true;
+  if (method_map.count(class_name)==0)
+    exist = false;    
+  else if (method_map[class_name].count(method_name)==0)
+    exist = false;
+
+  return exist;
+}
+
+method_class ClassTable::get_method(Symbol class_name, Symbol method_name)
+{
+  return method_map[class_name][method_name];
+}
 
 void ClassTable::install_basic_classes() {
 
