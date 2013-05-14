@@ -128,14 +128,36 @@ std::vector<Symbol> ClassTable::get_signature(Symbol class_name, Symbol method_n
     for(int i = formals->first(); formals->more(i); i = formals->next(i))
     {
       formal_class *fm = (formal_class *)formals->nth(i);
-      sig.insert(fm->get_type_decl);//TODO
+      sig.push_back(fm->get_type_decl());//TODO
     }
     // add return type:
-    sig.insert(m->get_return_type);//TODO
+    sig.push_back(m->get_return_type());//TODO
 
   }
-
   return sig;
+}
+
+void ClassTable::verify_signature( class__class* cls, method_class* m )
+{
+  Formals formals = m->get_formals();
+  // iterater through the formal list to check each can't be self or SELF_TYPE
+  for (int i = formals->first(); formals->more(i); i = formals->next(i))
+  {
+    formal_class* fm = (formal_class *) formals->nth(i);
+
+    //formal list shouldn't have self
+    if(fm->get_name() == self)
+      semant_error((cls->get_filename()), m)<<"formal list shouldn't have self "<<endl;
+
+    //formal list shouldn't have SELF_TYPE
+    if(fm->get_name() == SELF_TYPE)
+      semant_error((cls->get_filename()), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
+  }
+  //check the return type should be an already defined class
+  if (class_map[m->get_return_type()] == NULL && m->get_return_type() != SELF_TYPE)
+    semant_error((cls->get_filename()), m)<<" return type not defined in method "<< m->get_name()<<endl;
+
+
 }
 
 bool ClassTable::method_exist(Symbol class_name, Symbol method_name)
@@ -149,7 +171,7 @@ bool ClassTable::method_exist(Symbol class_name, Symbol method_name)
   return exist;
 }
 
-method_class ClassTable::get_method(Symbol class_name, Symbol method_name)
+method_class* ClassTable::get_method(Symbol class_name, Symbol method_name)
 {
   return method_map[class_name][method_name];
 }
@@ -262,11 +284,11 @@ void ClassTable::install_basic_classes() {
   basic_class_set.insert(Str);
   basic_class_set.insert(SELF_TYPE);  //TODO: is this needed?
   //add these class mapping from name to class:
-  class_map.insert(std::make_pair(Object, Object_class));
-  class_map.insert(std::make_pair(IO, IO_class));
-  class_map.insert(std::make_pair(Int, Int_class));
-  class_map.insert(std::make_pair(Bool, Bool_class));
-  class_map.insert(std::make_pair(Str, Str_class));
+  class_map.insert(std::make_pair(Object, (class__class*)Object_class));
+  class_map.insert(std::make_pair(IO, (class__class*)IO_class));
+  class_map.insert(std::make_pair(Int, (class__class*)Int_class));
+  class_map.insert(std::make_pair(Bool, (class__class*)Bool_class));
+  class_map.insert(std::make_pair(Str, (class__class*)Str_class));
   //populate the inherit graph with the basic classes:
   inherit_graph[No_class].insert(Object);
   inherit_graph[Object].insert(IO);
@@ -353,11 +375,11 @@ void ClassTable::install_function_map()
   bool main_has_formal = false;
   std::queue<Symbol> q;
   q.push(Object);
-  
+  Symbol c;  
   // BFS all the classes 
   while ( ! q.empty())
   {
-    Symbol c = q.front();
+    c = q.front();
     q.pop();
     // for each class, get the features
     Features features = class_map[c]->get_features();
@@ -367,7 +389,7 @@ void ClassTable::install_function_map()
       if (typeid(f) == typeid(method_class *))  //TODO
       {
         method_class* m = (method_class*)f;
-        verify_signature(class_map[c], *m);
+        verify_signature(class_map[c], m);
         method_map[c][m->get_name()]=m;  //TODO
         if (c==Main && m->get_name()==main_meth)
         {
@@ -379,13 +401,13 @@ void ClassTable::install_function_map()
     } 
 
     //also add features from parent class:
-    std::map<Symbol, method_class> parent_methods = 
-      method_map[class_map[c].get_parent()]; //TODO
-    std::map<Symbol, method_class>::iterator iter;
+    std::map<Symbol, method_class*> parent_methods = 
+      method_map[class_map[c]->get_parent()]; //TODO
+    std::map<Symbol, method_class*>::iterator iter;
     for (iter=parent_methods.begin(); iter!=parent_methods.end(); ++iter)
     {
       if (method_map[c].count(iter->first) == 0 )
-        method_map[c][iter->first]=iter->second;
+        method_map[c][iter->first]= iter->second;
     }
 
     std::set<Symbol> child_class = inherit_graph[c];
@@ -398,16 +420,15 @@ void ClassTable::install_function_map()
   }
   
   if (!main_found)
-    semant_error(class_map[c].get_filename(), class_map[c])<<" No Main class and main method found"<<endl;
+    semant_error(class_map[c]->get_filename(), class_map[c])<<" No Main class and main method found"<<endl;
   if (main_has_formal)
-    semant_error(class_map[c].get_filename(), class_map[c])<<" main method shouldn't have formals"<<endl;
+    semant_error(class_map[c]->get_filename(), class_map[c])<<" main method shouldn't have formals"<<endl;
   
 }
 
-
-Class_ ClassTable::get_parent( Symbol class_name )
+class__class * ClassTable::get_parent( Symbol class_name )
 {
-  class__class *cls = (class__class *) class_map[class_name];
+  class__class *cls = class_map[class_name];
   return class_map[cls->get_parent()];
 }
 
@@ -489,7 +510,6 @@ void ClassTable::DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c)
 
 }
 
-
 Symbol ClassTable::least_upper_bound(Symbol c1, Symbol c2)
 {                                                             
   bool is_upper_bound = true;
@@ -511,22 +531,12 @@ Symbol ClassTable::least_upper_bound(Symbol c1, Symbol c2)
   return head;
 }
 
-method_class ClassTable::get_method(Symbol class_name, Symbol method_name)
-{
-
-}
-
-std::vector<Symbol> ClassTable::get_signature(Symbol class_name, Symbol method_name)
-{
-
-}
-
 
 void ClassTable::print_inherit_map()
 {
   std::map<Symbol, std::set<Symbol> > ::iterator iter1;
   std::set<Symbol>::iterator iter2;
-  for (itert_graph.begin(); iter1!=inherit_graph.end(); ++iter1)
+  for (inherit_graph.begin(); iter1!=inherit_graph.end(); ++iter1)
   {
     cout<<"Parent: "<<iter1->first<<" -> ";
     for (iter2=iter1->second.begin(); iter2!=iter1->second.end(); ++iter2)
@@ -541,7 +551,7 @@ void ClassTable::print_inherit_map()
 void ClassTable::print_class_map()
 {
   cout<<endl<<"printing the class_map"<<endl;
-  std::map<Symbol, Class_>::iterator iter;
+  std::map<Symbol, class__class*>::iterator iter;
   for( iter = class_map.begin(); iter != class_map.end(); ++iter )
     cout<<iter->first<<":"<<iter->second<<endl;
   cout<<endl;
@@ -584,34 +594,6 @@ void ClassTable::fatal()
   cerr<<"Compilation halted due to static semantic errors."<<endl;
   exit(1);
 }
-
-void ClassTable::verify_signature( class__class* cls, method_class* m )
-{
-  Formals formals = m->get_formals();
-  // iterater through the formal list to check each can't be self or SELF_TYPE
-  for (int i = formals->first(); formals->more(i); i = formals->next(i))
-  {
-    formal_class* fm = (formal_class *) formals->nth(i);
-    
-    //formal list shouldn't have self
-    if(fm->get_name() == self)
-      semant_error((cls->get_filename()), m)<<"formal list shouldn't have self "<<endl;
-
-    //formal list shouldn't have SELF_TYPE
-    if(fm->get_name() == SELF_TYPE)
-      semant_error((cls->get_filename()), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
-  }
-  //check the return type should be an already defined class
-  if (class_map[m->get_return_type()] == NULL && m->get_return_type != SELF_TYPE)
-    semant_error((cls->get_filename()), m)<<" return type not defined in method "<< m->get_name<<endl;
-
-
-}
-
-
-
-
-
 
 
 
@@ -856,39 +838,26 @@ void semanVisitor::visit(class__class* cl) {
 	}
 }
 
-void semanVisitor::visit(method_class *mt) {
-    Formals formals = mt->get_formals(); 
-    for(int i =formals->first(); formals->more(i); i=formals->next(i) ) {
-       formal_class* fm = (formal_class*) formals->nth(i);
-       if(typeid(probeObject(fm->get_name()))==typeid(formal_class)) {
-         classTable->semant_error(currentClass->get_filename(), fm);
-         // TODO print out error message
-       }
-       else {
-         addId(fm->get_name(),fm);
-       }
-    }
-    this->visit(mt->get_expr());
-    std::vector<Symbol> signature = classTable->get_signature(currentClass->get_name(), mt->get_name());
+/*void program_class::semant() {
+	try {
+	     ClassTable classTable = new ClassTable(classes);
+	     OcurredExpection = false;
+	     sv = new semanVisitor(classTable);
+	     this->accept(&sv);
 
-    Symbol return_from_method = mt->get_return_type();
-    Symbol return_from_expr = mt->get_expr()->get_type();
+	     if(classTable.errors()) {
+	    	 cerr << "compilation halted due to static semantic errors." << endl;
+	         throw 20;
+	     }
+	}
+	catch (int e){
+		OcurredExpection = true;
+	}
+	if(OcurredExpection) {
+		cerr << "compilation halted due to static semantic errors." << endl;
+	}
 
-    Symbol return_from_expr_infer = return_from_expr;
-    if(return_from_expr_infer == SELF_TYPE) {
-      return_from_expr_infer = this->currentClass->get_name();
-    }
-
-    bool case_1 = (return_from_method == SELF_TYPE) &&
-                  (return_from_expr != SELF_TYPE);
-    bool case_2 = (return_from_method != SELF_TYPE) &&
-                  (!classTable->is_child(return_from_expr_infer,return_from_method));
-    if(case_1 || case_2) {
-      classTable->semant_error(currentClass->get_filename(),mt);
-    }   //TODO print out error message
-}
-
-
+}*/
 
 void program_class::accept(Visitor *v) {
 	v->enterscope();
@@ -904,7 +873,6 @@ void class__class::accept(Visitor *v) {
 	v->enterscope();
 	semanVisitor* sv = (semanVisitor*) v;
 
-	parent_feature_list = new Features();
 	if( parent != No_class) {
 		// how to print out symbol table?
 		class__class* parentClass__class = sv->classTable->get_parent(this->get_name());
@@ -958,22 +926,7 @@ void class__class::accept(Visitor *v) {
 	v->exitscope();
 }
 
-void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) {
+void add_parentMembers(Visitor *v, Features parent_feature_list) {
 	semanVisitor* sv = (semanVisitor*) v;
-  for(int i=0; i < features->len(); i++) {
-     Feature ft = (Feature) features->nth(i);
-     if(typeid(*ft)==typeid(method_class)) {
-        method_class* mt = (method_class*) ft;
-        parent_feature_list-> cons(mt, parent_feature_list);
-     }
-     else if(typeid(*ft)==typeid(attr_class)) {
-        attr_class* at = (attr_class*) ft;
-        parent_feature_list-> cons(at, parent_feature_list);
-     }
-  }
-  if(parent != No_class) {
-    class__class* parentClass__class  = sv->classTable->get_parent(this->get_name());
-    // printf something?
-    parentClass__class->add_parentMembers(v, parent_feature_list);
-  }
+
 }
