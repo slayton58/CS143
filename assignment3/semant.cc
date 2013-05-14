@@ -131,7 +131,7 @@ std::vector<Symbol> ClassTable::get_signature(Symbol class_name, Symbol method_n
       sig.push_back(fm->get_type_decl());//TODO
     }
     // add return type:
-    sig.push_back(m->get_return_type());//TODO
+    sig.push_back(m->get_return_type()); //TODO
 
   }
   return sig;
@@ -838,26 +838,37 @@ void semanVisitor::visit(class__class* cl) {
 	}
 }
 
-/*void program_class::semant() {
-	try {
-	     ClassTable classTable = new ClassTable(classes);
-	     OcurredExpection = false;
-	     sv = new semanVisitor(classTable);
-	     this->accept(&sv);
+void semanVisitor::visit(method_class *mt) {
+  Formals formals = mt->get_formals(); 
+  for(int i =formals->first(); formals->more(i); i=formals->next(i) ) {
+    formal_class* fm = (formal_class*) formals->nth(i);
+    if(typeid(probeObject(fm->get_name()))==typeid(formal_class)) {
+      classTable->semant_error(currentClass->get_filename(), fm);
+      // TODO print out error message
+    }
+    else {
+      addId(fm->get_name(),fm);
+    }
+  }
+  this->visit(mt->get_expr());
+  std::vector<Symbol> signature = classTable->get_signature(currentClass->get_name(), mt->get_name());
 
-	     if(classTable.errors()) {
-	    	 cerr << "compilation halted due to static semantic errors." << endl;
-	         throw 20;
-	     }
-	}
-	catch (int e){
-		OcurredExpection = true;
-	}
-	if(OcurredExpection) {
-		cerr << "compilation halted due to static semantic errors." << endl;
-	}
+  Symbol return_from_method = mt->get_return_type();
+  Symbol return_from_expr = mt->get_expr()->get_type();
 
-}*/
+  Symbol return_from_expr_infer = return_from_expr;
+  if(return_from_expr_infer == SELF_TYPE) {
+    return_from_expr_infer = this->currentClass->get_name();
+  }
+
+  bool case_1 = (return_from_method == SELF_TYPE) &&
+    (return_from_expr != SELF_TYPE);
+  bool case_2 = (return_from_method != SELF_TYPE) &&
+    (!classTable->is_child(return_from_expr_infer,return_from_method));
+  if(case_1 || case_2) {
+    classTable->semant_error(currentClass->get_filename(),mt);
+  }   //TODO print out error message
+}
 
 void program_class::accept(Visitor *v) {
 	v->enterscope();
@@ -926,7 +937,23 @@ void class__class::accept(Visitor *v) {
 	v->exitscope();
 }
 
-void add_parentMembers(Visitor *v, Features parent_feature_list) {
-	semanVisitor* sv = (semanVisitor*) v;
 
+void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) {
+  semanVisitor* sv = (semanVisitor*) v;
+  for(int i=0; i < features->len(); i++) {
+    Feature ft = (Feature) features->nth(i);
+    if(typeid(*ft)==typeid(method_class)) {
+      method_class* mt = (method_class*) ft;
+      parent_feature_list-> append(single_Features(ft), parent_feature_list);
+    }
+    else if(typeid(*ft)==typeid(attr_class)) {
+      attr_class* at = (attr_class*) ft;
+      parent_feature_list->append(single_Features(ft), parent_feature_list);
+    }
+  }
+  if(parent != No_class) {
+    class__class* parentClass__class  = sv->classTable->get_parent(this->get_name());
+    // printf something?
+    parentClass__class->add_parentMembers(v, parent_feature_list);
+  }
 }
