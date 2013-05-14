@@ -1040,6 +1040,12 @@ void formal_class::accept(Visitor *v) {
   v->visit(this);
 }
 
+void Expression_class::accept( Visitor *v )
+{
+  v->enterscope();
+  v->visit(this);                 
+  v->exitscope();
+}
 void branch_class::accept(Visitor *v) {
   v->enterscope();
   v->visit(this);
