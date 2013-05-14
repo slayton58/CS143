@@ -218,6 +218,7 @@ public:
    Symbol get_name() {return name;}
    Formals get_formals() {return formals;}
    Symbol get_return_type() {return return_type;}
+   Expression get_expr() {return expr;}
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
