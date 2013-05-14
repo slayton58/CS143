@@ -765,32 +765,37 @@ void semanVisitor::visit(program_class* prg) {
 	}  // shall I use next(i) or just i?
 }
 
-void semanVisitor::visit(class__class* cl) {
+void semanVisitor::visit(class__class* cl) 
+{
 	currentClass = cl;
 	Features features = cl->get_features();
 	Features parent_feature_list = cl->parent_feature_list;
 
-	for(int i=0; i < features->len(); i++) {
+	for(int i=0; i < features->len(); i++) 
+  {
 		Feature ft1 = (Feature) features->nth(i);
 		bool conflictWithParents = false;
 
-		for(int j=0; j < parent_feature_list->len(); j++) {
+		for(int j=0; j < parent_feature_list->len(); j++) 
+    {
 			Feature ft2 = (Feature) parent_feature_list->nth(j);
-			if(typeid(*ft1)==typeid(attr_class) && typeid(*ft2)==typeid(attr_class) //do I need * ?
-				&& (((attr_class*)ft1)->get_name()->get_string() == ((attr_class*)ft2)->get_name()->get_string())){
+			if(typeid(*ft1)==typeid(attr_class) && typeid(*ft2)==typeid(attr_class) //TODO: do I need * ?
+				&& (((attr_class*)ft1)->get_name() == ((attr_class*)ft2)->get_name()))
+      {
 				conflictWithParents = true;
-
-				classTable->semant_error(currentClass->get_filename(), ft1); //how about the error information?
+				classTable->semant_error(currentClass->get_filename(), ft1)<<"arribute "<<((attr_class*)ft1)->get_name()<<"is an attribute of inherited class"<<endl;
 				break;
 			}
 			else if(typeid(*ft1)==typeid(method_class) && typeid(*ft2)==typeid(method_class)
-					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string()){
+					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string())
+      {
 				method_class* mt1 =((method_class*)ft1);
 				method_class* mt2 =((method_class*)ft2);
 
 				//check return_type
-				if(mt1->get_return_type()->get_string()!=mt2->get_return_type()->get_string()){
-					classTable->semant_error(currentClass->get_filename(), ft1);
+				if(mt1->get_return_type()->get_string()!=mt2->get_return_type()->get_string())
+        {
+					classTable->semant_error(currentClass->get_filename(), ft1)<<"return type is different from inherited type"<<endl;
 					break;
 				}
 
@@ -801,36 +806,43 @@ void semanVisitor::visit(class__class* cl) {
 					sameFormalsLength = true;
 				}
 				else {
-					classTable->semant_error(currentClass->get_filename(), ft1);
+					classTable->semant_error(currentClass->get_filename(), ft1)<<"different number of formals from parent"<<endl;
 				}
 
 				//check formal type
-				if(sameFormalsLength ) {
-					for(int i =0; i< fms1->len(); i++) {
+				if(sameFormalsLength ) 
+        {
+					for(int i =0; i< fms1->len(); i++) 
+          {
 						formal_class* fm1 = (formal_class*)fms1->nth(i);
 						formal_class* fm2 = (formal_class*)fms2->nth(i);
 
-						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) {
-							classTable->semant_error(currentClass->get_filename(), ft1);
+						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) 
+            {
+							classTable->semant_error(currentClass->get_filename(), ft1)<<"formal length is differnt from parent"<<endl;
 						    break;
 						}
 					}
 				}
 			}
 		}
-		if(conflictWithParents == false) {
+		if(conflictWithParents == false) 
+    {
 		    //	check feature defined conflicts within the current class
-			for(int k=0; k< i; k++) {
+			for(int k=0; k< i; k++) 
+      {
 				Feature ft3 = (Feature) features->nth(k);
 
 				if(typeid(*ft1)==typeid(attr_class) && typeid(*ft3)==typeid(attr_class)
-						&& ((attr_class*)ft1)->get_name()->get_string()== ((attr_class*)ft3)->get_name()->get_string()) {
-					classTable->semant_error(currentClass->get_filename(), ft1);
+						&& ((attr_class*)ft1)->get_name()->get_string()== ((attr_class*)ft3)->get_name()->get_string()) 
+        {
+					classTable->semant_error(currentClass->get_filename(), ft1)<<"attribute is multiply defined"<<endl;
 					break;
 				}
 				else if(typeid(*ft1)==typeid(method_class) && typeid(*ft3)==typeid(method_class)
-						&& ((method_class*)ft1)->get_name()->get_string()== ((method_class*)ft3)->get_name()->get_string()) {
-					classTable->semant_error(currentClass->get_filename(), ft1);
+						&& ((method_class*)ft1)->get_name()->get_string()== ((method_class*)ft3)->get_name()->get_string()) 
+        {
+					classTable->semant_error(currentClass->get_filename(), ft1)<<"method is multiply defined"<<endl;
 					break;
 				}
 			}
@@ -838,17 +850,18 @@ void semanVisitor::visit(class__class* cl) {
 	}
 }
 
-void semanVisitor::visit(method_class *mt) {
+void semanVisitor::visit(method_class *mt) 
+{
   Formals formals = mt->get_formals(); 
-  for(int i =formals->first(); formals->more(i); i=formals->next(i) ) {
+  for(int i =formals->first(); formals->more(i); i=formals->next(i) ) 
+  {
     formal_class* fm = (formal_class*) formals->nth(i);
-    if(typeid(probeObject(fm->get_name()))==typeid(formal_class)) {
-      classTable->semant_error(currentClass->get_filename(), fm);
-      // TODO print out error message
+    if(typeid(probeObject(fm->get_name()))==typeid(formal_class)) 
+    {
+      classTable->semant_error(currentClass->get_filename(), fm)<<"formal multiply defined"<<endl;
     }
-    else {
+    else
       addId(fm->get_name(),fm);
-    }
   }
   this->visit(mt->get_expr());
   // get method signature
@@ -868,8 +881,8 @@ void semanVisitor::visit(method_class *mt) {
   bool case_2 = (return_from_method != SELF_TYPE) &&
     (!classTable->is_child(return_from_expr_infer,return_from_method));
   if(case_1 || case_2) {
-    classTable->semant_error(currentClass->get_filename(),mt);
-  }   //TODO print out error message
+    classTable->semant_error(currentClass->get_filename(),mt)<<"return type does not match!"<<endl;
+  }
 }
 
 void semanVisitor::visit(attr_class *at) {
