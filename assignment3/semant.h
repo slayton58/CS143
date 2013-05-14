@@ -63,7 +63,8 @@ public:
   method_class get_method(Symbol class_name, Symbol method_name);
   std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
   void verify_signature( class__class* cls, method_class* m );
-
+  bool class_exist(Symbol c);
+  bool method_exist(Symbol class_name, Symbol method_name);
 
 };
 
