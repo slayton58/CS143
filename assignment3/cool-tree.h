@@ -175,6 +175,7 @@ public:
       features = a3;
       filename = a4;
    }
+
    Features parent_feature_list;
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
@@ -185,7 +186,7 @@ public:
    void accept(Visitor *v);
    void add_parentMembers(Visitor *v, Features features);
 
-   Features parent_feature_list;
+
 
 
 #ifdef Class__SHARED_EXTRAS

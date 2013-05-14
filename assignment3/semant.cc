@@ -318,13 +318,13 @@ void ClassTable::install_function_map()
       Feature f = features->nth(i);
       if (typeid(f) == typeid(method_class *))  //TODO
       {
-        method_class m = (method_class)f;
-        verify_signature(class_map[c], m);
-        method_map[c][m.get_name()]=m;  //TODO
-        if (c==Main && m.get_name()==main_meth)
+        method_class* m = (method_class*)f;
+        verify_signature(class_map[c], *m);
+        method_map[c][m->get_name()]=m;  //TODO
+        if (c==Main && m->get_name()==main_meth)
         {
           main_found = true;
-          if (m.get_formals()->len()>0)//TODO
+          if (m->get_formals()->len()>0)//TODO
             main_has_formal = true;          
         }
       }
@@ -537,9 +537,9 @@ void ClassTable::fatal()
   exit(1);
 }
 
-void ClassTable::verify_signature( class__class cls, method_class m )
+void ClassTable::verify_signature( class__class* cls, method_class* m )
 {
-  Formals formals = m.get_formals();
+  Formals formals = m->get_formals();
   // iterater through the formal list to check each can't be self or SELF_TYPE
   for (int i = formals->first(); formals->more(i); i = formals->next(i))
   {
@@ -547,15 +547,15 @@ void ClassTable::verify_signature( class__class cls, method_class m )
     
     //formal list shouldn't have self
     if(fm->get_name() == self)
-      semant_error(cls.get_filename(), m)<<"formal list shouldn't have self "<<endl;
+      semant_error((cls->get_filename()), m)<<"formal list shouldn't have self "<<endl;
 
     //formal list shouldn't have SELF_TYPE
     if(fm->get_name() == SELF_TYPE)
-      semant_error(cls.get_filename(), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
+      semant_error((cls->get_filename()), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
   }
   //check the return type should be an already defined class
-  if (class_map[m.get_return_type()] == NULL && m.get_return_type != SELF_TYPE)
-    semant_error(cls.get_filename(), m)<<" return type not defined in method "<<m.get_name<<endl;
+  if (class_map[m->get_return_type()] == NULL && m->get_return_type != SELF_TYPE)
+    semant_error((cls->get_filename()), m)<<" return type not defined in method "<< m->get_name<<endl;
 
 
 }
@@ -623,7 +623,7 @@ void semanVisitor::visit(Formal e) {
 	cerr << "public void visit (Formal e) should never be called." << endl;
 }
 
-<<<<<<< HEAD
+
 void semanVisitor::visit(Case e) {
 	cerr << "public void visit (Case e) should never be called." << endl;
 }
