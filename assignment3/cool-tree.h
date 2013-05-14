@@ -9,10 +9,18 @@
 //////////////////////////////////////////////////////////
 
 
+#include "typeinfo"
 #include "tree.h"
 #include "cool-tree.handcode.h"
+#include "symtab.h"
 #include <algorithm>
 
+
+
+
+class Visitor;
+class semanVisitor;
+class ClassTable;
 
 // define the class for phylum
 // define simple phylum - Program
@@ -36,6 +44,7 @@ class Class__class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Class_(); }
    virtual Class_ copy_Class_() = 0;
+
 
 #ifdef Class__EXTRAS
    Class__EXTRAS
@@ -136,6 +145,12 @@ public:
    }
    Program copy_Program();
    void dump(ostream& stream, int n);
+   Classes getClasses() {return classes;}
+   void accept(Visitor *v);
+
+private:
+   semanVisitor *sv;
+   bool OcurredExpection;
 
 #ifdef Program_SHARED_EXTRAS
    Program_SHARED_EXTRAS
@@ -160,12 +175,18 @@ public:
       features = a3;
       filename = a4;
    }
+   Features parent_feature_list;
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
-   Symbol get_name(){return name;}
-   Symbol get_parent(){return parent;}
-   Features get_features(){return features;}
+
+   Symbol get_name() {return name;}
+   Symbol get_parent() {return parent;}
+   Features get_features() {return features;}
+   void accept(Visitor *v);
+   void add_parentMembers(Visitor *v, Features features);
+
    Features parent_feature_list;
+
 
 #ifdef Class__SHARED_EXTRAS
    Class__SHARED_EXTRAS
@@ -192,6 +213,10 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
+   Symbol get_name() {return name;}
+   Formals get_formals() {return formals;}
+   Symbol get_return_type() {return return_type;}
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -216,6 +241,11 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
+
+   Symbol get_name() {return name;}
+   Symbol get_type_decl() {return type_decl;}
+   Expression get_init() {return init;}
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -238,6 +268,9 @@ public:
    }
    Formal copy_Formal();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
+   Symbol get_name() {return name;}
+   Symbol get_type_decl() {return type_decl;}
 
 #ifdef Formal_SHARED_EXTRAS
    Formal_SHARED_EXTRAS
@@ -262,6 +295,7 @@ public:
    }
    Case copy_Case();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Case_SHARED_EXTRAS
    Case_SHARED_EXTRAS
@@ -284,6 +318,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -310,6 +345,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -334,6 +370,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -358,6 +395,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -380,6 +418,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -402,6 +441,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -422,6 +462,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -448,6 +489,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -470,6 +512,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -492,6 +535,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -514,6 +558,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -536,6 +581,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -556,6 +602,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -578,6 +625,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -600,6 +648,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -622,6 +671,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -642,6 +692,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -662,6 +713,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -682,6 +734,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -702,6 +755,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -722,6 +776,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -742,6 +797,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -760,6 +816,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -780,6 +837,7 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+   void accept(Visitor *v);
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -788,6 +846,133 @@ public:
    object_EXTRAS
 #endif
 };
+
+
+class Visitor {
+public:
+	virtual void visit(Program e)=0;
+	virtual void visit(Class_ e)=0;
+	virtual void visit(Feature e)=0;
+	virtual void visit(Formal)=0;
+	virtual void visit(Expression e)=0;
+	virtual void visit(Case e)=0;
+
+	virtual void visit(program_class *e)=0;
+	virtual void visit(class__class *e)=0;
+	virtual void visit(method_class *e)=0;
+	virtual void visit(attr_class *e)=0;
+	virtual void visit(formal_class *e)=0;
+	virtual void visit(branch_class *e)=0;
+	virtual void visit(assign_class *e)=0;
+	virtual void visit(static_dispatch_class *e)=0;
+	virtual void visit(dispatch_class *e)=0;
+	virtual void visit(cond_class *e)=0;
+	virtual void visit(loop_class *e)=0;
+	virtual void visit(typcase_class *e)=0;
+	virtual void visit(block_class *e)=0;
+	virtual void visit(let_class *e)=0;
+	virtual void visit(plus_class *e)=0;
+	virtual void visit(sub_class *e)=0;
+	virtual void visit(mul_class *e)=0;
+	virtual void visit(divide_class *e)=0;
+	virtual void visit(neg_class *e)=0;
+	virtual void visit(lt_class *e)=0;
+	virtual void visit(eq_class *e)=0;
+	virtual void visit(leq_class *e)=0;
+	virtual void visit(comp_class *e)=0;
+	virtual void visit(int_const_class *e)=0;
+	virtual void visit(bool_const_class *e)=0;
+	virtual void visit(string_const_class *e)=0;
+	virtual void visit(new__class *e)=0;
+	virtual void visit(isvoid_class *e)=0;
+	virtual void visit(no_expr_class *e)=0;
+	virtual void visit(object_class *e)=0;
+
+	virtual void enterscope()=0;
+	virtual void exitscope()=0;
+};
+
+
+class semanVisitor: public Visitor
+{
+public:
+	SymbolTable<Symbol, tree_node> *symtable_o;
+	SymbolTable<Symbol, tree_node> *symtable_m;
+	ClassTable *classTable;
+
+
+	semanVisitor(ClassTable *ct) {
+		symtable_o=new SymbolTable<Symbol, tree_node>();
+		symtable_m=new SymbolTable<Symbol, tree_node>();
+		classTable = ct;
+	}
+    void getSymbolTableO()  {symtable_o->dump();}
+	void getSymbolTableM()  {symtable_m->dump();}
+
+	void enterscope()  {
+		symtable_o->enterscope();
+	    symtable_m->enterscope();
+	}
+
+	void exitscope()  {
+		symtable_o->exitscope();
+		symtable_m->exitscope();
+	}
+	void addId(Symbol s, tree_node *i) {
+		if(typeid(s) == typeid(method_class)) symtable_m->addid(s, i);
+		else if(typeid(s) == typeid(attr_class)||typeid(s) ==typeid(formal_class)
+				||typeid(s) ==typeid(let_class)||typeid(s)==typeid(branch_class))
+			symtable_o->addid(s,i);
+	}
+
+	tree_node * probeMethod(Symbol s) {return symtable_m->probe(s);}
+	tree_node * probeObject(Symbol s) {return symtable_o->probe(s);}
+	tree_node * lookupMethod(Symbol s) {return symtable_m->lookup(s);}
+	tree_node * lookupObject(Symbol s) {return symtable_o->lookup(s);}
+
+
+	 void visit(Program e);
+     void visit(Class_ e);
+	 void visit(Feature e);
+	 void visit(Formal);
+	 void visit(Expression e);
+	 void visit(Case e);
+
+	 void visit(program_class *e);
+	 void visit(class__class *e);
+	 void visit(method_class *e);
+	 void visit(attr_class *e);
+	 void visit(formal_class *e);
+	 void visit(branch_class *e);
+	 void visit(assign_class *e);
+	 void visit(static_dispatch_class *e);
+	 void visit(dispatch_class *e);
+	 void visit(cond_class *e);
+	 void visit(loop_class *e);
+	 void visit(typcase_class *e);
+	 void visit(block_class *e);
+	 void visit(let_class *e);
+	 void visit(plus_class *e);
+	 void visit(sub_class *e);
+	 void visit(mul_class *e);
+	 void visit(divide_class *e);
+	 void visit(neg_class *e);
+	 void visit(lt_class *e);
+	 void visit(eq_class *e);
+	 void visit(leq_class *e);
+	 void visit(comp_class *e);
+	 void visit(int_const_class *e);
+	 void visit(bool_const_class *e);
+	 void visit(string_const_class *e);
+	 void visit(new__class *e);
+	 void visit(isvoid_class *e);
+	 void visit(no_expr_class *e);
+	 void visit(object_class *e);
+
+private:
+	class__class* currentClass;
+};
+
 
 
 // define the prototypes of the interface

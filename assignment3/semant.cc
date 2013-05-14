@@ -5,8 +5,12 @@
 #include <stdarg.h>
 #include "semant.h"
 #include "utilities.h"
+
+#include "typeinfo"
+
 #include <queue>
 #include <vector>
+
 
 
 extern int semant_debug;
@@ -356,7 +360,7 @@ void ClassTable::install_function_map()
     Symbol c = q.front();
     q.pop();
     // for each class, get the features
-    Features features = class_map[c].getFeatures();    
+    Features features = class_map[c]->get_features();
     for(int i = features->first(); features->more(i); i = features->next(i))
     {
       Feature f = features->nth(i);
@@ -364,11 +368,11 @@ void ClassTable::install_function_map()
       {
         method_class m = (method_class)f;
         verify_signature(class_map[c], m);
-        method_map[c][m.getName()]=m;  //TODO
-        if (c==Main && m.getName()==main_meth)
+        method_map[c][m.get_name()]=m;  //TODO
+        if (c==Main && m.get_name()==main_meth)
         {
           main_found = true;
-          if (m.getFormals().get_length()>0)//TODO
+          if (m.get_formals()->len()>0)//TODO
             main_has_formal = true;          
         }
       }
@@ -376,7 +380,7 @@ void ClassTable::install_function_map()
 
     //also add features from parent class:
     std::map<Symbol, method_class> parent_methods = 
-      method_map[class_map[c].getParent()]; //TODO
+      method_map[class_map[c].get_parent()]; //TODO
     std::map<Symbol, method_class>::iterator iter;
     for (iter=parent_methods.begin(); iter!=parent_methods.end(); ++iter)
     {
@@ -522,7 +526,7 @@ void ClassTable::print_inherit_map()
 {
   std::map<Symbol, std::set<Symbol> > ::iterator iter1;
   std::set<Symbol>::iterator iter2;
-  for (iter1=inherit_graph.begin(); iter1!=inherit_graph.end(); ++iter1)
+  for (itert_graph.begin(); iter1!=inherit_graph.end(); ++iter1)
   {
     cout<<"Parent: "<<iter1->first<<" -> ";
     for (iter2=iter1->second.begin(); iter2!=iter1->second.end(); ++iter2)
@@ -583,23 +587,23 @@ void ClassTable::fatal()
 
 void ClassTable::verify_signature( class__class cls, method_class m )
 {
-  Formals formals = m.getFormals();
+  Formals formals = m.get_formals();
   // iterater through the formal list to check each can't be self or SELF_TYPE
   for (int i = formals->first(); formals->more(i); i = formals->next(i))
   {
     formal_class* fm = (formal_class *) formals->nth(i);
     
     //formal list shouldn't have self
-    if(fm->getName() == self)
+    if(fm->get_name() == self)
       semant_error(cls.get_filename(), m)<<"formal list shouldn't have self "<<endl;
 
     //formal list shouldn't have SELF_TYPE
-    if(fm->getName() == SELF_TYPE)
+    if(fm->get_name() == SELF_TYPE)
       semant_error(cls.get_filename(), m)<<"formal list shouldn't have SELF_TYPE "<<endl;
   }
   //check the return type should be an already defined class
-  if (class_map[m.getReturn_type()] == NULL && m.getReturn_type != SELF_TYPE)
-    semant_error(cls.get_filename(), m)<<" return type not defined in method "<<m.getName<<endl;      
+  if (class_map[m.get_return_type()] == NULL && m.get_return_type != SELF_TYPE)
+    semant_error(cls.get_filename(), m)<<" return type not defined in method "<<m.get_name<<endl;
 
 
 }
@@ -628,16 +632,270 @@ void ClassTable::verify_signature( class__class cls, method_class m )
 void program_class::semant()
 {
     initialize_constants();
-
     /* ClassTable constructor may do some semantic analysis */
-    ClassTable *classtable = new ClassTable(classes);
-
     /* some semantic analysis code may go here */
+	try {
+	     ClassTable *classTable = new ClassTable(classes);
+	     OcurredExpection = false;
+	     sv = new semanVisitor(classTable);
+	     this->accept(sv);
 
-    if (classtable->errors()) {
-	    cerr << "Compilation halted due to static semantic errors." << endl;
-	    exit(1);
-    }
+	     if(classTable->errors()) {
+	    	 cerr << "compilation halted due to static semantic errors." << endl;
+	         throw 20;
+	     }
+	}
+	catch (int e){
+		OcurredExpection = true;
+	}
+	if(OcurredExpection) {
+		cerr << "compilation halted due to static semantic errors." << endl;
+		exit(1);
+	}
+
+}
+
+void semanVisitor::visit(Program e) {
+	cerr << "public void visit (program e) should never be called." << endl;
+}
+
+void semanVisitor::visit(Class_ e) {
+	cerr << "public void visit (Class_ e) should never be called." << endl;
+}
+
+void semanVisitor::visit(Feature e) {
+	cerr << "public void visit (Feature e) should never be called." << endl;
+}
+
+void semanVisitor::visit(Formal e) {
+	cerr << "public void visit (Formal e) should never be called." << endl;
+}
+
+<<<<<<< HEAD
+void semanVisitor::visit(Case e) {
+	cerr << "public void visit (Case e) should never be called." << endl;
 }
 
 
+void semanVisitor::visit(Expression e) {
+	if (typeid(*e)==typeid(assign_class)) {
+		assign_class* node=(assign_class *) (e);
+		visit(node);
+	 }
+	else if(typeid(*e) == typeid(static_dispatch_class)) {
+		static_dispatch_class* node = (static_dispatch_class*) (e);
+		visit(node);
+	}
+	else if(typeid(*e) == typeid(dispatch_class)) {
+        dispatch_class* node = (dispatch_class*) (e);
+        visit(node);
+	}
+	else if(typeid(*e) == typeid(cond_class)) {
+		cond_class* node = (cond_class*) (e);
+		visit(node);
+	}
+	else if(typeid(*e) == typeid(loop_class)) {
+		loop_class* node = (loop_class*) (e);
+		visit(node);
+	}
+	else if(typeid(*e) == typeid(typcase_class) ){
+		typcase_class* node = (typcase_class*) (e);
+		visit(node);
+	}
+	else if(typeid(*e) == typeid(block_class)) {
+		block_class* node = (block_class*) (e);
+		visit(node);
+	}
+	else if(typeid(*e) == typeid(let_class)) {
+		let_class* node = (let_class*) (e);
+		visit(node);
+	}
+	else if(typeid(*e) == typeid(plus_class) ){
+		plus_class* node = (plus_class*) (e);
+		visit(node);
+	}
+	else if(typeid(e) == typeid(sub_class)) {
+		sub_class* node = (sub_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(mul_class)) {
+		mul_class* node = (mul_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(divide_class)) {
+		divide_class* node = (divide_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(neg_class)) {
+		neg_class* node = (neg_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(lt_class)) {
+		lt_class* node = (lt_class*) e;
+		visit(node);
+	}
+	else if( typeid(e) == typeid(eq_class)) {
+		eq_class* node = (eq_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(leq_class)) {
+		leq_class* node = (leq_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(comp_class)) {
+		comp_class* node = (comp_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(int_const_class)) {
+		int_const_class* node = (int_const_class*) e;
+		visit(node);
+	}
+	else if(typeid(e)== typeid(bool_const_class)){
+		bool_const_class* node = (bool_const_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(string_const_class)) {
+		string_const_class* node = (string_const_class*) e;
+		visit(node);
+	}
+	else if(typeid(e)== typeid(new__class)) {
+		new__class* node = (new__class*) e;
+		visit(node);
+	}
+	else if(typeid(e)== typeid(isvoid_class)) {
+		isvoid_class* node = (isvoid_class*) e;
+		visit(node);
+	}
+	else if(typeid(e)== typeid(no_expr_class)) {
+		no_expr_class* node = (no_expr_class*) e;
+		visit(node);
+	}
+	else if(typeid(e) == typeid(object_class)) {
+		object_class* node = (object_class*) e;
+		visit(node);
+	}
+}
+
+void semanVisitor::visit(program_class* prg) {
+	Classes classes = prg->getClasses();
+	for(int i =classes->first(); classes->more(i); i=classes->next(i) ){
+		class__class* cl = (class__class*) classes->nth(i);
+	}  // shall I use next(i) or just i?
+}
+
+void semanVisitor::visit(class__class* cl) {
+	currentClass = cl;
+	Features features = cl->get_features();
+	Features parent_feature_list = cl->parent_feature_list;
+
+	for(int i=0; i < features->len(); i++) {
+		Feature ft1 = (Feature) features->nth(i);
+		bool conflictWithParents = false;
+
+		for(int j=0; j < parent_feature_list->len(); j++) {
+			Feature ft2 = (Feature) parent_feature_list->nth(j);
+			if(typeid(*ft1)==typeid(attr_class) && typeid(*ft2)==typeid(attr_class) //do I need * ?
+				&& (((attr_class*)ft1)->get_name()->get_string() == ((attr_class*)ft2)->get_name()->get_string())){
+				conflictWithParents = true;
+
+				classTable->semant_error(currentClass->get_filename(), ft1); //how about the error information?
+				break;
+			}
+			else if(typeid(*ft1)==typeid(method_class) && typeid(*ft2)==typeid(method_class)
+					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string()){
+				method_class* mt1 =((method_class*)ft1);
+				method_class* mt2 =((method_class*)ft2);
+
+				//check return_type
+				if(mt1->get_return_type()->get_string()!=mt2->get_return_type()->get_string()){
+					classTable->semant_error(currentClass->get_filename(), ft1);
+					break;
+				}
+
+				bool sameFormalsLength = false;
+				Formals fms1 = mt1->get_formals();
+				Formals fms2 = mt2->get_formals();
+				if(fms1->len() == fms2->len()) {
+					sameFormalsLength = true;
+				}
+				else {
+					classTable->semant_error(currentClass->get_filename(), ft1);
+				}
+
+				//check formal type
+				if(sameFormalsLength ) {
+					for(int i =0; i< fms1->len(); i++) {
+						formal_class* fm1 = (formal_class*)fms1->nth(i);
+						formal_class* fm2 = (formal_class*)fms2->nth(i);
+
+						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) {
+							classTable->semant_error(currentClass->get_filename(), ft1);
+						    break;
+						}
+					}
+				}
+			}
+		}
+		if(conflictWithParents == false) {
+		    //	check feature defined conflicts within the current class
+			for(int k=0; k< i; k++) {
+				Feature ft3 = (Feature) features->nth(k);
+
+				if(typeid(*ft1)==typeid(attr_class) && typeid(*ft3)==typeid(attr_class)
+						&& ((attr_class*)ft1)->get_name()->get_string()== ((attr_class*)ft3)->get_name()->get_string()) {
+					classTable->semant_error(currentClass->get_filename(), ft1);
+					break;
+				}
+				else if(typeid(*ft1)==typeid(method_class) && typeid(*ft3)==typeid(method_class)
+						&& ((method_class*)ft1)->get_name()->get_string()== ((method_class*)ft3)->get_name()->get_string()) {
+					classTable->semant_error(currentClass->get_filename(), ft1);
+					break;
+				}
+			}
+		}
+	}
+}
+
+/*void program_class::semant() {
+	try {
+	     ClassTable classTable = new ClassTable(classes);
+	     OcurredExpection = false;
+	     sv = new semanVisitor(classTable);
+	     this->accept(&sv);
+
+	     if(classTable.errors()) {
+	    	 cerr << "compilation halted due to static semantic errors." << endl;
+	         throw 20;
+	     }
+	}
+	catch (int e){
+		OcurredExpection = true;
+	}
+	if(OcurredExpection) {
+		cerr << "compilation halted due to static semantic errors." << endl;
+	}
+
+}*/
+
+void program_class::accept(Visitor *v) {
+	v->enterscope();
+	v->visit(this);
+	for(int i =classes->first(); classes->more(i); i=classes->next(i)) {
+		class__class* cl = (class__class*)classes->nth(i);
+				cl->accept(v);
+	}
+	v->exitscope();
+}
+
+void class__class::accept(Visitor *v) {
+	v->enterscope();
+	semanVisitor* sv = (semanVisitor*) v;
+
+	//parent_feature_list = new Features();
+	if( parent != No_class) {
+		//class__class* parentClass__class = sv.classTable->getParent(this->getName());
+	}
+
+	v->visit(this);
+	v->exitscope();
+}
