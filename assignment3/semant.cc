@@ -918,6 +918,23 @@ void semanVisitor::visit(formal_class* fm) {
   }    
 }
 
+void semanVisitor::visit(branch_class *br) {
+  // no need to check object redefinition 
+  addId(br->get_name(), br);
+    
+    if(!classTable->class_exist(br->get_type_decl()){
+      classTable->semant_error(currentClass->get_filename(), br)
+        << "" << endl;
+    }
+   //SELF_TYPE is not allowed in case branch
+    if((br->get_type_decl()) == SELF_TYPE) {
+    classTable->semant_error(currentClass->get_filename(), br)
+      << "Identifier " << br->get_name()->get_string()
+      << " declared with SELF_TYPE in case. \n" << endl;
+  }
+
+}
+
 void program_class::accept(Visitor *v) {
 	v->enterscope();
 	v->visit(this);
