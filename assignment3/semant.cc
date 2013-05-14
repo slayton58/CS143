@@ -935,9 +935,10 @@ void semanVisitor::visit(branch_class *br) {
   // no need to check object redefinition 
   addId(br->get_name(), br);
     
-    if(!classTable->class_exist(br->get_type_decl()){
+    if(!classTable->class_exist(br->get_type_decl())){
       classTable->semant_error(currentClass->get_filename(), br)
-        << "" << endl;
+        << "Class " << br->get_type_decl()
+        << " in case branch is undefined.\n" << endl;
     }
    //SELF_TYPE is not allowed in case branch
     if((br->get_type_decl()) == SELF_TYPE) {
@@ -945,6 +946,175 @@ void semanVisitor::visit(branch_class *br) {
       << "Identifier " << br->get_name()->get_string()
       << " declared with SELF_TYPE in case. \n" << endl;
   }
+  this->visit(br->get_expr());
+}
+
+void semanVisitor::visit(assign_class *as) {
+  if(symtable_o->lookup(as->get_name())==NULL) {
+     classTable->semant_error(currentClass->get_filename(),as) 
+       << "Assigned variable "<< as->get_name()->get_string()
+       <<"in undeclared.\n" <<endl;
+    as->set_type(Object);
+  }         // Do I need to return from here?
+  if(as->get_name() == self) {
+     classTable->semant_error(currentClass->get_filename(), as)
+       << "\'self\' cannot be assigned.\n" <<endl;
+     as->set_type(Object);
+  }    // Do I needd to return from here?
+
+  Symbol type =NULL;
+  tree_node *node =  symtable_o->lookup(as->get_name());
+
+   //check type of ID
+  if(typeid(node) == typeid(attr_class)) {
+    type = ((attr_class*) node )->get_type_decl();
+  }
+  else if(typeid(node) == typeid(formal_class)) {
+    type = ((formal_class*) node)->get_type_decl();
+  }
+  else if(typeid(node) == typeid(let_class)) {
+    type = ((let_class*) node)->get_type_decl();
+  }
+  else if(typeid(node) == typeid(branch_class)) {
+    type = ((branch_class*)node)->get_type_decl();
+  }
+
+  this->visit(as->get_expr());
+  Symbol type1 = as->get_expr()->get_type();
+
+  //error is type1 >= type
+  Symbol type_cur = type;
+  Symbol type1_cur = type1;
+  if(type_cur == SELF_TYPE) {
+     type_cur = currentClass->get_name();
+  }
+  if(type1_cur == SELF_TYPE) {
+    type1_cur = currentClass->get_name();
+  } 
+
+  if(!this->classTable->is_child(type1_cur,type_cur)) {
+    classTable->semant_error(currentClass->get_filename(),as)
+      << "Type of assigned expression is " << type1_cur->get_string()
+      << " which does not conform to the declared type "
+      << type->get_string() << " of " << as->get_name()->get_string()<< endl;
+    as->set_type(Object);
+    // return?
+  }
+  as->set_type(type1_cur);
+}
+
+void semanVisitor::visit( static_dispatch_class *e )
+{
+
+}
+
+void semanVisitor::visit( dispatch_class *e )
+{
+
+}
+
+void semanVisitor::visit( cond_class *e )
+{
+
+}
+
+void semanVisitor::visit( loop_class *e )
+{
+
+}
+
+void semanVisitor::visit( typcase_class *e )
+{
+
+}
+
+void semanVisitor::visit( block_class *e )
+{
+
+}
+
+void semanVisitor::visit( let_class *e )
+{
+
+}
+
+void semanVisitor::visit( plus_class *e )
+{
+
+}
+
+void semanVisitor::visit( sub_class *e )
+{
+
+}
+
+void semanVisitor::visit( mul_class *e )
+{
+
+}
+
+void semanVisitor::visit( divide_class *e )
+{
+
+}
+
+void semanVisitor::visit( neg_class *e )
+{
+
+}
+
+void semanVisitor::visit( lt_class *e )
+{
+
+}
+
+void semanVisitor::visit( eq_class *e )
+{
+
+}
+
+void semanVisitor::visit( leq_class *e )
+{
+
+}
+
+void semanVisitor::visit( comp_class *e )
+{
+
+}
+
+void semanVisitor::visit( int_const_class *e )
+{
+
+}
+
+void semanVisitor::visit( bool_const_class *e )
+{
+
+}
+
+void semanVisitor::visit( string_const_class *e )
+{
+
+}
+
+void semanVisitor::visit( new__class *e )
+{
+
+}
+
+void semanVisitor::visit( isvoid_class *e )
+{
+
+}
+
+void semanVisitor::visit( no_expr_class *e )
+{
+
+}
+
+void semanVisitor::visit( object_class *e )
+{
 
 }
 
