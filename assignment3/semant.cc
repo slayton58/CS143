@@ -836,13 +836,13 @@ void semanVisitor::visit(class__class* cl)
       {
 				Feature ft3 = (Feature) features->nth(k);
 
-				if((!(ft1->get_is_method()) && !(ft2->get_is_method()))
+				if((!(ft1->get_is_method()) && !(ft3->get_is_method()))
 						&& ((attr_class*)ft1)->get_name()->get_string()== ((attr_class*)ft3)->get_name()->get_string()) 
         {
 					classTable->semant_error(currentClass->get_filename(), ft1)<<"attribute is multiply defined"<<endl;
 					break;
 				}
-				else if ((ft1->get_is_method() && ft2->get_is_method())
+				else if ((ft1->get_is_method() && ft3->get_is_method())
 						&& ((method_class*)ft1)->get_name()->get_string()== ((method_class*)ft3)->get_name()->get_string()) 
         {
 					classTable->semant_error(currentClass->get_filename(), ft1)<<"method is multiply defined"<<endl;
