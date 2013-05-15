@@ -794,25 +794,25 @@ void semanVisitor::visit(class__class* cl)
 	currentClass = cl;
 	Features features = cl->get_features();
 	Features parent_feature_list = cl->parent_feature_list;
-
+   cout << "wrong in visit" << endl;
 	for(int i=0; i < features->len(); i++) 
   {
 		Feature ft1 = (Feature) features->nth(i);
 		bool conflictWithParents = false;
-
+      cout << "wrong in outter loop" << endl;
 		for(int j=0; j < parent_feature_list->len(); j++) 
-    {
+    {     cout << "wrong in inner loop" << endl;
 			Feature ft2 = (Feature) parent_feature_list->nth(j);
       if((!(ft1->get_is_method()) && !(ft2->get_is_method()))
 				&& (((attr_class*)ft1)->get_name() == ((attr_class*)ft2)->get_name()))
-      {
+      {            cout << "wrong in if" << endl;
 				conflictWithParents = true;
 				classTable->semant_error(currentClass->get_filename(), ft1)<<"arribute "<<((attr_class*)ft1)->get_name()<<"is an attribute of inherited class"<<endl;
 				break;
 			}
       else if((ft1->get_is_method() && ft2->get_is_method())
 					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string())
-      {
+      {      cout << "wrong in else if" << endl;
 				method_class* mt1 =((method_class*)ft1);
 				method_class* mt2 =((method_class*)ft2);
 
@@ -1571,11 +1571,11 @@ void class__class::accept(Visitor *v) {
 		if(parentClass__class != NULL) {
 			parentClass__class->add_parentMembers(v, parent_feature_list);
 		}
-		 cout << "wrong in accept" << endl;//how to print out symbol table?
+		 //how to print out symbol table?
 	}
-    cout << "wrong in accept before visit" << endl;
+
 	v->visit(this);
-      cout << "wrong in accept after visit" << endl;
+    
 	for (int i=0; i < features->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
     if(ft->get_is_method())
