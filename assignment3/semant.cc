@@ -675,7 +675,7 @@ void semanVisitor::visit(Case e) {
 
 void semanVisitor::visit(Expression e) {
   cout << "come to visit Expression" << endl;
-  cout << typeid(*e).name()<<endl;
+  cout << "visit Expression: "<< typeid(*e).name()<<endl;
 	if (typeid(*e)==typeid(assign_class)) {
 		assign_class* node=(assign_class *) (e);   cout<<"before visit assign"<<endl;
 		visit(node); cout<<" after visit assign"<<endl;
@@ -787,6 +787,7 @@ void semanVisitor::visit(class__class* cl)
 	Features features = cl->get_features();
 	Features parent_feature_list = cl->parent_feature_list;
    cout << "wrong in visit" << endl;
+   cout << "visit class__class: features length: " << features->len()<<endl;
 	for(int i=0; i < features->len(); i++) 
   {
 		Feature ft1 = (Feature) features->nth(i);
@@ -991,23 +992,24 @@ void semanVisitor::visit(assign_class *as) {
 
   cout<<"assign class called "<<typeid(node).name()<<endl;
    //check type of ID
-  if(typeid(node) == typeid(attr_class)) {
-    type = ((attr_class*) node )->get_type_decl();
+  //if(typeid(node) == typeid(attr_class)) {
+  if(!((Feature_class*) node)->get_is_method()) {
+    type = ((attr_class*) node )->get_type_decl(); cout<<"node is attr" << endl;
   }
   else if(typeid(node) == typeid(formal_class)) {
-    type = ((formal_class*) node)->get_type_decl();
+    type = ((formal_class*) node)->get_type_decl();  cout<<"node is formal" << endl;
   }
   else if(typeid(node) == typeid(let_class)) {
-    type = ((let_class*) node)->get_type_decl();
+    type = ((let_class*) node)->get_type_decl();    cout<<"node is let" << endl;
   }
   else if(typeid(node) == typeid(branch_class)) {
-    type = ((branch_class*)node)->get_type_decl();
+    type = ((branch_class*)node)->get_type_decl();   cout<< "node is branch" << endl;
   }
 
-  //cout<<"type is "<<type<<endl;
+  cout<<"type is "<<type->get_string()<<endl;
 
-  this->visit(as->get_expr());
-  Symbol type1 = as->get_expr()->get_type();
+  this->visit(as->get_expr());  cout<< "finish visit expression" << endl;
+  Symbol type1 = as->get_expr()->get_type();  cout<< "type1 is: "<< type1->get_string()<<endl;
 
   //error is type1 >= type
   Symbol type_cur = type;
@@ -1547,8 +1549,9 @@ void semanVisitor::visit( object_class *e )
   }
  
   tree_node* node = symtable_o->lookup(e->get_name());
-  if(typeid(node) == typeid(attr_class)) {
-    type = ((attr_class*) node)->get_type_decl();
+  //if(typeid(node) == typeid(attr_class)) {
+  if(!((Feature_class*) node)->get_is_method()) {
+    type = ((attr_class*) node)->get_type_decl();   cout<<"In Object_class, type is : "<< type->get_string()<<endl; 
   }
   else if(typeid(node) == typeid(formal_class)) {
     type = ((formal_class*) node)->get_type_decl();
@@ -1582,15 +1585,14 @@ void class__class::accept(Visitor *v)
   cout << endl<<"--Visiting class: " << this->get_name()<< " .feature length = "<<features->len() << endl;
 	semanVisitor* sv = (semanVisitor*) v;
 	if( parent != No_class) {
-		// how to print out symbol table?
+		
 		class__class* parentClass__class = sv->classTable->get_parent(this->get_name());
 		if(parentClass__class != NULL) 
     {
       cout<<"parent class is: "<<parentClass__class->get_name()<<endl;
 			parentClass__class->add_parentMembers(v, parent_feature_list);
-      cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
+      cout<< "1.parent feature list length: "<<parent_feature_list->len()<< endl;
 		}
-		 //how to print out symbol table?
 	}
 
 	v->visit(this);
@@ -1618,10 +1620,11 @@ void class__class::accept(Visitor *v)
       }
 		}
 	}
-  cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
+  cout<< "2.parent feature list length: "<<parent_feature_list->len()<< endl;
+  cout << "features length: " << features->len()<<endl;
 	for(int i=0; i < parent_feature_list->len(); i++) 
   {
-		Feature ft = (Feature) features->nth(i);
+		Feature ft = (Feature) parent_feature_list->nth(i);
     if(ft->get_is_method())
     {
 			method_class* mt = (method_class*) ft;
