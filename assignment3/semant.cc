@@ -349,6 +349,9 @@ void ClassTable::install_user_classes( Classes classes )
 
     // Finally add the child to the parent key in the inherit graph
     inherit_graph[parent].insert(cls->get_name());
+    cout<<"inserting "<<parent<<":"<<cls->get_name()<<endl;
+    cout<<inherit_graph[parent].count(cls->get_name()) <<endl;
+
   }
   //To debug least upper bound:
   //Symbol c1, c2, common;
@@ -696,63 +699,63 @@ void semanVisitor::visit(Expression e) {
 		plus_class* node = (plus_class*) (e);
 		visit(node);
 	}
-	else if(typeid(e) == typeid(sub_class)) {
+	else if(typeid(*e) == typeid(sub_class)) {
 		sub_class* node = (sub_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(mul_class)) {
+	else if(typeid(*e) == typeid(mul_class)) {
 		mul_class* node = (mul_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(divide_class)) {
+	else if(typeid(*e) == typeid(divide_class)) {
 		divide_class* node = (divide_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(neg_class)) {
+	else if(typeid(*e) == typeid(neg_class)) {
 		neg_class* node = (neg_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(lt_class)) {
+	else if(typeid(*e) == typeid(lt_class)) {
 		lt_class* node = (lt_class*) e;
 		visit(node);
 	}
-	else if( typeid(e) == typeid(eq_class)) {
+	else if( typeid(*e) == typeid(eq_class)) {
 		eq_class* node = (eq_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(leq_class)) {
+	else if(typeid(*e) == typeid(leq_class)) {
 		leq_class* node = (leq_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(comp_class)) {
+	else if(typeid(*e) == typeid(comp_class)) {
 		comp_class* node = (comp_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(int_const_class)) {
+	else if(typeid(*e) == typeid(int_const_class)) {
 		int_const_class* node = (int_const_class*) e;
 		visit(node);
 	}
-	else if(typeid(e)== typeid(bool_const_class)){
+	else if(typeid(*e)== typeid(bool_const_class)){
 		bool_const_class* node = (bool_const_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(string_const_class)) {
+	else if(typeid(*e) == typeid(string_const_class)) {
 		string_const_class* node = (string_const_class*) e;
 		visit(node);
 	}
-	else if(typeid(e)== typeid(new__class)) {
+	else if(typeid(*e)== typeid(new__class)) {
 		new__class* node = (new__class*) e;
 		visit(node);
 	}
-	else if(typeid(e)== typeid(isvoid_class)) {
+	else if(typeid(*e)== typeid(isvoid_class)) {
 		isvoid_class* node = (isvoid_class*) e;
 		visit(node);
 	}
-	else if(typeid(e)== typeid(no_expr_class)) {
+	else if(typeid(*e)== typeid(no_expr_class)) {
 		no_expr_class* node = (no_expr_class*) e;
 		visit(node);
 	}
-	else if(typeid(e) == typeid(object_class)) {
+	else if(typeid(*e) == typeid(object_class)) {
 		object_class* node = (object_class*) e;
 		visit(node);
 	}
@@ -762,7 +765,7 @@ void semanVisitor::visit(program_class* prg) {
 	Classes classes = prg->getClasses();
 	for(int i =classes->first(); classes->more(i); i=classes->next(i) ){
 		class__class* cl = (class__class*) classes->nth(i);
-	}  // shall I use next(i) or just i?
+	}  
 }
 
 void semanVisitor::visit(class__class* cl) 
@@ -779,14 +782,14 @@ void semanVisitor::visit(class__class* cl)
 		for(int j=0; j < parent_feature_list->len(); j++) 
     {
 			Feature ft2 = (Feature) parent_feature_list->nth(j);
-			if(typeid(*ft1)==typeid(attr_class) && typeid(*ft2)==typeid(attr_class) //TODO: do I need * ?
+      if((!(ft1->get_is_method()) && !(ft2->get_is_method()))
 				&& (((attr_class*)ft1)->get_name() == ((attr_class*)ft2)->get_name()))
       {
 				conflictWithParents = true;
 				classTable->semant_error(currentClass->get_filename(), ft1)<<"arribute "<<((attr_class*)ft1)->get_name()<<"is an attribute of inherited class"<<endl;
 				break;
 			}
-			else if(typeid(*ft1)==typeid(method_class) && typeid(*ft2)==typeid(method_class)
+      else if((ft1->get_is_method() && ft2->get_is_method())
 					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string())
       {
 				method_class* mt1 =((method_class*)ft1);
@@ -833,13 +836,13 @@ void semanVisitor::visit(class__class* cl)
       {
 				Feature ft3 = (Feature) features->nth(k);
 
-				if(typeid(*ft1)==typeid(attr_class) && typeid(*ft3)==typeid(attr_class)
+				if((!(ft1->get_is_method()) && !(ft2->get_is_method()))
 						&& ((attr_class*)ft1)->get_name()->get_string()== ((attr_class*)ft3)->get_name()->get_string()) 
         {
 					classTable->semant_error(currentClass->get_filename(), ft1)<<"attribute is multiply defined"<<endl;
 					break;
 				}
-				else if(typeid(*ft1)==typeid(method_class) && typeid(*ft3)==typeid(method_class)
+				else if ((ft1->get_is_method() && ft2->get_is_method())
 						&& ((method_class*)ft1)->get_name()->get_string()== ((method_class*)ft3)->get_name()->get_string()) 
         {
 					classTable->semant_error(currentClass->get_filename(), ft1)<<"method is multiply defined"<<endl;
@@ -1267,10 +1270,11 @@ void semanVisitor::visit( let_class *e )
    if(type_id == SELF_TYPE) {
      type_id = currentClass->get_name();
    }
-   if(typeid((e->get_init()))!=typeid(no_expr_class)) {
+   if(typeid((e->get_init()))!=typeid(no_expr_class)) //TODO
+   {
      type_id=e->get_init()->get_type();
-     if(type_id != NULL && 
-       !classTable->is_child(type_id,e->get_type_decl())) {
+     if(type_id != NULL && !classTable->is_child(type_id,e->get_type_decl())) 
+     {
          classTable->semant_error(currentClass->get_filename(), e)
            << "Inferred type of initialization of " << e->get_identifier()->get_string()
            << " is " << type_id->get_string() 
@@ -1554,12 +1558,14 @@ void class__class::accept(Visitor *v) {
 
 	for (int i=0; i < features->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
-		if(typeid(*ft) == typeid(method_class)) {
+    if(ft->get_is_method())
+    {
 			method_class* mt = (method_class*) ft;
 			if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
 				sv->addId(mt->get_name(), mt);
 		}
-		else if(typeid(*ft)==typeid(attr_class)){
+    else if(!(ft->get_is_method()) )
+    {
 			attr_class* at = (attr_class*) ft;
 			if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
 					sv->addId(at->get_name(), at);
@@ -1568,12 +1574,12 @@ void class__class::accept(Visitor *v) {
 
 	for(int i=0; i < parent_feature_list->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
-		if(typeid(*ft) == typeid(method_class)) {
+    if(ft->get_is_method()){
 			method_class* mt = (method_class*) ft;
 			if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
 				sv->addId(mt->get_name(), mt);
 		}
-		else if(typeid(*ft)==typeid(attr_class)){
+    else if (!(ft->get_is_method())){
 			attr_class* at = (attr_class*) ft;
 			if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
 					sv->addId(at->get_name(), at);
@@ -1582,11 +1588,11 @@ void class__class::accept(Visitor *v) {
 
 	for(int i=0; i < features->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
-		if(typeid(*ft) == typeid(method_class)) {
+		if (ft->get_is_method()){
 			method_class* mt = (method_class*) ft;
 			mt->accept(v);
 		}
-		else if(typeid(*ft) == typeid(attr_class)) {
+		else if (!(ft->get_is_method())){
 			attr_class *at = (attr_class*) ft;
 			at->accept(v);
 		}
@@ -1599,11 +1605,11 @@ void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) {
   semanVisitor* sv = (semanVisitor*) v;
   for(int i=0; i < features->len(); i++) {
     Feature ft = (Feature) features->nth(i);
-    if(typeid(*ft)==typeid(method_class)) {
+    if (ft->get_is_method()){
       method_class* mt = (method_class*) ft;
       parent_feature_list-> append(single_Features(ft), parent_feature_list);
     }
-    else if(typeid(*ft)==typeid(attr_class)) {
+    if (!(ft->get_is_method())){
       attr_class* at = (attr_class*) ft;
       parent_feature_list->append(single_Features(ft), parent_feature_list);
     }
