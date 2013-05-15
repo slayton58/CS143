@@ -91,10 +91,10 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
   cout<<"calling class table constructor"<<endl;
   install_basic_classes();
   install_user_classes(classes);
-  //install_class_map(classes);
-  install_function_map();
-  print_inherit_map();
   
+  print_inherit_map();
+  install_function_map();
+
   check_cycle();
   if(cycle_found)
   {
@@ -330,7 +330,6 @@ void ClassTable::install_user_classes( Classes classes )
   {
     class__class * cls = (class__class *) classes->nth(i);
     Symbol parent = cls->get_parent();
-    
     // inherit from basic class
     if( parent == Int || parent == Str || parent == Bool ) {
       semant_error(cls->get_filename(), cls)<<"class "<<cls->get_name()<<" can't inherit class "<<parent<<endl;
@@ -377,24 +376,26 @@ void ClassTable::install_function_map()
   q.push(Object);
   Symbol c;  
   // BFS all the classes 
-  while ( ! q.empty())
+  while ( !q.empty() )
   {
     c = q.front();
+
     q.pop();
     // for each class, get the features
     Features features = class_map[c]->get_features();
     for(int i = features->first(); features->more(i); i = features->next(i))
     {
       Feature f = features->nth(i);
-      if (typeid(f) == typeid(method_class *))  //TODO
+      
+      if (f->get_is_method())  
       {
         method_class* m = (method_class*)f;
         verify_signature(class_map[c], m);
-        method_map[c][m->get_name()]=m;  //TODO
+        method_map[c][m->get_name()]=m;  
         if (c==Main && m->get_name()==main_meth)
         {
           main_found = true;
-          if (m->get_formals()->len()>0)//TODO
+          if (m->get_formals()->len()>0)
             main_has_formal = true;          
         }
       }
@@ -417,13 +418,13 @@ void ClassTable::install_function_map()
       q.push(*iter2) ;
     }
 
+
   }
   
   if (!main_found)
-    semant_error(class_map[c]->get_filename(), class_map[c])<<" No Main class and main method found"<<endl;
+    semant_error(class_map[c]->get_filename(), class_map[c])<<" No main method found"<<endl;
   if (main_has_formal)
     semant_error(class_map[c]->get_filename(), class_map[c])<<" main method shouldn't have formals"<<endl;
-  
 }
 
 class__class * ClassTable::get_parent( Symbol class_name )
@@ -434,7 +435,6 @@ class__class * ClassTable::get_parent( Symbol class_name )
 
 bool ClassTable::is_child (Symbol c, Symbol p)
 {
-  //cout<<"is child called"<<endl;
   bool c_is_child = false;
   std::map<Symbol, int> visited_map;
   std::map<Symbol, std::set<Symbol> > ::iterator iter;
@@ -553,7 +553,7 @@ void ClassTable::print_class_map()
   cout<<endl<<"printing the class_map"<<endl;
   std::map<Symbol, class__class*>::iterator iter;
   for( iter = class_map.begin(); iter != class_map.end(); ++iter )
-    cout<<iter->first<<":"<<iter->second<<endl;
+    cout<<iter->first<<endl;
   cout<<endl;
 }
 

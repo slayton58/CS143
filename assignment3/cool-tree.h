@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 
-#include "typeinfo"
+#include <typeinfo>
 #include "tree.h"
 #include "cool-tree.handcode.h"
 #include "symtab.h"
@@ -57,10 +57,18 @@ public:
 typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
+private:
+   bool is_method;
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+   
+   bool get_is_method () {return is_method;}
+   void set_is_method () {is_method = true; }
+   void set_is_attribute(){is_method= false; }
+
    void accept(Visitor *v);
+
 
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
@@ -217,6 +225,7 @@ public:
       formals = a2;
       return_type = a3;
       expr = a4;
+      set_is_method();
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
@@ -246,6 +255,7 @@ public:
       name = a1;
       type_decl = a2;
       init = a3;
+      set_is_attribute();
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
