@@ -1030,10 +1030,11 @@ public:
     symtable_o->exitscope();
     symtable_m->exitscope();
   }
-  void addId(Symbol s, tree_node *i) {
-    if(typeid(s) == typeid(method_class)) symtable_m->addid(s, i);
-    else if(typeid(s) == typeid(attr_class)||typeid(s) ==typeid(formal_class)
-      ||typeid(s) ==typeid(let_class)||typeid(s)==typeid(branch_class))
+  void addId(Symbol s, tree_node *i, bool is_method) 
+  {
+    if(is_method) 
+      symtable_m->addid(s, i);
+    else 
       symtable_o->addid(s,i);
   }
 

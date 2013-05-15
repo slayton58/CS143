@@ -19,7 +19,8 @@ class D inherits C {
 
 class E inherits D {
 
-    test(bar:String, foobar:C) : Int {
+    test(bar:String, foobar:Int) : Int
+	{
         {
             foo;
             foobar;

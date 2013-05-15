@@ -93,7 +93,6 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
   
   install_function_map();
   print_inherit_map();
-  print_method_map();
   
   check_cycle();
   if(cycle_found)
@@ -174,7 +173,6 @@ method_class* ClassTable::get_method(Symbol class_name, Symbol method_name)
 {
   return method_map[class_name][method_name];
 }
-
 void ClassTable::install_basic_classes() {
 
   // The tree package uses these globals to annotate the classes built below.
@@ -427,6 +425,7 @@ void ClassTable::install_function_map()
     semant_error(class_map[c]->get_filename(), class_map[c])<<" main method shouldn't have formals"<<endl;
 }
 
+
 class__class* ClassTable::get_parent( Symbol class_name )
 {
   class__class *cls = (class__class *) class_map[class_name];
@@ -600,21 +599,6 @@ void ClassTable::fatal()
   cerr<<"Compilation halted due to static semantic errors."<<endl;
   exit(1);
 }
-
-void ClassTable::print_method_map()
-{
-  std::map<Symbol, std::map<Symbol, method_class*> >::iterator iter1;
-  std::map<Symbol, method_class*>::iterator iter2;
-  for (iter1 = method_map.begin(); iter1!= method_map.end(); ++iter1)
-  {
-    cout<<"printing class: "<<iter1->first<<endl;
-    for (iter2= (iter1->second.begin()); iter2!= iter1->second.end(); ++iter2)
-      cout<<"  "<<iter2->first<<endl;
-    cout<<endl;
-  }
-  
-}
-
 
 
 
@@ -898,7 +882,7 @@ void semanVisitor::visit(method_class *mt)
       classTable->semant_error(currentClass->get_filename(), fm)<<"formal multiply defined"<<endl;
     }
     else
-      addId(fm->get_name(),fm);
+      addId(fm->get_name(),fm, 0);
   } 
   cout<< "after visit method outter loop " << endl;
   
@@ -972,7 +956,7 @@ void semanVisitor::visit(formal_class* fm) {
 
 void semanVisitor::visit(branch_class *br) {
   // no need to check object redefinition 
-  addId(br->get_name(), br);
+  addId(br->get_name(), br, 0);
     
     if(!classTable->class_exist(br->get_type_decl())){
       classTable->semant_error(currentClass->get_filename(), br)
@@ -1020,6 +1004,8 @@ void semanVisitor::visit(assign_class *as) {
   else if(typeid(node) == typeid(branch_class)) {
     type = ((branch_class*)node)->get_type_decl();
   }
+
+  //cout<<"type is "<<type<<endl;
 
   this->visit(as->get_expr());
   Symbol type1 = as->get_expr()->get_type();
@@ -1326,7 +1312,7 @@ void semanVisitor::visit( let_class *e )
    // we need this enter and exit scope since not all "let" processing is 
    //invoked from let.accept(v) 
    enterscope();
-   addId(e->get_identifier(), e);
+   addId(e->get_identifier(), e, 0);
    this->visit(e->get_body());
    exitscope();
    e->set_type(e->get_body()->get_type());
@@ -1616,8 +1602,8 @@ void class__class::accept(Visitor *v) {
      /* Feature f = (Feature)sv->probeMethod(mt->get_name())  ;    
 			if( !f->get_is_method() )*/
       {
-				sv->addId(mt->get_name(), mt);
-        cout<< "!!!!!!!!!!!!!!!!!!!!!!!!add method " << endl; 
+				sv->addId(mt->get_name(), mt, 1);
+        cout<< "!!!!!!!!!!!!!!!!!!!!!!!!add method " << mt->get_name()<<endl; 
       }
 		}
     else if(!(ft->get_is_method()) )
@@ -1627,23 +1613,26 @@ void class__class::accept(Visitor *v) {
       /*Feature f = (Feature)sv->probeMethod(at->get_name())   ;
 			if( f->get_is_method() )*/
       {
-					sv->addId(at->get_name(), at); cout<< "add object " << endl; 
-          cout<< "!!!!!!!!!!!!!!!!!!!!!!!!add attri " << endl; 
+					sv->addId(at->get_name(), at, 0); 
+          cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl; 
       }
 		}
 	}
      cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
-	for(int i=0; i < parent_feature_list->len(); i++) {
+	for(int i=0; i < parent_feature_list->len(); i++) 
+  {
 		Feature ft = (Feature) features->nth(i);
-    if(ft->get_is_method()){
+    if(ft->get_is_method())
+    {
 			method_class* mt = (method_class*) ft;
-			if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
-				sv->addId(mt->get_name(), mt);
+			//if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
+				sv->addId(mt->get_name(), mt, 1);
 		}
-    else if (!(ft->get_is_method())){
+    else if (!(ft->get_is_method()))
+    {
 			attr_class* at = (attr_class*) ft;
-			if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
-					sv->addId(at->get_name(), at);
+			//if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
+				sv->addId(at->get_name(), at, 0);
 		}
 	}
 
