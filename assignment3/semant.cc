@@ -955,12 +955,14 @@ void semanVisitor::visit(assign_class *as) {
        << "Assigned variable "<< as->get_name()->get_string()
        <<"in undeclared.\n" <<endl;
     as->set_type(Object);
-  }         // Do I need to return from here?
+    return;
+  }         
   if(as->get_name() == self) {
      classTable->semant_error(currentClass->get_filename(), as)
        << "\'self\' cannot be assigned.\n" <<endl;
      as->set_type(Object);
-  }    // Do I needd to return from here?
+     return;
+  }    
 
   Symbol type =NULL;
   tree_node *node =  symtable_o->lookup(as->get_name());
@@ -998,125 +1000,532 @@ void semanVisitor::visit(assign_class *as) {
       << " which does not conform to the declared type "
       << type->get_string() << " of " << as->get_name()->get_string()<< endl;
     as->set_type(Object);
-    // return?
+    return;
   }
   as->set_type(type1_cur);
 }
 
 void semanVisitor::visit( static_dispatch_class *e )
 {
+    this->visit(e->get_expr());
+    Expressions actual = e->get_actual();
+    for(int i =actual->first(); actual->more(i); i=actual->next(i) ){
+      Expression_class* ex = (Expression_class*) actual->nth(i);
+      this->visit(ex);
+    } 
 
+    Symbol static_type = e->get_type_name();
+
+    if(!classTable->method_exist(static_type, e->get_name())) {
+      classTable->semant_error(currentClass->get_filename(), e)
+        << "Cannot dispatch to undefined method "
+        <<e->get_name()->get_string() << ". \n" << endl;
+      e->set_type(Object);
+      return;
+    }
+
+    Symbol type_caller = e->get_expr()->get_type();
+    Symbol type_caller_cur = type_caller;
+    if(type_caller_cur == SELF_TYPE) {
+      type_caller_cur = this->currentClass->get_name();
+    }
+
+    if(!classTable->is_child(type_caller_cur, static_type)) {
+      classTable->semant_error(currentClass->get_filename(),e)
+        << "Expression type is " << type_caller_cur->get_string()
+        << " which does not conform to the declared static type "
+        << static_type->get_string() << ".\n" << endl;
+      e->set_type(Object);
+      return; 
+    }
+
+    std::vector<Symbol> sig = classTable->get_signature(static_type, e->get_name());
+    if(sig.size()-1 != actual->len()) {
+      classTable->semant_error(currentClass->get_filename(),e)
+        << "Number of arguments is imcompatible of the called method "
+        << e->get_name() << ".\n" << endl;
+      e->set_type(Object);
+      return;
+    }
+
+    for(int i=0; i<sig.size()-1; i++) {
+      Symbol type_formal = sig[i];
+      Symbol type_act = actual->nth(i)->get_type();
+
+      Symbol type_act_cur = type_act;
+      if(type_act == SELF_TYPE) {
+        type_act_cur = currentClass->get_name();
+      }
+      if(!classTable->is_child(type_act_cur, type_formal)) {
+        method_class* m = classTable->get_method(type_caller_cur, e->get_name());
+        formal_class* f = (formal_class*) m->get_formals()->nth(i);
+
+        classTable->semant_error(currentClass->get_filename(),e)
+          << "Type of parameter " << f->get_name()
+          << " in called method " << e->get_name()
+          << " is " << type_act_cur->get_string()
+          << " which does not conform to declared type "
+          << f->get_type_decl() << ".\n" << endl;
+        e->set_type(Object);
+        return;
+      }
+    }
+
+    Symbol return_type = sig[sig.size()-1];
+    if(return_type == SELF_TYPE) {
+      return_type = type_caller;
+    }
+    e->set_type(return_type);
 }
 
 void semanVisitor::visit( dispatch_class *e )
 {
+  this->visit(e->get_expr());
+  Expressions actual = e->get_actual();
+  for(int i =actual->first(); actual->more(i); i=actual->next(i) ){
+    Expression_class* ex = (Expression_class*) actual->nth(i);
+    this->visit(ex);
+  } 
 
+  Symbol type_caller = e->get_expr()->get_type();
+  Symbol type_caller_cur = type_caller;
+  if(type_caller_cur == SELF_TYPE) {
+    type_caller_cur = this->currentClass->get_name();
+  }
+
+  if(!classTable->method_exist(type_caller_cur, e->get_name())) {
+    classTable->semant_error(currentClass->get_filename(), e)
+      << "Cannot dispatch to undefined method "
+      <<e->get_name()->get_string() << ". \n" << endl;
+    e->set_type(Object);
+    return;
+  }
+
+
+  std::vector<Symbol> sig = classTable->get_signature(type_caller_cur, e->get_name());
+  if(sig.size()-1 != actual->len()) {
+    classTable->semant_error(currentClass->get_filename(),e)
+      << "Number of arguments is imcompatible of the called method "
+      << e->get_name() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
+
+  for(int i=0; i<sig.size()-1; i++) {
+    Symbol type_formal = sig[i];
+    Symbol type_act = actual->nth(i)->get_type();
+
+    Symbol type_act_cur = type_act;
+    if(type_act == SELF_TYPE) {
+      type_act_cur = currentClass->get_name();
+    }
+    if(!classTable->is_child(type_act_cur, type_formal)) {
+      method_class* m = classTable->get_method(type_caller_cur, e->get_name());
+      formal_class* f = (formal_class*) m->get_formals()->nth(i);
+
+      classTable->semant_error(currentClass->get_filename(),e)
+        << "Type of parameter " << f->get_name()
+        << " in called method " << e->get_name()
+        << " is " << type_act_cur->get_string()
+        << " which does not conform to declared type "
+        << f->get_type_decl() << ".\n" << endl;
+      e->set_type(Object);
+      return;
+    }
+  }
+
+  Symbol return_type = sig[sig.size()-1];
+  if(return_type == SELF_TYPE) {
+    return_type = type_caller;
+  }
+  e->set_type(return_type);
 }
 
 void semanVisitor::visit( cond_class *e )
 {
+  this->visit(e->get_pred());
+  this->visit(e->get_then_exp());
+  this->visit(e->get_else_exp());
 
+  if(Bool != e->get_pred()->get_type()) {
+    classTable->semant_error(currentClass->get_filename(),e)
+      << "Type of \'if\' predication is not Bool.\n" << endl;
+    e->set_type(Object);
+    return;
+  }
+  else {
+    Symbol type_then = e-> get_then_exp()->get_type();
+    Symbol type_else = e-> get_else_exp()->get_type();
+
+    if((type_then == SELF_TYPE) && (type_else == SELF_TYPE))  {
+       e->set_type(SELF_TYPE);
+       return;
+    }
+    else if(type_then == SELF_TYPE) {
+      type_then = currentClass->get_name();
+    }
+    else if(type_else == SELF_TYPE) {
+      type_else = currentClass->get_name();
+    }
+
+    Symbol lub = classTable->least_upper_bound(type_else, type_then);
+    e->set_type(lub);
+  }
 }
 
 void semanVisitor::visit( loop_class *e )
 {
+   this->visit(e->get_pred());
+   this->visit(e->get_body());
 
+   if(e->get_pred()->get_type() != Bool) {
+     classTable->semant_error(currentClass->get_filename(),e) 
+       << "Type of loop conditon is not Bool.\n" << endl;
+     e->set_type(Object);
+     return;
+   }
+   e->set_type(Object);
 }
 
 void semanVisitor::visit( typcase_class *e )
 {
+   this->visit(e->get_expr());
+   Cases cases = e->get_cases();
+   if(cases->len() == 0) {
+     e->set_type(Object);
+     return;
+   }
+   else {     
+     for(int i =cases->first(); cases->more(i); i=cases->next(i) ){
+       branch_class* ty = (branch_class*) cases->nth(i);
+       this->visit(ty);
+     }
 
+     for(int j=0; j< cases->len(); j++) {
+       for(int k =j+1; k < cases->len(); k++) {
+          branch_class* bj = (branch_class*) cases->nth(j);
+          branch_class* bk = (branch_class*) cases->nth(k);
+          if(bj->get_type_decl() == bk->get_type_decl()) {
+            classTable->semant_error(currentClass->get_filename(),bj)
+              << "Branch " << bj->get_type_decl()->get_string()
+              << " is duplicated in case statement.\n" << endl;
+            e->set_type(Object);
+            return;
+          }
+       }
+   }
+     Symbol type = ((branch_class*)cases->nth(0))->get_expr()->get_type();
+     if(type == SELF_TYPE) {
+       type = currentClass->get_name();
+     }
+     for(int i =cases->first(); cases->more(i); i=cases->next(i) ){
+       branch_class* b = (branch_class*) cases->nth(i);
+
+       Symbol type_b = b->get_expr()->get_type();
+       if(type_b == SELF_TYPE)  type_b = currentClass->get_name();
+        type = classTable->least_upper_bound(type, type_b);
+     }
+
+     bool all_self = true;
+     for(int i =cases->first(); cases->more(i); i=cases->next(i) ){
+       branch_class* b = (branch_class*) cases->nth(i);
+       if(b->get_expr()->get_type() != SELF_TYPE) {
+          all_self = false;   break;
+       }
+     } 
+     if(all_self) e->set_type(SELF_TYPE);
+     else e->set_type(type);
+  }
 }
 
 void semanVisitor::visit( block_class *e )
 {
+   Expressions body = e->get_body();
+   Symbol type = NULL;
 
+   for(int i =body->first(); body->more(i); i=body->next(i) ){
+     Expression_class* ex = (Expression_class*) body->nth(i); 
+     this->visit(ex);
+     type = ex->get_type();
+   }
+   e->set_type(type);
 }
 
 void semanVisitor::visit( let_class *e )
-{
+{  
+  Symbol type_id = e->get_type_decl();
 
+   if(e->get_identifier() == self) {
+      classTable->semant_error(currentClass->get_filename(), e)
+        << "Cannot bind \'self in a \'let\' expression.\n" << endl;
+      e->set_type(Object);
+      return;
+   }
+
+   this->visit(e->get_init());
+
+   if(type_id == SELF_TYPE) {
+     type_id = currentClass->get_name();
+   }
+   if(typeid((e->get_init()))!=typeid(no_expr_class)) {
+     type_id=e->get_init()->get_type();
+     if(type_id != NULL && 
+       !classTable->is_child(type_id,e->get_type_decl())) {
+         classTable->semant_error(currentClass->get_filename(), e)
+           << "Inferred type of initialization of " << e->get_identifier()->get_string()
+           << " is " << type_id->get_string() 
+           << " which does not conform to the declared type "
+           << e->get_type_decl()->get_string() << endl;
+         e->set_type(Object);
+         return;
+     }
+   }
+   // we need this enter and exit scope since not all "let" processing is 
+   //invoked from let.accept(v) 
+   enterscope();
+   addId(e->get_identifier(), e);
+   this->visit(e->get_body());
+   exitscope();
+   e->set_type(e->get_body()->get_type());
 }
 
 void semanVisitor::visit( plus_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  if(type1 == Int && type2 == Int)   e->set_type(Int);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Non-Int arguments for" << type1->get_string()
+      << " + " << type2->get_string() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( sub_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  if(type1 == Int && type2 == Int)   e->set_type(Int);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Non-Int arguments for" << type1->get_string()
+      << " - " << type2->get_string() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( mul_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  if(type1 == Int && type2 == Int)   e->set_type(Int);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Non-Int arguments for" << type1->get_string()
+      << " * " << type2->get_string() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( divide_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  if(type1 == Int && type2 == Int)   e->set_type(Int);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Non-Int arguments for" << type1->get_string()
+      << " / " << type2->get_string() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( neg_class *e )
 {
+  this->visit(e->get_e1());
 
+  if(e->get_e1()->get_type()==Int)  e->set_type(Int);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e)
+      << "Argument has type " << e->get_e1()->get_type()->get_string()
+      << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( lt_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  if(type1 == Int && type2 == Int)   e->set_type(Bool);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Non-Int arguments for" << type1->get_string()
+      << " < " << type2->get_string() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( eq_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  bool base_type1 = (type1 == Int)||(type1 == Bool)||(type1 == Str);
+  bool base_type2 = (type2 == Int)||(type2 == Bool)||(type2 == Str);
+
+  bool incompatible_base_type = (base_type1 && base_type2 && type1!=type2);
+  bool not_all_base_type = (base_type1 != base_type2);
+
+  if(incompatible_base_type || not_all_base_type) {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Illegal comparison with basic types" << endl;
+    e->set_type(Object);
+    return;
+  }
+  else e->set_type(Bool);
 }
 
 void semanVisitor::visit( leq_class *e )
 {
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
 
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
+
+  if(type1 == Int && type2 == Int)   e->set_type(Bool);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e) 
+      << "Non-Int arguments for" << type1->get_string()
+      << " <= " << type2->get_string() << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( comp_class *e )
 {
+  this->visit(e->get_e1());
 
+  if(e->get_e1()->get_type()==Bool)  e->set_type(Bool);
+  else {
+    classTable->semant_error(currentClass->get_filename(),e)
+      << "Argument has type " << e->get_e1()->get_type()->get_string()
+      << ".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
 }
 
 void semanVisitor::visit( int_const_class *e )
 {
-
+  inttable.add_int(atoi(e->get_token()->get_string()));
+  e->set_type(Int);
 }
 
 void semanVisitor::visit( bool_const_class *e )
 {
-
+  e->set_type(Bool);
 }
 
 void semanVisitor::visit( string_const_class *e )
 {
-
+  stringtable.add_string(e->get_token()->get_string());
+  e->set_type(Str);
 }
 
 void semanVisitor::visit( new__class *e )
-{
+{  
+   Symbol type = e->get_type_name();
 
+   if(e->get_type_name() != SELF_TYPE && 
+     !classTable->class_exist(type)) {
+       classTable->semant_error(currentClass->get_filename(),e)
+         << "Cannot use \'new\' with undefined class "
+         << type->get_string()
+         <<".\n" << endl;
+       e->set_type(Object);
+       return;
+   }
+
+   if(type == SELF_TYPE)    e->set_type(SELF_TYPE);
+   else e->set_type(type);
 }
 
 void semanVisitor::visit( isvoid_class *e )
 {
-
+   this->visit(e->get_e1());
+   e->set_type(Bool);
 }
 
 void semanVisitor::visit( no_expr_class *e )
 {
-
+   // do nothing
 }
 
 void semanVisitor::visit( object_class *e )
-{
+{ 
+  Symbol type = NULL;
 
+  if(e->get_name() == self)   {e->set_type(SELF_TYPE); return;}
+  if(symtable_o->lookup(e->get_name())==NULL) {
+    classTable->semant_error(currentClass->get_filename(),e)
+      << "Undeclared identifier" << e->get_name()->get_string()
+      <<".\n" << endl;
+    e->set_type(Object);
+    return;
+  }
+ 
+  tree_node* node = symtable_o->lookup(e->get_name());
+  if(typeid(node) == typeid(attr_class)) {
+    type = ((attr_class*) node)->get_type_decl();
+  }
+  else if(typeid(node) == typeid(formal_class)) {
+    type = ((formal_class*) node)->get_type_decl();
+  }
+  else if(typeid(node) == typeid(let_class)) {
+    type = ((let_class*) node)->get_type_decl();
+  }
+  else if(typeid(node) == typeid(branch_class)) {
+    type = ((branch_class*) node)->get_type_decl();
+  }
+  e->set_type(type);
 }
+
+/**************************************************************/
+/*                   Accept function                          */
+/**************************************************************/
 
 void program_class::accept(Visitor *v) {
 	v->enterscope();
