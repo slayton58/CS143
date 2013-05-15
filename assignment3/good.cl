@@ -36,7 +36,7 @@ class B inherits IO {
         {
             1 + 2;
             {
-            1 + 2;
+            3 + 4;
             };
             new B;
         }
@@ -48,6 +48,7 @@ class TestAssign inherits IO {
     c : IO;
     cC : TestAssign;
     test() : TestAssign {
+
         {
         a <- 123;
         c <- cC;

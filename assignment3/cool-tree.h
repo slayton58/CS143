@@ -188,9 +188,10 @@ public:
     parent = a2;
     features = a3;
     filename = a4;
+    parent_feature_list = new nil_node<Feature>();
   }
 
-  Features parent_feature_list;
+  Features parent_feature_list ;
   Class_ copy_Class_();
   void dump(ostream& stream, int n);
 

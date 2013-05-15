@@ -638,7 +638,7 @@ void program_class::semant()
     initialize_constants();
     /* ClassTable constructor may do some semantic analysis */
     /* some semantic analysis code may go here */
-	try {
+
 	     ClassTable *classTable = new ClassTable(classes);
        
 	     OcurredExpection = false;
@@ -648,17 +648,7 @@ void program_class::semant()
        
 	     if(classTable->errors()) {
 	    	 cerr << "compilation halted due to static semantic errors." << endl;
-	         throw 20;
-	     }
-	}
-	catch (int e){
-		OcurredExpection = true;
-	}
-	if(OcurredExpection) {
-		cerr << "compilation halted due to static semantic errors." << endl;
-		exit(1);
-	}
-
+	         }
 }
 
 void semanVisitor::visit(Program e) {
@@ -684,9 +674,11 @@ void semanVisitor::visit(Case e) {
 
 
 void semanVisitor::visit(Expression e) {
+  cout << "come to visit Expression" << endl;
+  cout << typeid(*e).name()<<endl;
 	if (typeid(*e)==typeid(assign_class)) {
-		assign_class* node=(assign_class *) (e);
-		visit(node);
+		assign_class* node=(assign_class *) (e);   cout<<"before visit assign"<<endl;
+		visit(node); cout<<" after visit assign"<<endl;
 	 }
 	else if(typeid(*e) == typeid(static_dispatch_class)) {
 		static_dispatch_class* node = (static_dispatch_class*) (e);
@@ -754,7 +746,7 @@ void semanVisitor::visit(Expression e) {
 	}
 	else if(typeid(*e) == typeid(int_const_class)) {
 		int_const_class* node = (int_const_class*) e;
-		visit(node);
+		visit(node); cout<<"after visit int const " << node->get_token()<<endl;
 	}
 	else if(typeid(*e)== typeid(bool_const_class)){
 		bool_const_class* node = (bool_const_class*) e;
@@ -800,8 +792,10 @@ void semanVisitor::visit(class__class* cl)
 		Feature ft1 = (Feature) features->nth(i);
 		bool conflictWithParents = false;
       cout << "wrong in outter loop" << endl;
+      cout<< parent_feature_list->len()<<endl;
 		for(int j=0; j < parent_feature_list->len(); j++) 
-    {     cout << "wrong in inner loop" << endl;
+    {     
+      cout << "wrong in inner loop" << endl;
 			Feature ft2 = (Feature) parent_feature_list->nth(j);
       if((!(ft1->get_is_method()) && !(ft2->get_is_method()))
 				&& (((attr_class*)ft1)->get_name() == ((attr_class*)ft2)->get_name()))
@@ -836,10 +830,10 @@ void semanVisitor::visit(class__class* cl)
 				//check formal type
 				if(sameFormalsLength ) 
         {
-					for(int i =0; i< fms1->len(); i++) 
+					for(int q =0; q< fms1->len(); q++) 
           {
-						formal_class* fm1 = (formal_class*)fms1->nth(i);
-						formal_class* fm2 = (formal_class*)fms2->nth(i);
+						formal_class* fm1 = (formal_class*)fms1->nth(q);
+						formal_class* fm2 = (formal_class*)fms2->nth(q);
 
 						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) 
             {
@@ -850,11 +844,13 @@ void semanVisitor::visit(class__class* cl)
 				}
 			}
 		}
+    cout<< " pass outter loop " << endl;
 		if(conflictWithParents == false) 
-    {
+    {    cout<< "wrong in conflict with parents" << endl;
+         cout << i << endl;
 		    //	check feature defined conflicts within the current class
 			for(int k=0; k< i; k++) 
-      {
+      {   cout<< "wrong in conflict inner loop"<<endl;
 				Feature ft3 = (Feature) features->nth(k);
 
 				if((!(ft1->get_is_method()) && !(ft3->get_is_method()))
@@ -877,17 +873,20 @@ void semanVisitor::visit(class__class* cl)
 void semanVisitor::visit(method_class *mt) 
 {
   Formals formals = mt->get_formals(); 
+  cout<< "before visit method outter loop " << endl;
   for(int i =formals->first(); formals->more(i); i=formals->next(i) ) 
   {
-    formal_class* fm = (formal_class*) formals->nth(i);
+    formal_class* fm = (formal_class*) formals->nth(i);   cout<< "formal name: " << fm->get_name()<<endl;
     if(typeid(probeObject(fm->get_name()))==typeid(formal_class)) 
     {
       classTable->semant_error(currentClass->get_filename(), fm)<<"formal multiply defined"<<endl;
     }
     else
       addId(fm->get_name(),fm);
-  }
-  this->visit(mt->get_expr());
+  } 
+  cout<< "after visit method outter loop " << endl;
+  
+  this->visit(mt->get_expr());     cout<< "after visit get expr " << endl;
   // get method signature
   std::vector<Symbol> signature = classTable->get_signature(currentClass->get_name(), mt->get_name());
   
@@ -974,10 +973,11 @@ void semanVisitor::visit(branch_class *br) {
 }
 
 void semanVisitor::visit(assign_class *as) {
-  if(symtable_o->lookup(as->get_name())==NULL) {
+  if(symtable_o->lookup(as->get_name())==NULL) 
+  {
      classTable->semant_error(currentClass->get_filename(),as) 
        << "Assigned variable "<< as->get_name()->get_string()
-       <<"in undeclared.\n" <<endl;
+       <<" is undeclared.\n" <<endl;
     as->set_type(Object);
     return;
   }         
@@ -1269,7 +1269,9 @@ void semanVisitor::visit( block_class *e )
 
    for(int i =body->first(); body->more(i); i=body->next(i) ){
      Expression_class* ex = (Expression_class*) body->nth(i); 
+     cout<<"block visit start"<<endl;
      this->visit(ex);
+     cout<<"block visit finish"<<endl;
      type = ex->get_type();
    }
    e->set_type(type);
@@ -1316,13 +1318,18 @@ void semanVisitor::visit( let_class *e )
 
 void semanVisitor::visit( plus_class *e )
 {
-  Symbol type1 = e->get_e1()->get_type();
-  Symbol type2 = e->get_e2()->get_type();
-
   this->visit(e->get_e1());
   this->visit(e->get_e2());
 
-  if(type1 == Int && type2 == Int)   e->set_type(Int);
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
+
+  if(type1 == Int && type2 == Int){
+    e->set_type(Int);
+    cout<<"plus finish"<<endl;
+
+  }
+
   else {
     classTable->semant_error(currentClass->get_filename(),e) 
       << "Non-Int arguments for" << type1->get_string()
@@ -1334,12 +1341,12 @@ void semanVisitor::visit( plus_class *e )
 
 void semanVisitor::visit( sub_class *e )
 {
-  Symbol type1 = e->get_e1()->get_type();
-  Symbol type2 = e->get_e2()->get_type();
-
   this->visit(e->get_e1());
   this->visit(e->get_e2());
-
+  
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
+  
   if(type1 == Int && type2 == Int)   e->set_type(Int);
   else {
     classTable->semant_error(currentClass->get_filename(),e) 
@@ -1352,11 +1359,13 @@ void semanVisitor::visit( sub_class *e )
 
 void semanVisitor::visit( mul_class *e )
 {
-  Symbol type1 = e->get_e1()->get_type();
-  Symbol type2 = e->get_e2()->get_type();
 
   this->visit(e->get_e1());
   this->visit(e->get_e2());
+
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
+
 
   if(type1 == Int && type2 == Int)   e->set_type(Int);
   else {
@@ -1370,11 +1379,12 @@ void semanVisitor::visit( mul_class *e )
 
 void semanVisitor::visit( divide_class *e )
 {
-  Symbol type1 = e->get_e1()->get_type();
-  Symbol type2 = e->get_e2()->get_type();
 
   this->visit(e->get_e1());
   this->visit(e->get_e2());
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
+
 
   if(type1 == Int && type2 == Int)   e->set_type(Int);
   else {
@@ -1402,11 +1412,12 @@ void semanVisitor::visit( neg_class *e )
 
 void semanVisitor::visit( lt_class *e )
 {
-  Symbol type1 = e->get_e1()->get_type();
-  Symbol type2 = e->get_e2()->get_type();
 
   this->visit(e->get_e1());
   this->visit(e->get_e2());
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
+
 
   if(type1 == Int && type2 == Int)   e->set_type(Bool);
   else {
@@ -1420,11 +1431,12 @@ void semanVisitor::visit( lt_class *e )
 
 void semanVisitor::visit( eq_class *e )
 {
-  Symbol type1 = e->get_e1()->get_type();
-  Symbol type2 = e->get_e2()->get_type();
 
   this->visit(e->get_e1());
   this->visit(e->get_e2());
+  Symbol type1 = e->get_e1()->get_type();
+  Symbol type2 = e->get_e2()->get_type();
+
 
   bool base_type1 = (type1 == Int)||(type1 == Bool)||(type1 == Str);
   bool base_type2 = (type2 == Int)||(type2 == Bool)||(type2 == Str);
@@ -1443,11 +1455,12 @@ void semanVisitor::visit( eq_class *e )
 
 void semanVisitor::visit( leq_class *e )
 {
+  this->visit(e->get_e1());
+  this->visit(e->get_e2());
   Symbol type1 = e->get_e1()->get_type();
   Symbol type2 = e->get_e2()->get_type();
 
-  this->visit(e->get_e1());
-  this->visit(e->get_e2());
+
 
   if(type1 == Int && type2 == Int)   e->set_type(Bool);
   else {
@@ -1568,30 +1581,42 @@ void class__class::accept(Visitor *v) {
 	if( parent != No_class) {
 		// how to print out symbol table?
 		class__class* parentClass__class = sv->classTable->get_parent(this->get_name());
-		if(parentClass__class != NULL) {
+		if(parentClass__class != NULL) 
+    {
 			parentClass__class->add_parentMembers(v, parent_feature_list);
 		}
 		 //how to print out symbol table?
 	}
 
 	v->visit(this);
-    
+      cout << "correct after visit this " << this->get_name()<< endl;
+      cout << "feature length "<<features->len() << endl;
 	for (int i=0; i < features->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
     if(ft->get_is_method())
-    {
+    {   
+      cout << "is method " << endl;
 			method_class* mt = (method_class*) ft;
-			if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
+     /* Feature f = (Feature)sv->probeMethod(mt->get_name())  ;    
+			if( !f->get_is_method() )*/
+      {
 				sv->addId(mt->get_name(), mt);
+        cout<< "!!!!!!!!!!!!!!!!!!!!!!!!add method " << endl; 
+      }
 		}
     else if(!(ft->get_is_method()) )
-    {
+    {     
+      cout << "is object " << endl;
 			attr_class* at = (attr_class*) ft;
-			if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
-					sv->addId(at->get_name(), at);
+      /*Feature f = (Feature)sv->probeMethod(at->get_name())   ;
+			if( f->get_is_method() )*/
+      {
+					sv->addId(at->get_name(), at); cout<< "add object " << endl; 
+          cout<< "!!!!!!!!!!!!!!!!!!!!!!!!add attri " << endl; 
+      }
 		}
 	}
-
+     cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
 	for(int i=0; i < parent_feature_list->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
     if(ft->get_is_method()){
@@ -1610,31 +1635,48 @@ void class__class::accept(Visitor *v) {
 		Feature ft = (Feature) features->nth(i);
 		if (ft->get_is_method()){
 			method_class* mt = (method_class*) ft;
-			mt->accept(v);
+      cout<<"correct before get is method"<<endl;
+			mt->accept(v);  cout<<"correct after get is method"<<endl;
 		}
 		else if (!(ft->get_is_method())){
 			attr_class *at = (attr_class*) ft;
-			at->accept(v);
+      cout<<"correct before get is attr"<<endl;
+			at->accept(v); cout <<"correct after get is attr " << endl; 
 		}
-	}
-	v->exitscope();
+	}   cout<< "before exit scope" << endl;
+	v->exitscope();  cout<< " exit scope" << endl;
 }
 
 
-void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) {
+void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) 
+{
+  
   semanVisitor* sv = (semanVisitor*) v;
-  for(int i=0; i < features->len(); i++) {
+  cout<<"adding parent members for "<<this->get_name()<<endl;
+  cout<<features->len()<<endl;
+  for(int i=0; i < features->len(); i++) 
+  {
     Feature ft = (Feature) features->nth(i);
-    if (ft->get_is_method()){
+    if (ft->get_is_method())
+    {
       method_class* mt = (method_class*) ft;
-      parent_feature_list-> append(single_Features(ft), parent_feature_list);
+      parent_feature_list = append_Features(single_Features(mt), parent_feature_list);
     }
-    if (!(ft->get_is_method())){
+    else if (!(ft->get_is_method()))
+    {
       attr_class* at = (attr_class*) ft;
-      parent_feature_list->append(single_Features(ft), parent_feature_list);
+      parent_feature_list = append_Features(single_Features(at), parent_feature_list);
     }
+    cout<<parent_feature_list->len()<<endl;
+    for(int i = parent_feature_list->first(); parent_feature_list->more(i); i = parent_feature_list->next(i))
+      cout<<i<<endl;
+      /*if (features->nth(i)->get_is_method())
+        method_class *m =(method_class *)features->nth(i)->get_is_method();*/
+      
+
   }
   if(parent != No_class) {
+   // cout<<"adding parent members for in class"<<sv->classTable->get_parent(this->get_name())->get_name()<<endl;
     class__class* parentClass__class  = sv->classTable->get_parent(this->get_name());
     // printf something?
     parentClass__class->add_parentMembers(v, parent_feature_list);
@@ -1642,9 +1684,9 @@ void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) {
 }
 
 void method_class::accept(Visitor *v) {
-  v->enterscope();
+  v->enterscope();  cout << "before visit " << this->get_name() << endl;
   v->visit(this);
-
+   cout << "after visit " << this->get_name() << endl;
   for(int i =formals->first(); formals->more(i); i=formals->next(i)) {
     formal_class* fm = (formal_class*)formals->nth(i);
     fm->accept(v);   
