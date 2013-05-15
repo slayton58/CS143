@@ -33,7 +33,7 @@ private:
   void check_cycle();
   void DFS_is_child(std::map<Symbol, int> visited_map, Symbol c, Symbol p, bool &);
   void DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c);
-  void verify_signature( class__class* cls, method_class* m );
+  
   
 
   void print_inherit_map();
@@ -66,6 +66,7 @@ public:
   class__class * get_parent( Symbol class_name );
   method_class* get_method ( Symbol class_name, Symbol method_name);
   std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
+  void verify_signature( class__class* cls, method_class* m );
  
 
 };
