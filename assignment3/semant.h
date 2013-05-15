@@ -33,7 +33,9 @@ private:
   void check_cycle();
   void DFS_is_child(std::map<Symbol, int> visited_map, Symbol c, Symbol p, bool &);
   void DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c);
+  void verify_signature( class__class* cls, method_class* m );
   
+
   void print_inherit_map();
   void print_class_map();
   void fatal();
@@ -41,9 +43,9 @@ private:
   ostream& error_stream;
 
   //map from class name to class
-  std::map<Symbol, class__class *> class_map;
+  std::map<Symbol, class__class*> class_map;
   //map from class name and function name to function
-  std::map<Symbol, std::map<Symbol, method_class*> > function_map;
+  std::map<Symbol, std::map<Symbol, method_class*> > method_map;
   //inheritance map
   std::map<Symbol, std::set<Symbol> > inherit_graph;
   //class set
@@ -57,12 +59,14 @@ public:
   ostream& semant_error(Class_ c);
   ostream& semant_error(Symbol filename, tree_node *t);
  
+  bool class_exist(Symbol Symbol);
+  bool method_exist(Symbol class_name, Symbol method_name);
   bool is_child (Symbol c1, Symbol c2);
   Symbol least_upper_bound(Symbol c1, Symbol c2);
-  Class_ get_parent(Symbol);
-  method_class get_method(Symbol class_name, Symbol method_name);
+  class__class * get_parent( Symbol class_name );
+  method_class* get_method ( Symbol class_name, Symbol method_name);
   std::vector<Symbol> get_signature(Symbol class_name, Symbol method_name);
-
+ 
 
 };
 

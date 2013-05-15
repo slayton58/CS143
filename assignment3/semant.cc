@@ -300,7 +300,7 @@ void ClassTable::install_function_map()
 }
 
 
-Class_ ClassTable::get_parent( Symbol class_name )
+class__class* ClassTable::get_parent( Symbol class_name )
 {
   class__class *cls = (class__class *) class_map[class_name];
   return class_map[cls->get_parent()];
@@ -406,7 +406,7 @@ Symbol ClassTable::least_upper_bound(Symbol c1, Symbol c2)
   return head;
 }
 
-method_class ClassTable::get_method(Symbol class_name, Symbol method_name)
+method_class * ClassTable::get_method(Symbol class_name, Symbol method_name)
 {
 
 }
