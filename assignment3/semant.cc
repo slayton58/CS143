@@ -93,6 +93,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
   
   install_function_map();
   print_inherit_map();
+  print_method_map();
   
   check_cycle();
   if(cycle_found)
@@ -173,6 +174,7 @@ method_class* ClassTable::get_method(Symbol class_name, Symbol method_name)
 {
   return method_map[class_name][method_name];
 }
+
 void ClassTable::install_basic_classes() {
 
   // The tree package uses these globals to annotate the classes built below.
@@ -425,7 +427,6 @@ void ClassTable::install_function_map()
     semant_error(class_map[c]->get_filename(), class_map[c])<<" main method shouldn't have formals"<<endl;
 }
 
-
 class__class* ClassTable::get_parent( Symbol class_name )
 {
   class__class *cls = (class__class *) class_map[class_name];
@@ -599,6 +600,21 @@ void ClassTable::fatal()
   cerr<<"Compilation halted due to static semantic errors."<<endl;
   exit(1);
 }
+
+void ClassTable::print_method_map()
+{
+  std::map<Symbol, std::map<Symbol, method_class*> >::iterator iter1;
+  std::map<Symbol, method_class*>::iterator iter2;
+  for (iter1 = method_map.begin(); iter1!= method_map.end(); ++iter1)
+  {
+    cout<<"printing class: "<<iter1->first<<endl;
+    for (iter2= (iter1->second.begin()); iter2!= iter1->second.end(); ++iter2)
+      cout<<"  "<<iter2->first<<endl;
+    cout<<endl;
+  }
+  
+}
+
 
 
 

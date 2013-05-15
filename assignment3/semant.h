@@ -38,6 +38,7 @@ private:
 
   void print_inherit_map();
   void print_class_map();
+  void print_method_map();
   void fatal();
 
   ostream& error_stream;
