@@ -844,13 +844,11 @@ void semanVisitor::visit(class__class* cl)
 				}
 			}
 		}
-    cout<< " pass outter loop " << endl;
 		if(conflictWithParents == false) 
-    {    cout<< "wrong in conflict with parents" << endl;
-         cout << i << endl;
+    {    
 		    //	check feature defined conflicts within the current class
 			for(int k=0; k< i; k++) 
-      {   cout<< "wrong in conflict inner loop"<<endl;
+      {   
 				Feature ft3 = (Feature) features->nth(k);
 
 				if((!(ft1->get_is_method()) && !(ft3->get_is_method()))
@@ -991,6 +989,7 @@ void semanVisitor::visit(assign_class *as) {
   Symbol type =NULL;
   tree_node *node =  symtable_o->lookup(as->get_name());
 
+  cout<<"assign class called "<<typeid(node).name()<<endl;
    //check type of ID
   if(typeid(node) == typeid(attr_class)) {
     type = ((attr_class*) node )->get_type_decl();
@@ -1577,38 +1576,39 @@ void program_class::accept(Visitor *v) {
 	v->exitscope();
 }
 
-void class__class::accept(Visitor *v) {
+void class__class::accept(Visitor *v) 
+{
 	v->enterscope();
+  cout << endl<<"--Visiting class: " << this->get_name()<< " .feature length = "<<features->len() << endl;
 	semanVisitor* sv = (semanVisitor*) v;
 	if( parent != No_class) {
 		// how to print out symbol table?
 		class__class* parentClass__class = sv->classTable->get_parent(this->get_name());
 		if(parentClass__class != NULL) 
     {
+      cout<<"parent class is: "<<parentClass__class->get_name()<<endl;
 			parentClass__class->add_parentMembers(v, parent_feature_list);
+      cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
 		}
 		 //how to print out symbol table?
 	}
 
 	v->visit(this);
-      cout << "correct after visit this " << this->get_name()<< endl;
-      cout << "feature length "<<features->len() << endl;
+      
 	for (int i=0; i < features->len(); i++) {
 		Feature ft = (Feature) features->nth(i);
     if(ft->get_is_method())
     {   
-      cout << "is method " << endl;
 			method_class* mt = (method_class*) ft;
      /* Feature f = (Feature)sv->probeMethod(mt->get_name())  ;    
 			if( !f->get_is_method() )*/
       {
 				sv->addId(mt->get_name(), mt, 1);
-        cout<< "!!!!!!!!!!!!!!!!!!!!!!!!add method " << mt->get_name()<<endl; 
+        cout<< "add method @@@@@@@@@@@@@@@@ " << mt->get_name()<<endl; 
       }
 		}
     else if(!(ft->get_is_method()) )
     {     
-      cout << "is object " << endl;
 			attr_class* at = (attr_class*) ft;
       /*Feature f = (Feature)sv->probeMethod(at->get_name())   ;
 			if( f->get_is_method() )*/
@@ -1618,7 +1618,7 @@ void class__class::accept(Visitor *v) {
       }
 		}
 	}
-     cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
+  cout<< "parent feature list length: "<<parent_feature_list->len()<< endl;
 	for(int i=0; i < parent_feature_list->len(); i++) 
   {
 		Feature ft = (Feature) features->nth(i);
@@ -1627,12 +1627,14 @@ void class__class::accept(Visitor *v) {
 			method_class* mt = (method_class*) ft;
 			//if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
 				sv->addId(mt->get_name(), mt, 1);
+        cout<< "add method @@@@@@@@@@@@@@@@@@" << mt->get_name()<<endl; 
 		}
     else if (!(ft->get_is_method()))
     {
 			attr_class* at = (attr_class*) ft;
 			//if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
 				sv->addId(at->get_name(), at, 0);
+        cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl;
 		}
 	}
 
@@ -1640,25 +1642,25 @@ void class__class::accept(Visitor *v) {
 		Feature ft = (Feature) features->nth(i);
 		if (ft->get_is_method()){
 			method_class* mt = (method_class*) ft;
-      cout<<"correct before get is method"<<endl;
-			mt->accept(v);  cout<<"correct after get is method"<<endl;
+      cout<<"---visiting method "<<mt->get_name()<<endl;
+			mt->accept(v);  
 		}
 		else if (!(ft->get_is_method())){
 			attr_class *at = (attr_class*) ft;
-      cout<<"correct before get is attr"<<endl;
-			at->accept(v); cout <<"correct after get is attr " << endl; 
+      cout<<"---visiting attribute "<<at->get_name()<<endl;
+			at->accept(v); 
 		}
-	}   cout<< "before exit scope" << endl;
-	v->exitscope();  cout<< " exit scope" << endl;
+	}  
+	v->exitscope();  
+  cout<< " exit class " <<this->get_name()<< endl;
 }
 
 
-void class__class::add_parentMembers(Visitor *v, Features parent_feature_list) 
+void class__class::add_parentMembers(Visitor *v, Features &parent_feature_list) 
 {
   
   semanVisitor* sv = (semanVisitor*) v;
   cout<<"adding parent members for "<<this->get_name()<<endl;
-  cout<<features->len()<<endl;
   for(int i=0; i < features->len(); i++) 
   {
     Feature ft = (Feature) features->nth(i);
@@ -1666,26 +1668,28 @@ void class__class::add_parentMembers(Visitor *v, Features parent_feature_list)
     {
       method_class* mt = (method_class*) ft;
       parent_feature_list = append_Features(single_Features(mt), parent_feature_list);
+      cout<<": added parent method "<<mt->get_name()<<endl;
     }
     else if (!(ft->get_is_method()))
     {
       attr_class* at = (attr_class*) ft;
       parent_feature_list = append_Features(single_Features(at), parent_feature_list);
+      cout<<": added parent attr "<<at->get_name()<<endl;
     }
-    cout<<parent_feature_list->len()<<endl;
-    for(int i = parent_feature_list->first(); parent_feature_list->more(i); i = parent_feature_list->next(i))
-      cout<<i<<endl;
-      /*if (features->nth(i)->get_is_method())
-        method_class *m =(method_class *)features->nth(i)->get_is_method();*/
-      
-
   }
+
+  //for(int i = parent_feature_list->first(); parent_feature_list->more(i); i = parent_feature_list->next(i))
+  //  if (parent_feature_list->nth(i)->get_is_method())
+  //  {
+  //    method_class *m =(method_class *)parent_feature_list->nth(i);
+  //    cout<<"; added parent method "<<m->get_name()<<endl;
+  //  }
+
   if(parent != No_class) {
-   // cout<<"adding parent members for in class"<<sv->classTable->get_parent(this->get_name())->get_name()<<endl;
     class__class* parentClass__class  = sv->classTable->get_parent(this->get_name());
-    // printf something?
     parentClass__class->add_parentMembers(v, parent_feature_list);
   }
+  cout<<" inside: parent feature list length = "<<parent_feature_list->len()<<endl;
 }
 
 void method_class::accept(Visitor *v) {

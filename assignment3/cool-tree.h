@@ -199,7 +199,7 @@ public:
   Symbol get_parent() {return parent;}
   Features get_features() {return features;}
   void accept(Visitor *v);
-  void add_parentMembers(Visitor *v, Features features);
+  void add_parentMembers(Visitor *v, Features &features);
 
 
 

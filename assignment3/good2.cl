@@ -1,7 +1,7 @@
 Class C
 {
 	init (a:Int, b:Bool): C {
-	self;
+	self
 	}
 };
 
