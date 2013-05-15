@@ -85,7 +85,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
   cout<<"calling class table constructor"<<endl;
   install_basic_classes();
   install_user_classes(classes);
-  //install_class_map(classes);
+
   install_function_map();
   print_inherit_map();
   
@@ -209,11 +209,11 @@ void ClassTable::install_basic_classes() {
   basic_class_set.insert(Str);
   basic_class_set.insert(SELF_TYPE);  //TODO: is this needed?
   //add these class mapping from name to class:
-  class_map.insert(std::make_pair(Object, Object_class));
-  class_map.insert(std::make_pair(IO, IO_class));
-  class_map.insert(std::make_pair(Int, Int_class));
-  class_map.insert(std::make_pair(Bool, Bool_class));
-  class_map.insert(std::make_pair(Str, Str_class));
+  class_map.insert(std::make_pair(Object, (class__class *)Object_class));
+  class_map.insert(std::make_pair(IO, (class__class *)IO_class));
+  class_map.insert(std::make_pair(Int, (class__class *)Int_class));
+  class_map.insert(std::make_pair(Bool, (class__class *)Bool_class));
+  class_map.insert(std::make_pair(Str, (class__class *)Str_class));
   //populate the inherit graph with the basic classes:
   inherit_graph[No_class].insert(Object);
   inherit_graph[Object].insert(IO);
@@ -436,9 +436,9 @@ void ClassTable::print_inherit_map()
 void ClassTable::print_class_map()
 {
   cout<<endl<<"printing the class_map"<<endl;
-  std::map<Symbol, Class_>::iterator iter;
+  std::map<Symbol, class__class *>::iterator iter;
   for( iter = class_map.begin(); iter != class_map.end(); ++iter )
-    cout<<iter->first<<":"<<iter->second<<endl;
+    cout<<iter->first<<endl;
   cout<<endl;
 }
 
@@ -514,5 +514,9 @@ void program_class::semant()
 	    exit(1);
     }
 }
+
+
+
+
 
 

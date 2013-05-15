@@ -41,9 +41,9 @@ private:
   ostream& error_stream;
 
   //map from class name to class
-  std::map<Symbol, Class_> class_map;
+  std::map<Symbol, class__class *> class_map;
   //map from class name and function name to function
-  std::map<Symbol, std::map<Symbol, method_class> > function_map;
+  std::map<Symbol, std::map<Symbol, method_class*> > function_map;
   //inheritance map
   std::map<Symbol, std::set<Symbol> > inherit_graph;
   //class set
