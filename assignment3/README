@@ -288,4 +288,40 @@ Symbol tables and currentClass are maintained as private members in visitor, sin
 will change with the visiting process; while map is created and stored in
 ClassTable, since its containing information is global and static.
 
+The next procedure is to do type checking and scope checking in one pass.
+Combined with the global information on class and methods from 
+ClassTable and method table, we have all the information needed to perform type checking.
+Whenever we call visit() on a particular expression, scope checking has already 
+done around this expression, and we can get all relevant object information in the 
+symbol table.  
+
+Most of the type checking is the translation of the cool manual into code. Take 
+static dispatch for example, 
+e0@T.f(e1, e2,..., en): Tn+1  
+We first get e0 type, it should be subtype of T. Then we call method f in class 
+T. We can get the signature of the method from method map. Then we 
+check whether the type of the method is the subtype of the signature. If return 
+type in signature is SELF_TYPE, we return the current Class type. Otherwise, 
+we return the signature's type. 
+ 
+We also need check whether it is legal to call methods and attributes before definition.
+This is legal for classes, methods and attributes. 
+Classes are already recorded in ClassTable, what we left to do is check. Also we can get the 
+name and signature of the method and attributes in the install_user_class.
+ 
+The tricky part in type checking is dealing with SELF_TYPE. The least upper
+bound of SELF_TYPE is SELF_TYPE, and this fact is used in IF and CASE
+expressions; also, whenever type compatibility is checked, we have to translate
+SELF_TYPE before hand.
+ 
+For self, we need to compare every ID in the Cool Syntax. We need to make sure that 
+no object name is "self".
+ 
+For the SELF_TYPE, we check all the places with TYPE in Cool Syntax. For example, in 
+	m(x:T):T' {...}
+only T' can be SELF_TYPE (T cannot be SELF_TYPE). In fact, we follow exactly as what cool 
+manual says in terms of type checking. 
+*****************************************************************************************
+                                  Error Handling
+*****************************************************************************************
 
