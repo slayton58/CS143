@@ -1032,7 +1032,6 @@ public:
   }
   void addId(Symbol s, tree_node *i, bool is_method) 
   {
-    cout<<"++++ adding symbol "<<s<<" tree node type: "<<typeid(*i).name()<<endl;
     if(is_method) 
       symtable_m->addid(s, i);
     else 

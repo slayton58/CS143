@@ -278,4 +278,14 @@ method information, identifier scope information. As a result, we merge type che
 and scope checking in one pass, taking good advantage of the symbol table.
 
 For the environment structure, we have 3 differnt environment information that
-need to keep track of. 
+needs to keep track of. Therefore, we use a) two symbol tables, one for method, 
+and one for object. b) currentClass indicating the current processing class 
+c) a 2-level map, the key for the first level is the class name, and that for 
+the second level is the method name, and the value stored is a list containing
+all relevant types in method signature.
+
+Symbol tables and currentClass are maintained as private members in visitor, since they
+will change with the visiting process; while map is created and stored in
+ClassTable, since its containing information is global and static.
+
+

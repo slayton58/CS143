@@ -86,10 +86,10 @@ static void initialize_constants(void)
 }
 
 ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) {
-  cout<<"calling class table constructor"<<endl;
+  ////cout<<"calling class table constructor"<<endl;
   install_basic_classes();
   install_user_classes(classes);
-  print_inherit_map();
+  //print_inherit_map();
 
   check_cycle();
   if(cycle_found)
@@ -308,7 +308,7 @@ void ClassTable::install_user_classes( Classes classes )
       //iterate over all the classes: cls
       class__class* cls = (class__class *) classes->nth(i);
 
-      cout<<"adding class "<<cls->get_name()<<endl;
+      //cout<<"adding class "<<cls->get_name()<<endl;
 
       //check class redefinition:
       if(class_map.count(cls->get_name())) {
@@ -332,7 +332,7 @@ void ClassTable::install_user_classes( Classes classes )
   if (!contains_main)
     semant_error()<<"Class Main is not defined."<<endl;
 
-  print_class_map();
+  //print_class_map();
   
   // second iteration: begin insert the parent-child:
   for (int i = classes->first(); classes->more(i); i = classes->next(i))
@@ -367,14 +367,14 @@ void ClassTable::install_user_classes( Classes classes )
   //{
   //  class__class * cls = (class__class *) classes->nth(i);
   //  // To debug is_child:
-  //  // cout<<cls->get_name()<<" is child of Oject: "<<is_child(cls->get_name(), Object)<<endl;
+  //  // //cout<<cls->get_name()<<" is child of Oject: "<<is_child(cls->get_name(), Object)<<endl;
   //  if (!strcmp(cls->get_name()->get_string(),"D7"))
   //    c1=cls->get_name();
   //  if (!strcmp(cls->get_name()->get_string(),"D5"))
   //    c2=cls->get_name();
   //}
   //common = least_upper_bound(c1, c2);
-  //cout<<c1<<" and "<<c2<<" is commoned at "<<common<<endl;
+  ////cout<<c1<<" and "<<c2<<" is commoned at "<<common<<endl;
 
 
 }
@@ -390,7 +390,7 @@ void ClassTable::install_function_map()
   while ( !q.empty() )
   {
     c = q.front();
-    cout<<"install method for class "<<c<<endl;
+    //cout<<"install method for class "<<c<<endl;
     q.pop();
     // for each class, get the features
     Features features = class_map[c]->get_features();
@@ -427,7 +427,7 @@ void ClassTable::install_function_map()
     for(iter2= child_class.begin(); iter2!= child_class.end(); ++iter2)
     {
       q.push(*iter2) ;
-      cout<<"pushed: "<<*iter2<<endl;
+      //cout<<"pushed: "<<*iter2<<endl;
     }
 
 
@@ -448,7 +448,7 @@ class__class* ClassTable::get_parent( Symbol class_name )
 
 bool ClassTable::is_child (Symbol c, Symbol p)
 {
-  //cout<<"is child called"<<endl;
+  ////cout<<"is child called"<<endl;
   bool c_is_child = false;
   std::map<Symbol, int> visited_map;
   std::map<Symbol, std::set<Symbol> > ::iterator iter;
@@ -512,7 +512,7 @@ void ClassTable::DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c)
 {
   
   visited_map[c] = -1;
-  //cout<<"  visiting "<<c<<endl;
+  ////cout<<"  visiting "<<c<<endl;
   for (std::set<Symbol>::iterator iter = inherit_graph[c].begin(); iter != inherit_graph[c].end(); ++iter)
   {
     if(visited_map[*iter] == -1)
@@ -557,23 +557,23 @@ void ClassTable::print_inherit_map()
   std::set<Symbol>::iterator iter2;
   for (iter1=inherit_graph.begin(); iter1!=inherit_graph.end(); ++iter1)
   {
-    cout<<"Parent: "<<iter1->first<<" -> ";
+    //cout<<"Parent: "<<iter1->first<<" -> ";
     for (iter2=iter1->second.begin(); iter2!=iter1->second.end(); ++iter2)
     {
-      cout<<(*iter2)<<", " ;
+      //cout<<(*iter2)<<", " ;
     }
-    cout<<endl;
+    //cout<<endl;
 
   }
 }
 
 void ClassTable::print_class_map()
 {
-  cout<<endl<<"printing the class_map"<<endl;
+  //cout<<endl<<"printing the class_map"<<endl;
   std::map<Symbol, class__class *>::iterator iter;
-  for( iter = class_map.begin(); iter != class_map.end(); ++iter )
-    cout<<iter->first<<endl;
-  cout<<endl;
+  for( iter = class_map.begin(); iter != class_map.end(); ++iter ) ;
+    ////cout<<iter->first<<endl;
+  //////cout<<endl;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -690,11 +690,11 @@ void semanVisitor::visit(Case e) {
 
 
 void semanVisitor::visit(Expression e) {
-  cout << "come to visit Expression" << endl;
-  cout << "visit Expression: "<< typeid(*e).name()<<endl;
+  //cout << "come to visit Expression" << endl;
+  //cout << "visit Expression: "<< typeid(*e).name()<<endl;
 	if (typeid(*e)==typeid(assign_class)) {
-		assign_class* node=(assign_class *) (e);   cout<<"before visit assign"<<endl;
-		visit(node); cout<<" after visit assign"<<endl;
+		assign_class* node=(assign_class *) (e);   //cout<<"before visit assign"<<endl;
+		visit(node); //cout<<" after visit assign"<<endl;
 	 }
 	else if(typeid(*e) == typeid(static_dispatch_class)) {
 		static_dispatch_class* node = (static_dispatch_class*) (e);
@@ -762,7 +762,7 @@ void semanVisitor::visit(Expression e) {
 	}
 	else if(typeid(*e) == typeid(int_const_class)) {
 		int_const_class* node = (int_const_class*) e;
-		visit(node); cout<<"after visit int const " << node->get_token()<<endl;
+		visit(node); //cout<<"after visit int const " << node->get_token()<<endl;
 	}
 	else if(typeid(*e)== typeid(bool_const_class)){
 		bool_const_class* node = (bool_const_class*) e;
@@ -802,7 +802,7 @@ void semanVisitor::visit(class__class* cl)
 	currentClass = cl;
 	Features features = cl->get_features();
 	Features parent_feature_list = cl->parent_feature_list;
-   cout << "visit class__class: features length: " << features->len()<<endl;
+   //cout << "visit class__class: features length: " << features->len()<<endl;
 	for(int i=0; i < features->len(); i++) 
   {
 		Feature ft1 = (Feature) features->nth(i);
@@ -884,11 +884,11 @@ void semanVisitor::visit(class__class* cl)
 void semanVisitor::visit(method_class *mt) 
 {
   Formals formals = mt->get_formals(); 
-  cout<< "visiting method " << mt->get_name()<< endl;
+  //cout<< "visiting method " << mt->get_name()<< endl;
   for(int i =formals->first(); formals->more(i); i=formals->next(i) ) 
   {
     formal_class* fm = (formal_class*) formals->nth(i);   
-    cout<< "formal name: " << fm->get_name()<<endl;
+    //cout<< "formal name: " << fm->get_name()<<endl;
     tree_node *node = probeObject(fm->get_name());
 
     // Check if formal is multiply defined
@@ -1014,33 +1014,33 @@ void semanVisitor::visit(assign_class *as) {
   Symbol type =NULL;
   tree_node *node =  symtable_o->lookup(as->get_name());
 
-  cout<<"!!!assign class called. name: "<<as->get_name()<<" type: "<<typeid(*node).name()<<endl;
+  //cout<<"!!!assign class called. name: "<<as->get_name()<<" type: "<<typeid(*node).name()<<endl;
    //check type of ID
   if(typeid(*node) == typeid(attr_class)) 
   {
     type = ((attr_class*) node )->get_type_decl(); 
-    cout<<"from 1 attr" << endl;
+    //cout<<"from 1 attr" << endl;
   }
   else if(typeid(*node) == typeid(formal_class)) 
   {
     type = ((formal_class*) node)->get_type_decl();  
-    cout<<"from 2 formal" << endl;
+    //cout<<"from 2 formal" << endl;
   }
   else if(typeid(*node) == typeid(let_class)) 
   {
     type = ((let_class*) node)->get_type_decl();    
-    cout<<"from 3 let" << endl;
+    //cout<<"from 3 let" << endl;
   }
   else if(typeid(*node) == typeid(branch_class)) 
   {
     type = ((branch_class*)node)->get_type_decl();   
-    cout<< "from 4 branch" << endl;
+    //cout<< "from 4 branch" << endl;
   }
 
-  cout<<"type is "<<type->get_string()<<endl;
+  //cout<<"type is "<<type->get_string()<<endl;
 
-  this->visit(as->get_expr());  cout<< "finish visit expression" << endl;
-  Symbol type1 = as->get_expr()->get_type();  cout<< "type1 is: "<< type1->get_string()<<endl;
+  this->visit(as->get_expr());  //cout<< "finish visit expression" << endl;
+  Symbol type1 = as->get_expr()->get_type();  //cout<< "type1 is: "<< type1->get_string()<<endl;
 
   //error is type1 >= type
   Symbol type_cur = type;
@@ -1303,9 +1303,9 @@ void semanVisitor::visit( block_class *e )
 
    for(int i =body->first(); body->more(i); i=body->next(i) ){
      Expression_class* ex = (Expression_class*) body->nth(i); 
-     cout<<"block visit start"<<endl;
+     //cout<<"block visit start"<<endl;
      this->visit(ex);
-     cout<<"block visit finish"<<endl;
+     //cout<<"block visit finish"<<endl;
      type = ex->get_type();
    }
    e->set_type(type);
@@ -1359,7 +1359,7 @@ void semanVisitor::visit( plus_class *e )
 
   if(type1 == Int && type2 == Int){
     e->set_type(Int);
-    cout<<"plus finish"<<endl;
+    //cout<<"plus finish"<<endl;
 
   }
 
@@ -1580,30 +1580,30 @@ void semanVisitor::visit( object_class *e )
  
   tree_node* node = symtable_o->lookup(e->get_name());
 
-  cout<<"!!!object class called. name: "<<e->get_name()<<" type: "<<typeid(*node).name()<<endl;
+  //cout<<"!!!object class called. name: "<<e->get_name()<<" type: "<<typeid(*node).name()<<endl;
   //check type of ID
   if(typeid(*node) == typeid(attr_class)) 
   {
     type = ((attr_class*) node )->get_type_decl(); 
-    cout<<"from 1 attr" << endl;
+    //cout<<"from 1 attr" << endl;
   }
   else if(typeid(*node) == typeid(formal_class)) 
   {
     type = ((formal_class*) node)->get_type_decl();  
-    cout<<"from 2 formal" << endl;
+    //cout<<"from 2 formal" << endl;
   }
   else if(typeid(*node) == typeid(let_class)) 
   {
     type = ((let_class*) node)->get_type_decl();    
-    cout<<"from 3 let" << endl;
+    //cout<<"from 3 let" << endl;
   }
   else if(typeid(*node) == typeid(branch_class)) 
   {
     type = ((branch_class*)node)->get_type_decl();   
-    cout<< "from 4 branch" << endl;
+    //cout<< "from 4 branch" << endl;
   }
 
-  cout<<"type is "<<type->get_string()<<endl;
+  //cout<<"type is "<<type->get_string()<<endl;
 
   e->set_type(type);
 }
@@ -1625,16 +1625,16 @@ void program_class::accept(Visitor *v) {
 void class__class::accept(Visitor *v) 
 {
 	v->enterscope();
-  cout << endl<<"--Visiting class: " << this->get_name()<< " .feature length = "<<features->len() << endl;
+  //cout << endl<<"--Visiting class: " << this->get_name()<< " .feature length = "<<features->len() << endl;
 	semanVisitor* sv = (semanVisitor*) v;
 	if( parent != No_class) {
 		
 		class__class* parentClass__class = sv->classTable->get_parent(this->get_name());
 		if(parentClass__class != NULL) 
     {
-      cout<<"parent class is: "<<parentClass__class->get_name()<<endl;
+      //cout<<"parent class is: "<<parentClass__class->get_name()<<endl;
 			parentClass__class->add_parentMembers(v, parent_feature_list);
-      cout<< "1.parent feature list length: "<<parent_feature_list->len()<< endl;
+      //cout<< "1.parent feature list length: "<<parent_feature_list->len()<< endl;
 		}
 	}
 
@@ -1649,7 +1649,7 @@ void class__class::accept(Visitor *v)
 			if( !f->get_is_method() )*/
       {
 				sv->addId(mt->get_name(), mt, 1);
-        cout<< "add method @@@@@@@@@@@@@@@@ " << mt->get_name()<<endl; 
+        //cout<< "add method @@@@@@@@@@@@@@@@ " << mt->get_name()<<endl; 
       }
 		}
     else if(!(ft->get_is_method()) )
@@ -1659,12 +1659,12 @@ void class__class::accept(Visitor *v)
 			if( f->get_is_method() )*/
       {
 					sv->addId(at->get_name(), at, 0); 
-          cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl; 
+          //cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl; 
       }
 		}
 	}
-  cout<< "2.parent feature list length: "<<parent_feature_list->len()<< endl;
-  cout << "features length: " << features->len()<<endl;
+  //cout<< "2.parent feature list length: "<<parent_feature_list->len()<< endl;
+  //cout << "features length: " << features->len()<<endl;
   for(int i = parent_feature_list->first(); parent_feature_list->more(i); i = parent_feature_list->next(i))      
   {
 		Feature ft = (Feature) parent_feature_list->nth(i);
@@ -1676,7 +1676,7 @@ void class__class::accept(Visitor *v)
       if (node == NULL || (typeid(*node)) != typeid(method_class) )
       {
         sv->addId(mt->get_name(), mt, 1);
-        cout<< "add method @@@@@@@@@@@@@@@@@@" << mt->get_name()<<endl;
+        //cout<< "add method @@@@@@@@@@@@@@@@@@" << mt->get_name()<<endl;
       }
 		}
     else if (!(ft->get_is_method()))
@@ -1687,7 +1687,7 @@ void class__class::accept(Visitor *v)
       if (node == NULL || (typeid(*node)) != typeid(attr_class) )
       {
 				sv->addId(at->get_name(), at, 0);
-        cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl;
+        //cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl;
       }
 		}
 	}
@@ -1697,17 +1697,17 @@ void class__class::accept(Visitor *v)
 		Feature ft = (Feature) features->nth(i);
 		if (ft->get_is_method()){
 			method_class* mt = (method_class*) ft;
-      cout<<"---visiting method "<<mt->get_name()<<endl;
+      //cout<<"---visiting method "<<mt->get_name()<<endl;
 			mt->accept(v);  
 		}
 		else if (!(ft->get_is_method())){
 			attr_class *at = (attr_class*) ft;
-      cout<<"---visiting attribute "<<at->get_name()<<endl;
+      //cout<<"---visiting attribute "<<at->get_name()<<endl;
 			at->accept(v); 
 		}
 	}  
 	v->exitscope();  
-  cout<< " exit class " <<this->get_name()<< endl;
+  //cout<< " exit class " <<this->get_name()<< endl;
 }
 
 
@@ -1715,7 +1715,7 @@ void class__class::add_parentMembers(Visitor *v, Features &parent_feature_list)
 {
   
   semanVisitor* sv = (semanVisitor*) v;
-  cout<<"adding parent members for "<<this->get_name()<<endl;
+  //cout<<"adding parent members for "<<this->get_name()<<endl;
   for(int i=0; i < features->len(); i++) 
   {
     Feature ft = (Feature) features->nth(i);
@@ -1723,13 +1723,13 @@ void class__class::add_parentMembers(Visitor *v, Features &parent_feature_list)
     {
       method_class* mt = (method_class*) ft;
       parent_feature_list = append_Features(single_Features(mt), parent_feature_list);
-      cout<<": added parent method "<<mt->get_name()<<endl;
+      //cout<<": added parent method "<<mt->get_name()<<endl;
     }
     else if (!(ft->get_is_method()))
     {
       attr_class* at = (attr_class*) ft;
       parent_feature_list = append_Features(single_Features(at), parent_feature_list);
-      cout<<": added parent attr "<<at->get_name()<<endl;
+      //cout<<": added parent attr "<<at->get_name()<<endl;
     }
   }
 
@@ -1737,20 +1737,20 @@ void class__class::add_parentMembers(Visitor *v, Features &parent_feature_list)
   //  if (parent_feature_list->nth(i)->get_is_method())
   //  {
   //    method_class *m =(method_class *)parent_feature_list->nth(i);
-  //    cout<<"; added parent method "<<m->get_name()<<endl;
+  //    //cout<<"; added parent method "<<m->get_name()<<endl;
   //  }
 
   if(parent != No_class) {
     class__class* parentClass__class  = sv->classTable->get_parent(this->get_name());
     parentClass__class->add_parentMembers(v, parent_feature_list);
   }
-  cout<<" inside: parent feature list length = "<<parent_feature_list->len()<<endl;
+  //cout<<" inside: parent feature list length = "<<parent_feature_list->len()<<endl;
 }
 
 void method_class::accept(Visitor *v) {
-  v->enterscope();  cout << "before visit " << this->get_name() << endl;
+  v->enterscope();  //cout << "before visit " << this->get_name() << endl;
   v->visit(this);
-   cout << "after visit " << this->get_name() << endl;
+   //cout << "after visit " << this->get_name() << endl;
   for(int i =formals->first(); formals->more(i); i=formals->next(i)) {
     formal_class* fm = (formal_class*)formals->nth(i);
     fm->accept(v);   
