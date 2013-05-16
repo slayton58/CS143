@@ -89,17 +89,20 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
   cout<<"calling class table constructor"<<endl;
   install_basic_classes();
   install_user_classes(classes);
-
-  
-  install_function_map();
   print_inherit_map();
-  
+
   check_cycle();
   if(cycle_found)
   {
-    cerr<<"Circle found!"<<endl;
+    cerr<<"Cycle found in inheritance graph!"<<endl;
     fatal();
   }
+
+  install_function_map();
+
+  
+  
+  
 }
 
 
@@ -173,6 +176,7 @@ method_class* ClassTable::get_method(Symbol class_name, Symbol method_name)
 {
   return method_map[class_name][method_name];
 }
+
 void ClassTable::install_basic_classes() {
 
   // The tree package uses these globals to annotate the classes built below.
@@ -299,16 +303,24 @@ void ClassTable::install_user_classes( Classes classes )
   bool contains_main = false;
   for (int i = classes->first(); classes->more(i); i = classes->next(i))
   {
+
+      
       //iterate over all the classes: cls
       class__class* cls = (class__class *) classes->nth(i);
 
+      cout<<"adding class "<<cls->get_name()<<endl;
+
       //check class redefinition:
-      if(class_map.count(cls->get_name()))
+      if(class_map.count(cls->get_name())) {
         semant_error(cls->get_filename(), cls)<<"Class "<<cls->get_name()<<" was previously defined"<<endl;
+        fatal();
+      }
       
       //check basic class redefinition:
-      if(basic_class_set.count(cls->get_name()))
+      if(basic_class_set.count(cls->get_name())) {
         semant_error(cls->get_filename(), cls)<<"Redefinition of basic class "<<cls->get_name()<<endl;
+        fatal();
+      }
       
       //if Main class exist
       if(cls->get_name() == Main)
@@ -348,6 +360,7 @@ void ClassTable::install_user_classes( Classes classes )
     // Finally add the child to the parent key in the inherit graph
     inherit_graph[parent].insert(cls->get_name());
   }
+  
   //To debug least upper bound:
   //Symbol c1, c2, common;
   //for (int i = classes->first(); classes->more(i); i = classes->next(i))
@@ -377,7 +390,7 @@ void ClassTable::install_function_map()
   while ( !q.empty() )
   {
     c = q.front();
-
+    cout<<"install method for class "<<c<<endl;
     q.pop();
     // for each class, get the features
     Features features = class_map[c]->get_features();
@@ -414,6 +427,7 @@ void ClassTable::install_function_map()
     for(iter2= child_class.begin(); iter2!= child_class.end(); ++iter2)
     {
       q.push(*iter2) ;
+      cout<<"pushed: "<<*iter2<<endl;
     }
 
 
@@ -639,16 +653,18 @@ void program_class::semant()
     /* ClassTable constructor may do some semantic analysis */
     /* some semantic analysis code may go here */
 
-	     ClassTable *classTable = new ClassTable(classes);
-       
-	     OcurredExpection = false;
-	     sv = new semanVisitor(classTable);
-       
-	     this->accept(sv);
-       
-	     if(classTable->errors()) {
-	    	 cerr << "compilation halted due to static semantic errors." << endl;
-	         }
+	  ClassTable *classTable = new ClassTable(classes);
+    
+	  OcurredExpection = false;
+	  sv = new semanVisitor(classTable);
+    
+	  this->accept(sv);
+    
+	  if(classTable->errors()) 
+    {
+	    cerr << "compilation halted due to static semantic errors." << endl;
+      exit(1);
+    }
 }
 
 void semanVisitor::visit(Program e) {
@@ -834,7 +850,7 @@ void semanVisitor::visit(class__class* cl)
 
 						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) 
             {
-							classTable->semant_error(currentClass->get_filename(), ft1)<<"formal length is differnt from parent"<<endl;
+							classTable->semant_error(currentClass->get_filename(), ft1)<<"method paremeter type is differnt from parent"<<endl;
 						    break;
 						}
 					}
@@ -871,10 +887,15 @@ void semanVisitor::visit(method_class *mt)
   cout<< "visiting method " << mt->get_name()<< endl;
   for(int i =formals->first(); formals->more(i); i=formals->next(i) ) 
   {
-    formal_class* fm = (formal_class*) formals->nth(i);   cout<< "formal name: " << fm->get_name()<<endl;
-    if(typeid(probeObject(fm->get_name()))==typeid(formal_class)) 
+    formal_class* fm = (formal_class*) formals->nth(i);   
+    cout<< "formal name: " << fm->get_name()<<endl;
+    tree_node *node = probeObject(fm->get_name());
+
+    // Check if formal is multiply defined
+    if (node != NULL)
     {
-      classTable->semant_error(currentClass->get_filename(), fm)<<"formal multiply defined"<<endl;
+      if((typeid(*node))==typeid(formal_class)) 
+        classTable->semant_error(currentClass->get_filename(), fm)<<"formal multiply defined"<<endl;
     }
     else
       addId(fm->get_name(),fm, 0);
@@ -940,8 +961,13 @@ void semanVisitor::visit(attr_class *at) {
 
 void semanVisitor::visit(formal_class* fm) {
   //check whether type_decl is valid
-  if(fm->get_type_decl() != SELF_TYPE &&
-    !classTable->class_exist(fm->get_type_decl())) {
+  if (fm->get_type_decl() == SELF_TYPE)
+  {
+    classTable->semant_error(currentClass->get_filename(), fm)
+      <<"Formal parameter cannot have SELF_TYPE"<<endl;      
+  }
+  else if( !classTable->class_exist(fm->get_type_decl())) 
+  {
      classTable->semant_error(currentClass->get_filename(), fm)
        << "class " << fm->get_type_decl()->get_string()
        << " of formal " << fm->get_name()->get_string()
@@ -949,20 +975,22 @@ void semanVisitor::visit(formal_class* fm) {
   }    
 }
 
-void semanVisitor::visit(branch_class *br) {
+void semanVisitor::visit(branch_class *br) 
+{
   // no need to check object redefinition 
   addId(br->get_name(), br, 0);
     
-    if(!classTable->class_exist(br->get_type_decl())){
-      classTable->semant_error(currentClass->get_filename(), br)
-        << "Class " << br->get_type_decl()
-        << " in case branch is undefined.\n" << endl;
-    }
-   //SELF_TYPE is not allowed in case branch
-    if((br->get_type_decl()) == SELF_TYPE) {
+  if(!classTable->class_exist(br->get_type_decl())){
     classTable->semant_error(currentClass->get_filename(), br)
-      << "Identifier " << br->get_name()->get_string()
-      << " declared with SELF_TYPE in case. \n" << endl;
+      << "Class " << br->get_type_decl()
+      << " in case branch is undefined.\n" << endl;
+  }
+  //SELF_TYPE is not allowed in case branch
+  if((br->get_type_decl()) == SELF_TYPE) 
+  {
+   classTable->semant_error(currentClass->get_filename(), br)
+    << "Identifier " << br->get_name()->get_string()
+    << " declared with SELF_TYPE in case. \n" << endl;
   }
   this->visit(br->get_expr());
 }
@@ -1032,7 +1060,7 @@ void semanVisitor::visit(assign_class *as) {
     as->set_type(Object);
     return;
   }
-  as->set_type(type1_cur);
+  as->set_type(type1);
 }
 
 void semanVisitor::visit( static_dispatch_class *e )
@@ -1314,7 +1342,6 @@ void semanVisitor::visit( let_class *e )
      }
    }
    // we need this enter and exit scope since not all "let" processing is 
-   //invoked from let.accept(v) 
    enterscope();
    addId(e->get_identifier(), e, 0);
    this->visit(e->get_body());
@@ -1644,16 +1671,24 @@ void class__class::accept(Visitor *v)
     if(ft->get_is_method())
     {
 			method_class* mt = (method_class*) ft;
-			//if(typeid((sv->probeMethod(mt->get_name())))!=typeid(method_class))
-				sv->addId(mt->get_name(), mt, 1);
-        cout<< "add method @@@@@@@@@@@@@@@@@@" << mt->get_name()<<endl; 
+      tree_node *node = sv->probeObject(mt->get_name());
+      // Check if formal is multiply defined
+      if (node == NULL || (typeid(*node)) != typeid(method_class) )
+      {
+        sv->addId(mt->get_name(), mt, 1);
+        cout<< "add method @@@@@@@@@@@@@@@@@@" << mt->get_name()<<endl;
+      }
 		}
     else if (!(ft->get_is_method()))
     {
 			attr_class* at = (attr_class*) ft;
-			//if(typeid((sv->probeObject(at->get_name())))!=typeid(attr_class))
+      tree_node *node = sv->probeObject(at->get_name());
+      // Check if formal is multiply defined
+      if (node == NULL || (typeid(*node)) != typeid(attr_class) )
+      {
 				sv->addId(at->get_name(), at, 0);
         cout<< "add object@@@@@@@@@@@@@@@@@ " <<at->get_name()<< endl;
+      }
 		}
 	}
 
@@ -1739,6 +1774,7 @@ void Expression_class::accept( Visitor *v )
   v->visit(this);                 
   v->exitscope();
 }
+
 void branch_class::accept(Visitor *v) {
   v->enterscope();
   v->visit(this);
@@ -1749,7 +1785,7 @@ void branch_class::accept(Visitor *v) {
 void assign_class::accept(Visitor *v) {
   v->enterscope();
   v->visit(this);
-  expr->accept(v);
+  //expr->accept(v);
   v->exitscope();
 }
 

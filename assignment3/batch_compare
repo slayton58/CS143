@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# make clean && make && make semant
+for file in $1/*
+do
+  echo '['$file']\n'
+  rm -rf 1.txt 2.txt 3.txt tmp_1.txt tmp_2.txt
+  ./lexer $file | ./parser $file | ./semant $file > 1.txt
+  ./lexer $file | ./parser $file | /usr/class/cs143/bin/.coolref/semant $file > 2.txt
+  diff 1.txt 2.txt > 3.txt
+  cat 3.txt
+  echo '\n'
+done

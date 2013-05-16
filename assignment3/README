@@ -180,3 +180,102 @@ Instructions
 
 Write-up for PA3
 ----------------
+
+*************************************************************************
+                   Scope checking and type checking
+*************************************************************************
+
+3.1 AST traversal 
+----------------------------
+We used the visitor pattern to write the program during the AST traversal. 
+
+The visitor pattern seperates operations on objects and objects' 
+representation. Therefore we implemented seperate visitor for each operation.
+
+The traversal interface has two kinds of checking:
+  - scope-checking visitor 
+  - type-checking visitor
+  
+To implement various visitor to differnt kinds of class, we first implement
+an interface class Visitor, and defined a bunch of virtual visit function in it:
+
+class Visitor {
+public:
+	virtual void visit(Program e)=0;
+	virtual void visit(Class_ e)=0;
+	virtual void visit(Feature e)=0;
+	virtual void visit(Formal)=0;
+	virtual void visit(Expression e)=0;
+	virtual void visit(Case e)=0;
+
+	virtual void visit(program_class *e)=0;
+	virtual void visit(class__class *e)=0; 
+	...
+}
+
+Then we inherit from the interface Vistor and got a semanVisitor to build the frame of 
+our semantic analyzer.
+
+According to the "dragon book", visitor pattern does not requires frequent type casts 
+nor frequent recompilation. The code structure is basically like this:
+
+class semanVisitor: public Visitor {
+public:
+	SymbolTable<Symbol, tree_node> *symtable_o;
+	SymbolTable<Symbol, tree_node> *symtable_m;
+	
+    void addId(Symbol s, tree_node *i, bool is_method) 
+   {  
+      if(is_method)  symtable_m->addid(s, i);
+      else  symtable_o->addid(s,i);
+   }
+
+  tree_node * probeMethod(Symbol s) {return symtable_m->probe(s);}
+  tree_node * probeObject(Symbol s) {return symtable_o->probe(s);}
+  tree_node * lookupMethod(Symbol s) {return symtable_m->lookup(s);}
+  tree_node * lookupObject(Symbol s) {return symtable_o->lookup(s);}
+	...
+	
+private:
+	class__class* currentClass;	
+}
+
+Here, symtable_o is the symbol table for object, and symtable_m is the symbol table 
+for method. When we find an item with its scope, we will use addID function to add it 
+to the corresponding symbol table for later probe or look up. 
+	  
+
+3.2 Scope checking
+----------------------------
+The hierachy of a Cool program can be described as four levels -- program,
+class, feature, and expression. When traversing between these levels, we 
+enter a new scope and later exits the current scope. Therefore in each 
+subClass of TreeNode, we define the following function:
+
+public void  accept(Visitor *v){
+	v.enterscope();
+	v.visit(this);
+	v.exitscope();
+} 
+
+Because it will not casue conflict when method and attribute share the same name, 
+so we implement two Symbol Tables to store methods and objects(attributes, formals, 
+lets, branches) respectively. 
+
+When a program/class/feature is visited, semanVisitor scans the definition
+and generate a member list. When checking the scope of a class, we also need to analyze
+its parent. Because it is illegal to have current class and parent class's attributes
+share the same name. To avoid this happening, we collect the list of parent 
+members and those of the current class, then compare with each other. Then when the 
+comparison is over, we can add them to the current scope for the scope checking of 
+its features.
+
+3.3 type checking 
+----------------------------						 
+When doing type checking, the types are computed up the AST from the leaves towards the root,
+but the type environment is passed down the AST from the root towards the leaves, including
+method information, identifier scope information. As a result, we merge type checking
+and scope checking in one pass, taking good advantage of the symbol table.
+
+For the environment structure, we have 3 differnt environment information that
+need to keep track of. 

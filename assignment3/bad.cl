@@ -29,11 +29,12 @@ class A {
    -- Error : Class A was previously defined.
 class A { };
 
+
    -- Error : Redefinition of basic class Object.
 class Object {
 };
-*)
 
+*)
 class B inherits A{
    varA : A;
 
@@ -88,13 +89,13 @@ class DDD inherits DD { };
 class E inherits EEE { };
 class EE inherits E { };
 class EEE inherits EE { };
-*)
+
 
 -- Error : class re-definition
 class F {};
 class F {};
 
-(*
+
 -- Error : inherit from basic classes
 class InheritBasic1 inherits IO { };
 class InheritBasic2 inherits Int { };
