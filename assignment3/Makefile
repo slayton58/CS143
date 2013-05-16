@@ -57,7 +57,7 @@ submit: semant
 	$(CLASSDIR)/bin/pa_submit PA3 .
 
 clean:
-	rm -f semant ${OBJS} 
+	rm -f semant ${OBJS} lala* 1 2 3 4 5 6 7 8 9 0 
 
 # build rules
 

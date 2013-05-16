@@ -786,28 +786,24 @@ void semanVisitor::visit(class__class* cl)
 	currentClass = cl;
 	Features features = cl->get_features();
 	Features parent_feature_list = cl->parent_feature_list;
-   cout << "wrong in visit" << endl;
    cout << "visit class__class: features length: " << features->len()<<endl;
 	for(int i=0; i < features->len(); i++) 
   {
 		Feature ft1 = (Feature) features->nth(i);
 		bool conflictWithParents = false;
-      cout << "wrong in outter loop" << endl;
-      cout<< parent_feature_list->len()<<endl;
 		for(int j=0; j < parent_feature_list->len(); j++) 
     {     
-      cout << "wrong in inner loop" << endl;
 			Feature ft2 = (Feature) parent_feature_list->nth(j);
       if((!(ft1->get_is_method()) && !(ft2->get_is_method()))
 				&& (((attr_class*)ft1)->get_name() == ((attr_class*)ft2)->get_name()))
-      {            cout << "wrong in if" << endl;
+      {  
 				conflictWithParents = true;
 				classTable->semant_error(currentClass->get_filename(), ft1)<<"arribute "<<((attr_class*)ft1)->get_name()<<"is an attribute of inherited class"<<endl;
 				break;
 			}
       else if((ft1->get_is_method() && ft2->get_is_method())
 					&& ((method_class*)ft1)->get_name()->get_string() == ((method_class*)ft2)->get_name()->get_string())
-      {      cout << "wrong in else if" << endl;
+      {  
 				method_class* mt1 =((method_class*)ft1);
 				method_class* mt2 =((method_class*)ft2);
 
@@ -872,7 +868,7 @@ void semanVisitor::visit(class__class* cl)
 void semanVisitor::visit(method_class *mt) 
 {
   Formals formals = mt->get_formals(); 
-  cout<< "before visit method outter loop " << endl;
+  cout<< "visiting method " << mt->get_name()<< endl;
   for(int i =formals->first(); formals->more(i); i=formals->next(i) ) 
   {
     formal_class* fm = (formal_class*) formals->nth(i);   cout<< "formal name: " << fm->get_name()<<endl;
@@ -883,9 +879,9 @@ void semanVisitor::visit(method_class *mt)
     else
       addId(fm->get_name(),fm, 0);
   } 
-  cout<< "after visit method outter loop " << endl;
   
-  this->visit(mt->get_expr());     cout<< "after visit get expr " << endl;
+  this->visit(mt->get_expr());   
+
   // get method signature
   std::vector<Symbol> signature = classTable->get_signature(currentClass->get_name(), mt->get_name());
   
@@ -990,20 +986,27 @@ void semanVisitor::visit(assign_class *as) {
   Symbol type =NULL;
   tree_node *node =  symtable_o->lookup(as->get_name());
 
-  cout<<"assign class called "<<typeid(node).name()<<endl;
+  cout<<"!!!assign class called. name: "<<as->get_name()<<" type: "<<typeid(*node).name()<<endl;
    //check type of ID
-  //if(typeid(node) == typeid(attr_class)) {
-  if(!((Feature_class*) node)->get_is_method()) {
-    type = ((attr_class*) node )->get_type_decl(); cout<<"node is attr" << endl;
+  if(typeid(*node) == typeid(attr_class)) 
+  {
+    type = ((attr_class*) node )->get_type_decl(); 
+    cout<<"from 1 attr" << endl;
   }
-  else if(typeid(node) == typeid(formal_class)) {
-    type = ((formal_class*) node)->get_type_decl();  cout<<"node is formal" << endl;
+  else if(typeid(*node) == typeid(formal_class)) 
+  {
+    type = ((formal_class*) node)->get_type_decl();  
+    cout<<"from 2 formal" << endl;
   }
-  else if(typeid(node) == typeid(let_class)) {
-    type = ((let_class*) node)->get_type_decl();    cout<<"node is let" << endl;
+  else if(typeid(*node) == typeid(let_class)) 
+  {
+    type = ((let_class*) node)->get_type_decl();    
+    cout<<"from 3 let" << endl;
   }
-  else if(typeid(node) == typeid(branch_class)) {
-    type = ((branch_class*)node)->get_type_decl();   cout<< "node is branch" << endl;
+  else if(typeid(*node) == typeid(branch_class)) 
+  {
+    type = ((branch_class*)node)->get_type_decl();   
+    cout<< "from 4 branch" << endl;
   }
 
   cout<<"type is "<<type->get_string()<<endl;
@@ -1549,19 +1552,32 @@ void semanVisitor::visit( object_class *e )
   }
  
   tree_node* node = symtable_o->lookup(e->get_name());
-  //if(typeid(node) == typeid(attr_class)) {
-  if(!((Feature_class*) node)->get_is_method()) {
-    type = ((attr_class*) node)->get_type_decl();   cout<<"In Object_class, type is : "<< type->get_string()<<endl; 
+
+  cout<<"!!!object class called. name: "<<e->get_name()<<" type: "<<typeid(*node).name()<<endl;
+  //check type of ID
+  if(typeid(*node) == typeid(attr_class)) 
+  {
+    type = ((attr_class*) node )->get_type_decl(); 
+    cout<<"from 1 attr" << endl;
   }
-  else if(typeid(node) == typeid(formal_class)) {
-    type = ((formal_class*) node)->get_type_decl();
+  else if(typeid(*node) == typeid(formal_class)) 
+  {
+    type = ((formal_class*) node)->get_type_decl();  
+    cout<<"from 2 formal" << endl;
   }
-  else if(typeid(node) == typeid(let_class)) {
-    type = ((let_class*) node)->get_type_decl();
+  else if(typeid(*node) == typeid(let_class)) 
+  {
+    type = ((let_class*) node)->get_type_decl();    
+    cout<<"from 3 let" << endl;
   }
-  else if(typeid(node) == typeid(branch_class)) {
-    type = ((branch_class*) node)->get_type_decl();
+  else if(typeid(*node) == typeid(branch_class)) 
+  {
+    type = ((branch_class*)node)->get_type_decl();   
+    cout<< "from 4 branch" << endl;
   }
+
+  cout<<"type is "<<type->get_string()<<endl;
+
   e->set_type(type);
 }
 
@@ -1596,8 +1612,8 @@ void class__class::accept(Visitor *v)
 	}
 
 	v->visit(this);
-      
-	for (int i=0; i < features->len(); i++) {
+  for(int i = features->first(); features->more(i); i = features->next(i))      
+  {
 		Feature ft = (Feature) features->nth(i);
     if(ft->get_is_method())
     {   
@@ -1622,7 +1638,7 @@ void class__class::accept(Visitor *v)
 	}
   cout<< "2.parent feature list length: "<<parent_feature_list->len()<< endl;
   cout << "features length: " << features->len()<<endl;
-	for(int i=0; i < parent_feature_list->len(); i++) 
+  for(int i = parent_feature_list->first(); parent_feature_list->more(i); i = parent_feature_list->next(i))      
   {
 		Feature ft = (Feature) parent_feature_list->nth(i);
     if(ft->get_is_method())
@@ -1641,7 +1657,8 @@ void class__class::accept(Visitor *v)
 		}
 	}
 
-	for(int i=0; i < features->len(); i++) {
+	for(int i = features->first(); features->more(i); i = features->next(i))      
+  {
 		Feature ft = (Feature) features->nth(i);
 		if (ft->get_is_method()){
 			method_class* mt = (method_class*) ft;
