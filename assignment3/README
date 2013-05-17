@@ -33,6 +33,7 @@ The public methods for the class table are:
 The first step of the class table constructor is to install the basic classes
 and the user classes, i.e. to populate the class_map and the inheritance_map.
 During the insertion the following properties are checked:
+
 Defining:
 1. Whether a class was redefined.
 2. Whether a basis class is redefined.
@@ -82,10 +83,37 @@ environment.
 ----------------------------
     2.1 Data Structure 
 ----------------------------
-map from class name and function name to function
+double map from class name and function name to function
+
   std::map<Symbol, std::map<Symbol, method_class*> > method_map;
 
-    
+----------------------------
+    2.2 Install Methods
+----------------------------
+The install_method_map method will iterate from the root node of the inheritance
+graph, which is the Object class, and BFS traverse the inheritance graph and visit
+each class node. The top-down iteration grantees that by the time we visit the 
+child, we have already visit its parents and could all the methods of its parent
+to this class. 
+
+During the traverse, we also check:
+1. if main method exists
+2. main method shouldn't have formal
+
+----------------------------
+    2.3 Get Signatures
+----------------------------
+What we need from the method_map is actually the signatures of the method. 
+      
+      <T0, T1, T2.....Tn, Tn+1>
+      
+So a public method get_features is provided. The return signature is stored
+in a vector, std::vector<Symbol>
+also the following checks are provided in the signature:
+
+1. formal list shouldn't have self 
+2. formal list shouldn't have SELF_TYPE
+3. return type should be previously defined
     
     
 *****************************************************************************

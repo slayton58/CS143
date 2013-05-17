@@ -121,10 +121,10 @@ std::vector<Symbol> ClassTable::get_signature(Symbol class_name, Symbol method_n
     for(int i = formals->first(); formals->more(i); i = formals->next(i))
     {
       formal_class *fm = (formal_class *)formals->nth(i);
-      sig.push_back(fm->get_type_decl());//TODO
+      sig.push_back(fm->get_type_decl());
     }
     // add return type:
-    sig.push_back(m->get_return_type()); //TODO
+    sig.push_back(m->get_return_type()); 
 
   }
   return sig;
@@ -406,7 +406,7 @@ void ClassTable::install_method_map()
 
     //also add features from parent class:
     std::map<Symbol, method_class*> parent_methods = 
-      method_map[class_map[c]->get_parent()]; //TODO
+      method_map[class_map[c]->get_parent()]; 
     std::map<Symbol, method_class*>::iterator iter;
     for (iter=parent_methods.begin(); iter!=parent_methods.end(); ++iter)
     {
@@ -1324,7 +1324,7 @@ void semanVisitor::visit( let_class *e )
    if(type_id == SELF_TYPE) {
      type_id = currentClass->get_name();
    }
-   if(typeid((e->get_init()))!=typeid(no_expr_class)) //TODO
+   if(typeid((e->get_init()))!=typeid(no_expr_class)) 
    {
      type_id=e->get_init()->get_type();
      if(type_id != NULL && !classTable->is_child(type_id,e->get_type_decl())) 
