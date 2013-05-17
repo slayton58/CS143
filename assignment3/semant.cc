@@ -802,7 +802,7 @@ void semanVisitor::visit(class__class* cl)
 				&& (((attr_class*)ft1)->get_name() == ((attr_class*)ft2)->get_name()))
       {  
 				conflictWithParents = true;
-				classTable->semant_error(currentClass->get_filename(), ft1)<<"arribute "<<((attr_class*)ft1)->get_name()<<"is an attribute of inherited class"<<endl;
+				classTable->semant_error(currentClass->get_filename(), ft1)<<"atrribute "<<((attr_class*)ft1)->get_name()<<"is an attribute of inherited class"<<endl;
 				break;
 			}
       else if((ft1->get_is_method() && ft2->get_is_method())
@@ -838,7 +838,7 @@ void semanVisitor::visit(class__class* cl)
 
 						if(fm1->get_type_decl()->get_string() != fm2->get_type_decl()->get_string()) 
             {
-							classTable->semant_error(currentClass->get_filename(), ft1)<<"method paremeter type is differnt from parent"<<endl;
+							classTable->semant_error(currentClass->get_filename(), ft1)<<"method parameter type is different from parent"<<endl;
 						    break;
 						}
 					}

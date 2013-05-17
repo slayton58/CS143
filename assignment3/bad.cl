@@ -1,4 +1,5 @@
 --redefinination
+(*
 class X { };
 class X { };
 class Object {};
@@ -18,7 +19,7 @@ class C1 inherits IO { };
 class C2 inherits Int { };
 class C3 inherits Bool { };
 class C4 inherits String { };
-
+*)
 class AttributeRedef { x : Int; };
 class AttributeRedef1 inherits AttributeRedef { x : Int; };
 class AttributeConflict {x : Int; x : String;};

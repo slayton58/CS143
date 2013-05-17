@@ -230,7 +230,9 @@ symbol table.
 
 Most of the type checking is the translation of the cool manual into code. Take 
 static dispatch for example, 
+
 e0@T.f(e1, e2,..., en): Tn+1  
+
 We first get e0 type, it should be subtype of T. Then we call method f in class 
 T. We can get the signature of the method from method map. Then we 
 check whether the type of the method is the subtype of the signature. If return 
@@ -256,17 +258,17 @@ only T' can be SELF_TYPE (T cannot be SELF_TYPE). In fact, we follow exactly as 
 manual says in terms of type checking. 
 
 *****************************************************************************************
-                                  Error Handling
+                           4. Error Handling
 *****************************************************************************************
-We have fatal errors and nomal errors to handle. Fatal errors will cause semantic analyser
+We have fatal errors and normal errors to handle. Fatal errors will cause semantic analyser
 exit immediately, and they mainly happen in these cases:
 a) inherit from basic class
 b) inherit from SELF_TYPE 
 c) inherit from non-existing class
-d) class redefinaton (including basic class)
+d) class redefinition (including basic class)
 e) cycle found in inheritance graph
 
-For the nomal semantic errors, we systematically find all the errors according to 
+For the normal semantic errors, we systematically find all the errors according to 
 type-checking rules in Cool manual. Then we design error cases to exercise the reference 
 semant program, in this way we can get to know what error message shall we report.
 
@@ -279,5 +281,59 @@ error reporting code, in the meantime help manage total error count. For example
 		  
 After we report the error, we should continue to report more semantic errors, rather than halt 
 the program, so we assign it with an Object type, and return from this visit. 
+
+*****************************************************************************************
+                           5. Testing
+*****************************************************************************************
+We tried to cover the error for each node in the AST. One issue for testing is that once fatal
+error is encountered, the program will die immediately. So we have to test the non-fatal error
+first and then deal with fatal errors. The Errors we have caught include:
+
+fatal errors:
+  inherit from basic class
+  inherit from SELF_TYPE 
+  inherit from non-existing class
+  class redefinition
+  cycle found
+ 
+non-fatal errors:
+  bad.cl:23: attribute xis an attribute of inherited class
+  bad.cl:24: attribute is multiply defined
+  bad.cl:36: return type is different from inherited type
+  bad.cl:37: method parameter type is different from parent
+  bad.cl:38: different number of formals from parent
+  bad.cl:43: attribute is multiply defined
+  bad.cl:46: method is multiply defined
+  bad.cl:58: return type is different from inherited type
+  bad.cl:60: method parameter type is different from parent
+  bad.cl:61: return type is different from inherited type
+  bad.cl:62: different number of formals from parent
+  bad.cl:63: method parameter type is different from parent
+  bad.cl:61: return type does not match!
+  bad.cl:64: formal multiply defined
+  bad.cl:64: formal multiply defined
+  bad.cl:75: Assigned variable c is undeclared.
+  bad.cl:85: Non-Int arguments forInt <= String.
+  bad.cl:92: class NotPossibleToHaveThisTypeName of attribute var is undefined.
+  bad.cl:96: class NotPossibleToHaveThisTypeName of formal var is undefined.
+  bad.cl:100: cannot use 'self' as the name of an attribute.
+  bad.cl:103: 'self' cannot be assigned.
+  bad.cl:112: method is multiply defined
+  bad.cl:117: formal multiply defined
+  bad.cl:121: return type does not match!
+  bad.cl:122: return type does not match!
+  bad.cl:126: class NotPossibleToHaveThisTypeName of attribute var is undefined.
+  bad.cl:127: Initialized type IO of attribute var1 does not conform to the declared type Int.
+  bad.cl:131: class NotPossibleToHaveThisTypeName of formal x is undefined.
+  bad.cl:140: Identifier b2 declared with SELF_TYPE in case. 
+  bad.cl:153: Type of parameter y in called method init is Int which does not conform to declared type Bool.
+  bad.cl:154: Number of arguments is incompatible of the called method init.
+  bad.cl:155: Cannot dispatch to undefined method iinit. 
+
+
+
+
+
+
 
  
