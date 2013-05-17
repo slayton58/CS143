@@ -1253,17 +1253,26 @@ void semanVisitor::visit( typcase_class *e )
      e->set_type(Object);
      return;
    }
-   else {     
-     for(int i =cases->first(); cases->more(i); i=cases->next(i) ){
+   else 
+   {     
+     for(int i =cases->first(); cases->more(i); i=cases->next(i) )
+     {
        branch_class* ty = (branch_class*) cases->nth(i);
+       if (ty->get_name()==self)
+         classTable->semant_error(currentClass->get_filename(),ty)
+         << "self can not bound in case!"<<endl;
+
        this->visit(ty);
      }
 
-     for(int j=0; j< cases->len(); j++) {
-       for(int k =j+1; k < cases->len(); k++) {
+     for(int j=0; j< cases->len(); j++) 
+     {
+       for(int k =j+1; k < cases->len(); k++) 
+       {
           branch_class* bj = (branch_class*) cases->nth(j);
           branch_class* bk = (branch_class*) cases->nth(k);
-          if(bj->get_type_decl() == bk->get_type_decl()) {
+          if(bj->get_type_decl() == bk->get_type_decl()) 
+          {
             classTable->semant_error(currentClass->get_filename(),bj)
               << "Branch " << bj->get_type_decl()->get_string()
               << " is duplicated in case statement.\n" << endl;
@@ -1271,7 +1280,7 @@ void semanVisitor::visit( typcase_class *e )
             return;
           }
        }
-   }
+     }
      Symbol type = ((branch_class*)cases->nth(0))->get_expr()->get_type();
      if(type == SELF_TYPE) {
        type = currentClass->get_name();

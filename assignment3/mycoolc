@@ -1,2 +1,12 @@
-#!/bin/csh -f
-/usr/class/cs143/bin/coolc -l semant $*
+
+
+#!/bin/sh
+
+# make clean && make && make semant
+for file in $1/*
+do
+  echo '['$file']'
+  /usr/class/cs143/bin/coolc -l semant $file
+done
+
+
