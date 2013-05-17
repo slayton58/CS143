@@ -230,4 +230,11 @@ manual says in terms of type checking.
 *****************************************************************************************
                                   Error Handling
 *****************************************************************************************
+We have fatal errors and nomal errors to handle. Fatal errors mainly happen in these cases:
+a) inherit from basic class
+b) inherit from SELF_TYPE 
+c) inherit from non-existing class
+d) class redefinaton (including basic class)
+e) cycle found in inheritance graph
 
+For the 
