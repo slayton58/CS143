@@ -258,11 +258,26 @@ manual says in terms of type checking.
 *****************************************************************************************
                                   Error Handling
 *****************************************************************************************
-We have fatal errors and nomal errors to handle. Fatal errors mainly happen in these cases:
+We have fatal errors and nomal errors to handle. Fatal errors will cause semantic analyser
+exit immediately, and they mainly happen in these cases:
 a) inherit from basic class
 b) inherit from SELF_TYPE 
 c) inherit from non-existing class
 d) class redefinaton (including basic class)
 e) cycle found in inheritance graph
 
-For the 
+For the nomal semantic errors, we systematically find all the errors according to 
+type-checking rules in Cool manual. Then we design error cases to exercise the reference 
+semant program, in this way we can get to know what error message shall we report.
+
+And we rely on ClassTable.semantError() method to report errors. This method will simplify 
+error reporting code, in the meantime help manage total error count. For example, 
+
+	    classTable->semant_error(currentClass->get_filename(),as) 
+          << "Assigned variable "<< as->get_name()->get_string()
+          <<" is undeclared.\n" <<endl;	  
+		  
+After we report the error, we should continue to report more semantic errors, rather than halt 
+the program, so we assign it with an Object type, and return from this visit. 
+
+ 
