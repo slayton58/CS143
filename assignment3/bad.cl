@@ -54,8 +54,6 @@ class A {
 class B inherits A{
    varA : A;
    y : Int;
-   y : Int;
-   w : Bool <- z;
 
    a() : Int { 1 };
    b() : Int { 22 };

@@ -27,20 +27,6 @@ class ClassTable {
 private:
   int semant_errors;
   bool cycle_found;
-  void install_basic_classes();
-  void install_user_classes(Classes);
-  void install_function_map();
-  void check_cycle();
-  void DFS_is_child(std::map<Symbol, int> visited_map, Symbol c, Symbol p, bool &);
-  void DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c);
-  
-  
-
-  void print_inherit_map();
-  void print_class_map();
-  void print_method_map();
-  void fatal();
-
   ostream& error_stream;
 
   //map from class name to class
@@ -51,7 +37,17 @@ private:
   std::map<Symbol, std::set<Symbol> > inherit_graph;
   //class set
   std::set<Symbol> basic_class_set;
- 
+  void install_basic_classes();
+  void install_user_classes(Classes);
+  void install_method_map();
+  void check_cycle();
+  void DFS_is_child(std::map<Symbol, int> visited_map, Symbol c, Symbol p, bool &);
+  void DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c);
+
+  void print_inherit_map();
+  void print_class_map();
+  void print_method_map();
+  void fatal();
 
 public:
   ClassTable(Classes);
@@ -60,7 +56,7 @@ public:
   ostream& semant_error(Class_ c);
   ostream& semant_error(Symbol filename, tree_node *t);
  
-  bool class_exist(Symbol Symbol);
+  bool class_exist(Symbol);
   bool method_exist(Symbol class_name, Symbol method_name);
   bool is_child (Symbol c1, Symbol c2);
   Symbol least_upper_bound(Symbol c1, Symbol c2);

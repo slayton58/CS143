@@ -86,23 +86,15 @@ static void initialize_constants(void)
 }
 
 ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) {
-  ////cout<<"calling class table constructor"<<endl;
   install_basic_classes();
   install_user_classes(classes);
-  //print_inherit_map();
-
   check_cycle();
   if(cycle_found)
   {
     cerr<<"Cycle found in inheritance graph!"<<endl;
     fatal();
   }
-
-  install_function_map();
-
-  
-  
-  
+  install_method_map();
 }
 
 
@@ -379,7 +371,7 @@ void ClassTable::install_user_classes( Classes classes )
 
 }
 
-void ClassTable::install_function_map()
+void ClassTable::install_method_map()
 {
   bool main_found = false;
   bool main_has_formal = false;
@@ -425,10 +417,7 @@ void ClassTable::install_function_map()
     std::set<Symbol> child_class = inherit_graph[c];
     std::set<Symbol>::iterator iter2;
     for(iter2= child_class.begin(); iter2!= child_class.end(); ++iter2)
-    {
       q.push(*iter2) ;
-      //cout<<"pushed: "<<*iter2<<endl;
-    }
 
 
   }
@@ -512,7 +501,6 @@ void ClassTable::DFS_has_cycle(std::map<Symbol, int> visited_map, Symbol c)
 {
   
   visited_map[c] = -1;
-  ////cout<<"  visiting "<<c<<endl;
   for (std::set<Symbol>::iterator iter = inherit_graph[c].begin(); iter != inherit_graph[c].end(); ++iter)
   {
     if(visited_map[*iter] == -1)
