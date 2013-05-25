@@ -592,12 +592,12 @@ void CgenClassTable::code_select_gc()
 
 void CgenClassTable::code_class_nameTab()
 {
-   str << CLASSNAMETAB << LABEL << endl;
+   str << CLASSNAMETAB << LABEL;
    cout<<endl<<" there are totally "<<cur_tag<<" tags"<<endl;
    for(int i =0; i < cur_tag; i++) 
    {
-     List<CgenNode> *l = nds;
-     for (l; l != NULL; l = l->tl()) 
+     
+     for (List<CgenNode> *l = nds; l != NULL; l = l->tl()) 
      {
        CgenNode* node = l->hd();
        if(i == node->get_tag()) 
@@ -614,12 +614,34 @@ void CgenClassTable::code_class_nameTab()
 
 void CgenClassTable::code_class_objTab()
 {
-
+   str << CLASSOBJTAB << LABEL ;
+   for(int i=0; i< cur_tag; i++) {    
+     for(List<CgenNode> *l = nds; l!=NULL; l = l->tl()) {
+       CgenNode* node = l->hd();
+       if(i == node->get_tag())
+       {
+         str << WORD;
+         str << node->get_name() << PROTOBJ_SUFFIX <<endl;
+         str << WORD;
+         str << node->get_name() << CLASSINIT_SUFFIX <<endl;
+       }
+     }
+   }
 }
 
 void CgenClassTable::code_dispatch_table()
 {
+    
+    for(List<CgenNode> *l =nds; l!=NULL; l=l->tl()) {
+      CgenNode* node = l->hd();
 
+      str << node->get_name() << DISPTAB_SUFFIX;
+      str << LABEL;
+
+      /*for(int i =0; i< method_map ) {
+
+      }   */
+    }
 }
 
 void CgenClassTable::code_prototype_objects()
@@ -672,7 +694,6 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
-   print_inheritance_tree() ;
 
    code();
    exitscope();
@@ -833,19 +854,6 @@ void CgenClassTable::build_inheritance_tree()
 {
   for(List<CgenNode> *l = nds; l; l = l->tl())
       set_relations(l->hd());
-}
-
-void CgenClassTable::print_inheritance_tree()
-{
-  for( List<CgenNode> *l = nds; l; l = l->tl())
-  {
-    CgenNode *c = l->hd();
-    cout<<c->get_name()<<":"<<endl;
-    cout<<"  parent: "<<c->get_parentnd()->get_name()<<endl<<"  child : ";
-    for (List<CgenNode> * child = c->get_children(); child; child = child->tl())
-      cout<<child->hd()->get_name()<<", ";
-    cout<<endl;
-  }
 }
 
 //
