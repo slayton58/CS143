@@ -663,8 +663,8 @@ void CgenClassTable::code_constants()
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
    stringclasstag = 0 /* Change to your String class tag here */;
-   intclasstag =    0 /* Change to your Int class tag here */;
-   boolclasstag =   0 /* Change to your Bool class tag here */;
+   intclasstag =    1 /* Change to your Int class tag here */;
+   boolclasstag =   2 /* Change to your Bool class tag here */;
 
    cur_tag = 0;
    enterscope();
@@ -878,28 +878,36 @@ void CgenNode::set_parentnd(CgenNodeP p)
 void CgenClassTable::code()
 {
   if (cgen_debug) cout << "coding global data" << endl;
+  str << "#coding global data" << endl;
   code_global_data();
 
   if (cgen_debug) cout << "choosing gc" << endl;
+  str << "#choosing gc" << endl;
   code_select_gc();
 
   if (cgen_debug) cout << "coding constants" << endl;
+  str << "#coding constants" << endl;
   code_constants();
 
    if(cgen_debug) cout << "coding class_nameTab" << endl;
+   str << "#coding class_nameTab" << endl;
    code_class_nameTab();
 
    if(cgen_debug) cout << "coding class_objTab" << endl;
+   str <<"#coding class_objTab" << endl;
    code_class_objTab();
 
    if(cgen_debug) cout << "coding dispatch tables" << endl;
+   str << "#coding dispatch tables" << endl;
    code_dispatch_table();
 
    if(cgen_debug) cout << "coding prototype objects" << endl;
+   str << "#coding prototype objects" << endl;
    code_prototype_objects();
 
 
   if (cgen_debug) cout << "coding global text" << endl;
+  str<< "#coding global text" << endl;
   code_global_text();
 
   if(cgen_debug) cout << "coding init" << endl;
