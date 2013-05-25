@@ -589,6 +589,45 @@ void CgenClassTable::code_select_gc()
   str << WORD << (cgen_Memmgr_Test == GC_TEST) << endl;
 }
 
+void CgenClassTable::code_class_nameTab()
+{
+   str << CLASSNAMETAB << LABEL << endl;
+ //  for(int i =0; i < class_tag_map.size(); i++) {
+
+}
+
+/*void CgenClassTable:: set_class_tag()
+{
+  std:: map<Symbol, CgenNode> class_map_tag;
+
+  std:: stack<CgenNode> s;
+  q.push(root());
+  int tag = 0;
+  while(!s.Empty()) {
+
+  }    
+} */
+
+void CgenClassTable::code_class_objTab()
+{
+
+}
+
+void CgenClassTable::code_dispatch_table()
+{
+
+}
+
+void CgenClassTable::code_prototype_objects()
+{
+
+}
+
+void CgenClassTable::code_init()
+{
+
+}
+
 
 //********************************************************
 //
@@ -828,20 +867,24 @@ void CgenClassTable::code()
   if (cgen_debug) cout << "coding constants" << endl;
   code_constants();
 
-//                 Add your code to emit
-//                   - prototype objects
-//                   - class_nameTab
-//                   - dispatch tables
-//
+   if(cgen_debug) cout << "coding class_nameTab" << endl;
+   code_class_nameTab();
+
+   if(cgen_debug) cout << "coding class_objTab" << endl;
+   code_class_objTab();
+
+   if(cgen_debug) cout << "coding dispatch tables" << endl;
+   code_dispatch_table();
+
+   if(cgen_debug) cout << "coding prototype objects" << endl;
+   code_prototype_objects();
+
 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
 
-//                 Add your code to emit
-//                   - object initializer
-//                   - the class methods
-//                   - etc...
-
+  if(cgen_debug) cout << "coding init" << endl;
+  code_init();
 }
 
 
@@ -849,6 +892,7 @@ CgenNodeP CgenClassTable::root()
 {
    return probe(Object);
 }
+
 
 
 ///////////////////////////////////////////////////////////////////////
