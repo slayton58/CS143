@@ -672,6 +672,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
+   print_inheritance_tree() ;
 
    code();
    exitscope();
@@ -832,6 +833,19 @@ void CgenClassTable::build_inheritance_tree()
 {
   for(List<CgenNode> *l = nds; l; l = l->tl())
       set_relations(l->hd());
+}
+
+void CgenClassTable::print_inheritance_tree()
+{
+  for( List<CgenNode> *l = nds; l; l = l->tl())
+  {
+    CgenNode *c = l->hd();
+    cout<<c->get_name()<<":"<<endl;
+    cout<<"  parent: "<<c->get_parentnd()->get_name()<<endl<<"  child : ";
+    for (List<CgenNode> * child = c->get_children(); child; child = child->tl())
+      cout<<child->hd()->get_name()<<", ";
+    cout<<endl;
+  }
 }
 
 //
