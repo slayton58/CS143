@@ -14,9 +14,10 @@ typedef CgenClassTable *CgenClassTableP;
 class CgenNode;
 typedef CgenNode *CgenNodeP;
 
+//maps the class name (a symbol) to its CgenNode
 class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
 private:
-   List<CgenNode> *nds;
+   List<CgenNode> *nds; //this is the meat: a list of nodes
    ostream& str;
    int stringclasstag;
    int intclasstag;
@@ -46,21 +47,20 @@ public:
    CgenClassTable(Classes, ostream& str);
    void code();
    CgenNodeP root();
+   void print_inheritance_tree();
 };
 
-
-class CgenNode : public class__class {
-private: 
+// Each class corresponds to a CgenNode, records the children, the parent
+class CgenNode : public class__class 
+{
+ private: 
    CgenNodeP parentnd;                        // Parent of class
    List<CgenNode> *children;                  // Children of class
    Basicness basic_status;                    // `Basic' if class is basic
                                               // `NotBasic' otherwise
 
-public:
-   CgenNode(Class_ c,
-            Basicness bstatus,
-            CgenClassTableP class_table);
-
+ public:
+   CgenNode(Class_ c, Basicness bstatus, CgenClassTableP class_table);
    void add_child(CgenNodeP child);
    List<CgenNode> *get_children() { return children; }
    void set_parentnd(CgenNodeP p);

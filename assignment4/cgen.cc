@@ -628,6 +628,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
+   print_inheritance_tree();
 
    code();
    exitscope();
@@ -648,6 +649,8 @@ void CgenClassTable::install_basic_classes()
 // SELF_TYPE is the self class; it cannot be redefined or inherited.
 // prim_slot is a class known to the code generator.
 //
+  
+  // for every class, we need to generate a node for it.
   addid(No_class,
 	new CgenNode(class_(No_class,No_class,nil_Features(),filename),
 			    Basic,this));
@@ -667,6 +670,8 @@ void CgenClassTable::install_basic_classes()
 // There is no need for method bodies in the basic classes---these
 // are already built in to the runtime system.
 //
+
+
   install_class(
    new CgenNode(
     class_(Object, 
@@ -757,9 +762,12 @@ void CgenClassTable::install_basic_classes()
 
 // CgenClassTable::install_class
 // CgenClassTable::install_classes
-//
+
 // install_classes enters a list of classes in the symbol table.
-//
+// 1. generate a node for this class
+// 2. append this node to the nds list List<CgenNode> *
+// 3. add this class to the symbol table
+
 void CgenClassTable::install_class(CgenNodeP nd)
 {
   Symbol name = nd->get_name();
@@ -790,6 +798,19 @@ void CgenClassTable::build_inheritance_tree()
       set_relations(l->hd());
 }
 
+void CgenClassTable::print_inheritance_tree()
+{
+  for( List<CgenNode> *l = nds; l; l = l->tl())
+  {
+    CgenNode *c = l->hd();
+    cout<<c->get_name()<<":"<<endl;
+    cout<<"  parent:"<<c->get_parentnd()->get_name()<<endl;
+    for (List<CgenNode> * child = c->get_children(); child; child = child->tl())
+      cout<<"  child:"<<child->hd()->get_name()<<", ";
+    cout<<endl;
+  }
+}
+
 //
 // CgenClassTable::set_relations
 //
@@ -798,7 +819,8 @@ void CgenClassTable::build_inheritance_tree()
 //
 void CgenClassTable::set_relations(CgenNodeP nd)
 {
-  CgenNode *parent_node = probe(nd->get_parent());
+  //get_parent, (not get_parentnd), is from class__class
+  CgenNode *parent_node = probe(nd->get_parent()); // probe: <class name(symbol), node>
   nd->set_parentnd(parent_node);
   parent_node->add_child(nd);
 }
@@ -833,7 +855,7 @@ void CgenClassTable::code()
 //                   - class_nameTab
 //                   - dispatch tables
 //
-
+ 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
 
@@ -863,7 +885,9 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
    children(NULL),
    basic_status(bstatus)
 { 
-   stringtable.add_string(name->get_string());          // Add class name to string table
+  // Add class name to string table. the string table can later
+  // let all the entries, each represent a class, to do code_def
+   stringtable.add_string(name->get_string());          
 }
 
 
