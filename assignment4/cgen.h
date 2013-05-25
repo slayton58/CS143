@@ -3,6 +3,8 @@
 #include "emit.h"
 #include "cool-tree.h"
 #include "symtab.h"
+#include <map>
+#include <stack>
 
 enum Basicness     {Basic, NotBasic};
 #define TRUE 1
@@ -21,7 +23,7 @@ private:
    int stringclasstag;
    int intclasstag;
    int boolclasstag;
-
+   int cur_tag;
 
 // The following methods emit code for
 // constants and global declarations.
@@ -47,10 +49,13 @@ private:
    void install_classes(Classes cs);
    void build_inheritance_tree();
    void set_relations(CgenNodeP nd);
+   void set_class_tag();
+
 public:
    CgenClassTable(Classes, ostream& str);
    void code();
    CgenNodeP root();
+
 };
 
 
@@ -59,18 +64,20 @@ private:
    CgenNodeP parentnd;                        // Parent of class
    List<CgenNode> *children;                  // Children of class
    Basicness basic_status;                    // `Basic' if class is basic
-                                              // `NotBasic' otherwise
+                                             // `NotBasic' otherwise
+   int tag;                                   // tag for the class(unique number)
 
 public:
    CgenNode(Class_ c,
             Basicness bstatus,
-            CgenClassTableP class_table);
+            CgenClassTableP class_table, int tag_);
 
    void add_child(CgenNodeP child);
    List<CgenNode> *get_children() { return children; }
    void set_parentnd(CgenNodeP p);
    CgenNodeP get_parentnd() { return parentnd; }
    int basic() { return (basic_status == Basic); }
+   int get_tag() {return tag;}
 };
 
 class BoolConst 
