@@ -5,6 +5,7 @@
 #include "symtab.h"
 #include <map>
 #include <stack>
+#include <vector>
 
 enum Basicness     {Basic, NotBasic};
 #define TRUE 1
@@ -19,7 +20,7 @@ typedef CgenNode *CgenNodeP;
 //maps the class name (a symbol) to its CgenNode
 class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
 private:
-   List<CgenNode> *nds; //this is the meat: a list of nodes
+   std::vector<CgenNodeP> nds; //this is the meat: a list of nodes
    ostream& str;
    int stringclasstag;
    int intclasstag;
@@ -64,18 +65,19 @@ class CgenNode : public class__class
 {
  private: 
    CgenNodeP parentnd;                        // Parent of class
-   List<CgenNode> *children;                  // Children of class
+   
    Basicness basic_status;                    // `Basic' if class is basic
                                              // `NotBasic' otherwise
    int tag;                                   // tag for the class(unique number)
 
 public:
-   CgenNode(Class_ c,
+  std::vector<CgenNodeP> children;                  // Children of class 
+  CgenNode(Class_ c,
             Basicness bstatus,
             CgenClassTableP class_table, int tag_);
 
    void add_child(CgenNodeP child);
-   List<CgenNode> *get_children() { return children; }
+   std::vector<CgenNodeP> get_children() { return children; }
    void set_parentnd(CgenNodeP p);
    CgenNodeP get_parentnd() { return parentnd; }
    int basic() { return (basic_status == Basic); }

@@ -356,6 +356,7 @@ static void emit_gc_check(char *source, ostream &s)
 }
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // coding strings, ints, and booleans
@@ -592,17 +593,16 @@ void CgenClassTable::code_select_gc()
 
 void CgenClassTable::code_class_nameTab()
 {
-   str << CLASSNAMETAB << LABEL;
+   str << CLASSNAMETAB << LABEL << endl;
    cout<<endl<<" there are totally "<<cur_tag<<" tags"<<endl;
    for(int i =0; i < cur_tag; i++) 
    {
-     
-     for (List<CgenNode> *l = nds; l != NULL; l = l->tl()) 
+     std::vector<CgenNodeP>::iterator iter;
+     for (iter = nds.begin(); iter!= nds.end(); ++iter)
      {
-       CgenNode* node = l->hd();
-       if(i == node->get_tag()) 
+       if(i == (*iter)->get_tag()) 
        {
-           StringEntry* se =(StringEntry *)stringtable.lookup_string(node->get_name()->get_string());
+           StringEntry* se =(StringEntry *)stringtable.lookup_string((*iter)->get_name()->get_string());
            str << WORD;
            se->code_ref(str);
            str<< endl;
@@ -614,34 +614,12 @@ void CgenClassTable::code_class_nameTab()
 
 void CgenClassTable::code_class_objTab()
 {
-   str << CLASSOBJTAB << LABEL ;
-   for(int i=0; i< cur_tag; i++) {    
-     for(List<CgenNode> *l = nds; l!=NULL; l = l->tl()) {
-       CgenNode* node = l->hd();
-       if(i == node->get_tag())
-       {
-         str << WORD;
-         str << node->get_name() << PROTOBJ_SUFFIX <<endl;
-         str << WORD;
-         str << node->get_name() << CLASSINIT_SUFFIX <<endl;
-       }
-     }
-   }
+
 }
 
 void CgenClassTable::code_dispatch_table()
 {
-    
-    for(List<CgenNode> *l =nds; l!=NULL; l=l->tl()) {
-      CgenNode* node = l->hd();
 
-      str << node->get_name() << DISPTAB_SUFFIX;
-      str << LABEL;
-
-      /*for(int i =0; i< method_map ) {
-
-      }   */
-    }
 }
 
 void CgenClassTable::code_prototype_objects()
@@ -682,7 +660,7 @@ void CgenClassTable::code_constants()
 }
 
 
-CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
+CgenClassTable::CgenClassTable(Classes classes, ostream& s) :  str(s)
 {
    stringclasstag = 0 /* Change to your String class tag here */;
    intclasstag =    1 /* Change to your Int class tag here */;
@@ -694,6 +672,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
+   print_inheritance_tree() ;
 
    code();
    exitscope();
@@ -837,7 +816,10 @@ void CgenClassTable::install_class(CgenNodeP nd)
 
   // The class name is legal, so add it to the list of classes
   // and the symbol table.
-  nds = new List<CgenNode>(nd,nds);
+  nds.push_back(nd);
+/*
+  for (std::vector<CgenNodeP>::iterator iter = nds.begin(); iter!=nds.end(); ++iter)
+    cout<<(*iter)->get_name()<<endl;*/
   addid(name,nd);
 }
 
@@ -852,8 +834,25 @@ void CgenClassTable::install_classes(Classes cs)
 //
 void CgenClassTable::build_inheritance_tree()
 {
-  for(List<CgenNode> *l = nds; l; l = l->tl())
-      set_relations(l->hd());
+  std::vector<CgenNodeP>::iterator iter;
+  for (iter = nds.begin(); iter!= nds.end(); ++iter)
+      set_relations(*iter);
+}
+
+void CgenClassTable::print_inheritance_tree()
+{
+  std::vector<CgenNodeP>::iterator iter;
+  std::vector<CgenNodeP>::iterator iter2;
+  cout<<"printing"<<endl<<endl;
+  for (iter = nds.begin(); iter!= nds.end(); ++iter)
+  {
+    CgenNodeP c = *iter ;
+    cout<<c->get_name()<<":"<<endl;
+    cout<<"  parent: "<<c->get_parentnd()->get_name()<<endl<<"  child : ";
+    for (iter2 = c->children.begin(); iter2 != c->children.end(); ++iter2)
+      cout<<(*iter2)->get_name()<<", ";
+    cout<<endl;
+  }
 }
 
 //
@@ -871,7 +870,7 @@ void CgenClassTable::set_relations(CgenNodeP nd)
 
 void CgenNode::add_child(CgenNodeP n)
 {
-  children = new List<CgenNode>(n,children);
+  children.push_back(n);
 }
 
 void CgenNode::set_parentnd(CgenNodeP p)
@@ -939,7 +938,6 @@ CgenNodeP CgenClassTable::root()
 CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
    class__class((const class__class &) *nd),
    parentnd(NULL),
-   children(NULL),
    basic_status(bstatus),
    tag(tag_)
 { 
