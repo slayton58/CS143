@@ -19,8 +19,6 @@ class CgenNode;
 typedef CgenNode *CgenNodeP;
 class method_sign
 {
-
-<<<<<<< HEAD
 public:
   Symbol class_name;
   method_class* method_name;
@@ -29,12 +27,9 @@ public:
     method_name = m;
   }
 };
-||||||| merged common ancestors
-=======
 
 
 
->>>>>>> 2b8596f96ea365d90bdd05bb79a0554c69782ccf
 //maps the class name (a symbol) to its CgenNode
 class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
 private:
@@ -44,7 +39,6 @@ private:
    int intclasstag;
    int boolclasstag;
    int cur_tag;
-
 
 
 // The following methods emit code for
@@ -89,14 +83,10 @@ class CgenNode : public class__class
    Basicness basic_status;                    // `Basic' if class is basic
                                              // `NotBasic' otherwise
    int tag;                                   // tag for the class(unique number)
-<<<<<<< HEAD
 
 
-||||||| merged common ancestors
 
-=======
    
->>>>>>> 2b8596f96ea365d90bdd05bb79a0554c69782ccf
 public:
 
   std::vector<CgenNodeP> children;                  // Children of class 
@@ -113,12 +103,6 @@ public:
   std::vector<method_sign*> class_method_map;
 
    void add_child(CgenNodeP child);
-<<<<<<< HEAD
-||||||| merged common ancestors
-   std::vector<CgenNodeP> get_children() { return children; }
-=======
-   std::vector<CgenNodeP>* get_children() { return &children; }
->>>>>>> 2b8596f96ea365d90bdd05bb79a0554c69782ccf
    void set_parentnd(CgenNodeP p);
    CgenNodeP get_parentnd() { return parentnd; }
    int basic() { return (basic_status == Basic); }
@@ -134,8 +118,6 @@ class BoolConst
   void code_def(ostream&, int boolclasstag);
   void code_ref(ostream&) const;
 };
-
-
 
 class Environment
 {
