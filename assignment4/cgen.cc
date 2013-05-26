@@ -646,13 +646,13 @@ void CgenClassTable::code_select_gc()
 
 void CgenClassTable::code_class_nameTab()
 {
-   str << CLASSNAMETAB << LABEL << endl;
+   str << CLASSNAMETAB << LABEL;
    cout<<endl<<" there are totally "<<cur_tag<<" tags"<<endl;
    for(int i =0; i < cur_tag; i++) 
    {
      std::vector<CgenNodeP>::iterator iter;
      for (iter = nds.begin(); iter!= nds.end(); ++iter)
-     {
+     { 
        if(i == (*iter)->get_tag()) 
        {
            StringEntry* se =(StringEntry *)stringtable.lookup_string((*iter)->get_name()->get_string());
@@ -667,17 +667,89 @@ void CgenClassTable::code_class_nameTab()
 
 void CgenClassTable::code_class_objTab()
 {
-
+  str << CLASSOBJTAB << LABEL;
+  for(int i =0; i < cur_tag; i++) 
+  {
+    std::vector<CgenNodeP>::iterator iter;
+    for (iter = nds.begin(); iter!= nds.end(); ++iter)
+    {
+      if(i == (*iter)->get_tag()) 
+      {
+        str << WORD;
+        str << PROTOBJ_SUFFIX << endl;
+        str << WORD;
+        str << CLASSINIT_SUFFIX << endl;
+      }
+    }
+  }
 }
 
 void CgenClassTable::code_dispatch_table()
 {
-
+   std::vector<CgenNodeP>::iterator iter_node;
+   for(iter_node= nds.begin(); iter_node!=nds.end(); ++iter_node) {
+      str << (**iter_node).get_name() << DISPTAB_SUFFIX <<LABEL;
+     // cout << "@@@@@@@@@@@@@@@" << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->class_attr_map.size() << endl;
+      std::vector<method_sign*>::iterator iter_method;
+      cout << "$$$$$$$$$$$iter node method map size: " << (*iter_node)->class_method_map.size() << endl;
+      for(iter_method = (*iter_node)->class_method_map.begin(); iter_method != (*iter_node)->class_method_map.end(); ++iter_method) {
+          cout << "$$$$$$$$$$$$$$$" << endl;
+         str << (*iter_method)->class_name->get_string();
+         str << ".";
+         method_class* mc = (*iter_method)->method_name;
+         str << mc->get_name()->get_string() << endl;
+      }
+   }
 }
 
 void CgenClassTable::code_prototype_objects()
 {
+   std::vector<CgenNodeP>::iterator iter_node;
+   for(iter_node = nds.begin(); iter_node!=nds.end(); ++iter_node) {
+     
+     //garbage collector
+     str << WORD << "-1" << endl;
+     
+     // class name
+     str << (*iter_node)->get_name() << PROTOBJ_SUFFIX << LABEL;
+    
+     //class tag
+     str << WORD << (*iter_node)->get_tag() << endl;
+    
+     //object size
+     str << WORD << DEFAULT_OBJFIELDS + (*iter_node)->class_attr_map.size() << endl;
+     
+     //dispatch table pointer
+     str << WORD << (*iter_node)->get_name() << DISPTAB_SUFFIX << endl;
+     
+     //attributes
+     std::vector<attr_class*>::iterator iter_attr;
+     cout << "@@@@@@@@@@@@@@@" << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->class_attr_map.size() << endl;
+     for(iter_attr = (*iter_node)->class_attr_map.begin(); iter_attr != (*iter_node)->class_attr_map.end(); ++iter_node) {
+        str << WORD;
+         cout << "come in !!!!!!!!!!!!" << endl;
+        //generate default values
+        cout << "node attr type decl is: " << (*iter_attr)->type_decl->get_string() << endl;
+        if((*iter_attr)->type_decl == Int) {
+           IntEntry* ie = (IntEntry*)inttable.add_int(0);
+           ie->code_ref(str);
+        }
+        else if((*iter_attr)->type_decl == str) {
+           StringEntry* se = (StringEntry*) stringtable.add_string("");
+           se->code_ref(str);
+        }
+        else if((*iter_attr)->type_decl == Bool) {
+           BoolConst bc = BoolConst(false);
+           bc.code_ref(str);
+        }
+        else {
+          str << "0";
+        }
 
+        str << endl;
+     }
+
+   }
 }
 
 void CgenClassTable::code_init()
@@ -757,7 +829,10 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
    install_classes(classes);
    build_inheritance_tree();
    print_inheritance_tree() ;
-
+   build_features_map();
+   std::vector<CgenNodeP>::iterator iter_node;
+   for(iter_node = nds.begin(); iter_node!=nds.end(); ++iter_node) 
+     cout << "****************" << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->class_attr_map.size() << endl;
    code();
    exitscope();
 }
@@ -937,6 +1012,76 @@ void CgenClassTable::print_inheritance_tree()
       cout<<(*iter2)->get_name()<<", ";
     cout<<endl;
   }
+}
+
+
+void CgenClassTable::build_features_map()
+{
+  std:: stack<CgenNodeP> s;
+  s.push(root());
+  while(!s.empty()) 
+  {  
+    CgenNodeP curr_node = s.top();
+    CgenNodeP parent_node = curr_node->get_parentnd();
+    s.pop();
+
+    // include parent attributes and methods 
+    if(parent_node->get_name()!= No_class) 
+    {  cout << "parent node name: " << parent_node->get_name() << endl;
+    cout << "current node name: " << curr_node->get_name() <<endl;
+    std::vector<attr_class*>::iterator iter;
+    for(iter = parent_node->class_attr_map.begin(); iter != parent_node->class_attr_map.end(); ++iter) {
+      curr_node->class_attr_map.push_back(*iter);     
+      // cout << "add parent attr: " << (*iter)->name->get_string() << endl;
+    }                                                                                  
+    std::vector<method_sign*>::iterator iter2;
+    for(iter2 = parent_node->class_method_map.begin(); iter2 != parent_node->class_method_map.end(); ++iter) {
+      curr_node->class_method_map.push_back(*iter2);
+    }
+    }
+
+    //include current class features
+    // need to overwrite parent_node's method if curr_node's method has the same name 
+    for(int n = curr_node->get_features()->first(); curr_node->get_features()->more(n); n = curr_node->get_features()->next(n)) {
+      Feature ft = curr_node->get_features()->nth(n);
+      cout << "is method? "<< ft->get_is_method()<< endl;
+     // cout << curr_node.name->get_string() << " method size: " << curr_node.class_method_map.size() << endl;
+     //   cout << curr_node.name->get_string() << " attr size: " << curr_node.class_attr_map.size() << endl; 
+      if(ft->get_is_method()) {
+
+        method_sign* ms = (method_sign*)(curr_node->get_name(),(method_class*)ft); 
+
+        bool need_override = false;
+        cout <<  "current node class method size: " << curr_node->class_method_map.size() << endl;
+        cout <<  "current node class attr size: " << curr_node->class_attr_map.size() << endl; 
+        for(int i=0; i<curr_node->class_method_map.size(); i++ ){
+          method_sign* ms_parent = curr_node->class_method_map[i];
+
+          if(ms->method_name == ms_parent->method_name) {
+            need_override = true;
+            curr_node->class_method_map[i]= ms;
+          }
+        }
+        if(!need_override) {
+          curr_node->class_method_map.push_back(ms);
+        }
+      }
+      else {
+        curr_node->class_attr_map.push_back((attr_class*) ft);
+      }
+    } 
+
+    std::vector<CgenNodeP>::iterator iter3;
+    for(iter3 = curr_node->children.begin(); iter3 != curr_node->children.end(); ++iter3) {
+      s.push(*iter3);
+    }
+    cout << curr_node->name->get_string() << " method size: " << curr_node->class_method_map.size() << endl;
+    cout << curr_node->name->get_string() << " attr size: " << curr_node->class_attr_map.size() << endl; 
+    cout << "stack size: " << s.size()<< endl;
+  }
+  std::vector<CgenNodeP>::iterator iter_node;
+  for(iter_node = nds.begin(); iter_node!=nds.end(); ++iter_node) 
+    cout << "&&&&&&&&&&&&&&&&&" << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->class_attr_map.size() << endl;
 }
 
 //

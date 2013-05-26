@@ -47,9 +47,14 @@ public:
 typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
+private:  
+  bool is_method;
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+   bool get_is_method() {return is_method;}
+   void set_is_method() {is_method = true;}
+   void set_is_attribute() {is_method = false;}
 
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
@@ -162,6 +167,7 @@ public:
    }
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
+   Features get_features() {return features;}
    void code(Environment *env);
 
 #ifdef Class__SHARED_EXTRAS
@@ -189,6 +195,7 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
+   Symbol get_name() {return name;}
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -205,7 +212,6 @@ public:
    Symbol name;
    Symbol type_decl;
    Expression init;
-public:
    attr_class(Symbol a1, Symbol a2, Expression a3) {
       name = a1;
       type_decl = a2;
