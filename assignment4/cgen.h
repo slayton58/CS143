@@ -16,7 +16,17 @@ typedef CgenClassTable *CgenClassTableP;
 
 class CgenNode;
 typedef CgenNode *CgenNodeP;
+class method_sign
+{
 
+public:
+  Symbol class_name;
+  method_class* method_name;
+  method_sign(Symbol c, method_class* m) {
+    class_name = c;
+    method_name = m;
+  }
+};
 //maps the class name (a symbol) to its CgenNode
 class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
 private:
@@ -51,7 +61,7 @@ private:
    void install_classes(Classes cs);
    void build_inheritance_tree();
    void set_relations(CgenNodeP nd);
-   void set_class_tag();
+   void build_features_map();
 
 public:
    CgenClassTable(Classes, ostream& str);
@@ -70,14 +80,20 @@ class CgenNode : public class__class
                                              // `NotBasic' otherwise
    int tag;                                   // tag for the class(unique number)
 
+
 public:
   std::vector<CgenNodeP> children;                  // Children of class 
   CgenNode(Class_ c,
             Basicness bstatus,
             CgenClassTableP class_table, int tag_);
 
+  /** mapping for class attributes */
+  std::vector<attr_class*> class_attr_map;
+
+  /** mapping for class methods */
+  std::vector<method_sign*> class_method_map;
+
    void add_child(CgenNodeP child);
-   std::vector<CgenNodeP> get_children() { return children; }
    void set_parentnd(CgenNodeP p);
    CgenNodeP get_parentnd() { return parentnd; }
    int basic() { return (basic_status == Basic); }
