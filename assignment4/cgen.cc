@@ -135,6 +135,7 @@ void program_class::cgen(ostream &os)
   // spim wants comments to start with '#'
   os << "# start of generated code\n";
 
+
   initialize_constants();
   CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);
 
@@ -356,6 +357,41 @@ static void emit_gc_check(char *source, ostream &s)
 }
 
 
+
+
+void emit_init_begin(ostream &s)
+{
+  emit_addiu(SP, SP, -12, s);
+  emit_store(FP, 3, SP, s);
+  emit_store(SELF, 2, SP, s);
+  emit_store(RA, 1, SP, s);
+  emit_addiu(FP, SP, 4, s);
+  emit_move(SELF, ACC, s);
+}
+
+void emit_init_end(ostream &s)
+{
+  emit_load(FP, 3, SP, s);
+  emit_load(SELF, 2, SP, s);
+  emit_load(RA, 1, SP, s);
+  emit_addiu(SP, SP, 12, s);
+  emit_return(s);
+}
+
+void emit_arith(Expression e1, Expression e2, Environment * env)
+{
+  ostream &s = env->str;
+  //code e1, the result is written to ACC register
+  e1->code(env);
+  emit_push(ACC, s);
+  e2->code(env);
+
+  emit_jal("Object.copy", s);
+  emit_load(T2, 3, ACC, s); //the value of e2 is in T2
+  emit_load(T3, 1, SP, s);
+  emit_addiu(SP, SP, 4, s);
+  emit_load(T1, 3, T3, s);  //the value of e1 is in T1
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -956,85 +992,85 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
 //
 //*****************************************************************
 
-void assign_class::code(ostream &s) {
+void assign_class::code(Environment *env) {
 }
 
-void static_dispatch_class::code(ostream &s) {
+void static_dispatch_class::code(Environment *env) {
 }
 
-void dispatch_class::code(ostream &s) {
+void dispatch_class::code(Environment *env) {
 }
 
-void cond_class::code(ostream &s) {
+void cond_class::code(Environment *env) {
 }
 
-void loop_class::code(ostream &s) {
+void loop_class::code(Environment *env) {
 }
 
-void typcase_class::code(ostream &s) {
+void typcase_class::code(Environment *env) {
 }
 
-void block_class::code(ostream &s) {
+void block_class::code(Environment *env) {
 }
 
-void let_class::code(ostream &s) {
+void let_class::code(Environment *env) {
 }
 
-void plus_class::code(ostream &s) {
+void plus_class::code(Environment *env) {
 }
 
-void sub_class::code(ostream &s) {
+void sub_class::code(Environment *env) {
 }
 
-void mul_class::code(ostream &s) {
+void mul_class::code(Environment *env) {
 }
 
-void divide_class::code(ostream &s) {
+void divide_class::code(Environment *env) {
 }
 
-void neg_class::code(ostream &s) {
+void neg_class::code(Environment *env) {
 }
 
-void lt_class::code(ostream &s) {
+void lt_class::code(Environment *env) {
 }
 
-void eq_class::code(ostream &s) {
+void eq_class::code(Environment *env) {
 }
 
-void leq_class::code(ostream &s) {
+void leq_class::code(Environment *env) {
 }
 
-void comp_class::code(ostream &s) {
+void comp_class::code(Environment *env) {
 }
 
-void int_const_class::code(ostream& s)  
+void int_const_class::code(Environment *env)  
 {
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
-  emit_load_int(ACC,inttable.lookup_string(token->get_string()),s);
+  emit_load_int(ACC,inttable.lookup_string(token->get_string()),env->str);
 }
 
-void string_const_class::code(ostream& s)
+void string_const_class::code(Environment *env)
 {
-  emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
+  emit_load_string(ACC,stringtable.lookup_string(token->get_string()),env->str);
 }
 
-void bool_const_class::code(ostream& s)
+void bool_const_class::code(Environment *env)
 {
-  emit_load_bool(ACC, BoolConst(val), s);
+  emit_load_bool(ACC, BoolConst(val), env->str);
 }
 
-void new__class::code(ostream &s) {
+void new__class::code(Environment *env) {
 }
 
-void isvoid_class::code(ostream &s) {
+void isvoid_class::code(Environment *env) {
 }
 
-void no_expr_class::code(ostream &s) {
+void no_expr_class::code(Environment *env) {
 }
 
-void object_class::code(ostream &s) {
+void object_class::code(Environment *env) {
 }
 
 
