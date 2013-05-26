@@ -685,7 +685,7 @@ void CgenClassTable::code_init()
   std::vector<CgenNodeP>::iterator iter;
   for (iter=nds.begin(); iter!= nds.end(); ++iter)
   {
-    
+    CgenNode *n = *iter;
     env->cur_class = *iter;
     env->sym_table.enterscope();
     cout<<"init111 "<<endl;
@@ -700,6 +700,14 @@ void CgenClassTable::code_init()
       env->sym_table.addid((*iter2)->name, &info);
       i++;
     }
+    //emit init table
+    str<<n->get_name()<<CLASSINIT_SUFFIX<<LABEL;
+    emit_init_begin(str);
+    //init parent
+    CgenNode *parent = n->get_parentnd();
+    if (parent->get_name() != No_class)
+      emit_jal(parent->get_name()+std::string(CLASSINIT_SUFFIX), str);
+
     
     
     
