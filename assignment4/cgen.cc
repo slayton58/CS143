@@ -149,7 +149,6 @@ void program_class::cgen(ostream &os)
   initialize_constants();
 /*  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);*/
   Environment * env = new Environment(classes, os);
-  env->cgen_table->code();
   for(int i = classes->first(); classes->more(i); i = classes->next(i))
   {
     class__class* cls = (class__class *) classes->nth(i);
@@ -654,8 +653,9 @@ void CgenClassTable::code_class_nameTab()
      for (iter = nds.begin(); iter!= nds.end(); ++iter)
      { 
        if(i == (*iter)->get_tag()) 
-       {
+       {   cout<<" want to look up string:  "<< (*iter)->get_name()->get_string() <<endl;
            StringEntry* se =(StringEntry *)stringtable.lookup_string((*iter)->get_name()->get_string());
+           cout << "print string" << endl;
            str << WORD;
            se->code_ref(str);
            str<< endl;
@@ -667,6 +667,7 @@ void CgenClassTable::code_class_nameTab()
 
 void CgenClassTable::code_class_objTab()
 {
+ // cout << "come out" <<endl;
   str << CLASSOBJTAB << LABEL;
   for(int i =0; i < cur_tag; i++) 
   {
@@ -847,10 +848,11 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
    install_classes(classes);
    build_inheritance_tree();
    print_inheritance_tree() ;
+
    build_features_map();
- 
    code();
    exitscope();
+   cout<<endl<<endl<<endl;
 }
 
 void CgenClassTable::install_basic_classes()
@@ -1052,7 +1054,6 @@ void CgenClassTable::build_features_map()
        }                                                                                  
        std::vector<method_sign*>::iterator iter2;
        for(iter2 = parent_node->class_method_map.begin(); iter2 != parent_node->class_method_map.end(); iter2++) {
-          cout << "hahahahhahaha" <<endl;
           curr_node->class_method_map.push_back(*iter2);
           cout << "add parent method-- " << curr_node->name->get_string() << " method size: " << curr_node->class_method_map.size() << endl;
        }
@@ -1153,13 +1154,24 @@ void CgenNode::set_parentnd(CgenNodeP p)
 
 void CgenClassTable::code()
 {
+  std::vector<CgenNodeP>::iterator iter;
+  for (iter = nds.begin(); iter != nds.end(); ++iter)
+    cout<< " ---------------testing--------"<<(*iter)->name<<endl;
+
+
   if (cgen_debug) cout << "coding global data" << endl;
   str << "#coding global data" << endl;
   code_global_data();
 
+
+
+
   if (cgen_debug) cout << "choosing gc" << endl;
   str << "#choosing gc" << endl;
   code_select_gc();
+
+ 
+
 
   if (cgen_debug) cout << "coding constants" << endl;
   str << "#coding constants" << endl;
@@ -1213,7 +1225,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
    tag(tag_)
 { 
    stringtable.add_string(name->get_string());          // Add class name to string table
-   cout<<"generating class:"<<nd->get_name()<<" tag: "<<tag<<endl;
+   cout<<"generating class:"<<nd->get_name()<<"/"<<name->get_string()<<" tag: "<<tag<<endl;
 }
 
 
