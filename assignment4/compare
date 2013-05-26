@@ -1,0 +1,8 @@
+#!/bin/sh
+
+rm -rf *.txt *.s
+./mycoolc -g -t $* -o 1.s  
+./dragon_coolc -g -t  $* -o 2.s 
+diff 1.s 2.s > 3.txt 
+cat 3.txt
+vi -d 1.s 2.s

@@ -775,8 +775,11 @@ void CgenClassTable::code_init()
     //jal to parent init
     CgenNode *parent = n->get_parentnd();
     if (parent->get_name() != No_class)
-      emit_jal( strcat(  parent->get_name()->get_string(), CLASSINIT_SUFFIX), str);
-
+    {
+      std::string address = std::string(parent->get_name()->get_string())
+                          + std::string(CLASSINIT_SUFFIX);
+      emit_jal( (char *)address.c_str(), str);
+    }
     //code attributes only for this class (not inherited)
     int total_attr = n->class_attr_map.size();
     int parent_attr = parent->class_attr_map.size();
