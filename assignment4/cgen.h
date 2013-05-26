@@ -73,6 +73,7 @@ public:
    void code();
    CgenNodeP root();
    void print_inheritance_tree();
+   int get_attr_ofs(Symbol, Symbol);
 };
 
 // Each class corresponds to a CgenNode, records the children, the parent
