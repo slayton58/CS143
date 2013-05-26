@@ -472,8 +472,10 @@ void StringEntry::code_def(ostream& s, int stringclasstag)
 //
 void StrTable::code_string_table(ostream& s, int stringclasstag)
 {  
-  for (List<StringEntry> *l = tbl; l; l = l->tl())
+  for (List<StringEntry> *l = tbl; l; l = l->tl()) {
     l->hd()->code_def(s,stringclasstag);
+    cout << "what in the string table:   "  << l->hd()->get_string() << endl;
+  }
 }
 
 //
@@ -732,8 +734,8 @@ void CgenClassTable::code_prototype_objects()
            IntEntry* ie = (IntEntry*)inttable.add_int(0);
            ie->code_ref(str);
         }
-        else if((*iter_attr)->type_decl == str) {
-           StringEntry* se = (StringEntry*) stringtable.add_string("");
+        else if((*iter_attr)->type_decl == Str) {
+           StringEntry* se = (StringEntry*) stringtable.lookup_string("");
            se->code_ref(str);
         }
         else if((*iter_attr)->type_decl == Bool) {
@@ -1004,6 +1006,11 @@ void CgenClassTable::install_class(CgenNodeP nd)
   // The class name is legal, so add it to the list of classes
   // and the symbol table.
   nds.insert(nds.begin(),nd);
+
+ // std::vector<CgenNodeP>::iterator iter;
+ // for(iter=nds.begin();iter!=nds.end(); iter++) {
+  cout << "add node " << nd->get_name()->get_string() << " to string table" << endl;
+ // }
 /*
   for (std::vector<CgenNodeP>::iterator iter = nds.begin(); iter!=nds.end(); ++iter)
     cout<<(*iter)->get_name()<<endl;*/
