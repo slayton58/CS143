@@ -192,10 +192,11 @@ public:
       formals = a2;
       return_type = a3;
       expr = a4;
+      set_is_method();
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
-   Symbol get_name() {return name;}
+
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -216,6 +217,7 @@ public:
       name = a1;
       type_decl = a2;
       init = a3;
+      set_is_attribute();
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
