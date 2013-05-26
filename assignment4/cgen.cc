@@ -341,6 +341,19 @@ static void emit_push(char *reg, ostream& str)
   emit_addiu(SP,SP,-4,str);
 }
 
+//just pop the stack
+static void emit_pop(ostream & str)
+{
+  emit_addiu(SP, SP, 4, str);
+}
+
+//pop the stack and load it to reg
+static void emit_pop(char *reg, ostream & str)
+{
+  emit_load(reg, 1, SP, str);
+  emit_addiu(SP, SP, 4, str);
+}
+
 //
 // Fetch the integer value in an Int object.
 // Emits code to fetch the integer value of the Integer object pointed
@@ -1285,15 +1298,31 @@ void let_class::code(Environment *env) {
 }
 
 void plus_class::code(Environment *env) {
+  ostream &s = env->str;
+  emit_arith(e1, e2, env);
+  emit_add(T1, T1, T2, s);
+  emit_store(T1, 3, ACC, s);
 }
 
 void sub_class::code(Environment *env) {
+  ostream &s = env->str;
+  emit_arith(e1, e2, env);
+  emit_sub(T1, T1, T2, s);
+  emit_store(T1, 3, ACC, s);
 }
 
 void mul_class::code(Environment *env) {
+  ostream &s = env->str;
+  emit_arith(e1, e2, env);
+  emit_div(T1, T1, T2, s);
+  emit_store(T1, 3, ACC, s);
 }
 
 void divide_class::code(Environment *env) {
+  ostream &s = env->str;
+  emit_arith(e1, e2, env);
+  emit_add(T1, T1, T2, s);
+  emit_store(T1, 3, ACC, s);
 }
 
 void neg_class::code(Environment *env) {
