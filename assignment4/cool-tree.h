@@ -11,6 +11,7 @@
 
 #include "tree.h"
 #include "cool-tree.handcode.h"
+class Environment;
 
 
 // define the class for phylum
@@ -166,7 +167,12 @@ public:
    }
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
+<<<<<<< HEAD
    Features get_features() {return features;}
+||||||| merged common ancestors
+=======
+   void code(Environment *env);
+>>>>>>> 2b8596f96ea365d90bdd05bb79a0554c69782ccf
 
 #ifdef Class__SHARED_EXTRAS
    Class__SHARED_EXTRAS

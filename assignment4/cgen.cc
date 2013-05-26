@@ -24,6 +24,9 @@
 
 #include "cgen.h"
 #include "cgen_gc.h"
+#include <iosfwd>
+#include <string>
+#include <sstream>
 
 
 extern void emit_string_constant(ostream& str, char *s);
@@ -106,6 +109,13 @@ static void initialize_constants(void)
   val         = idtable.add_string("_val");
 }
 
+static std::string int2string(int number)
+{
+  std::stringstream ss;//create a stringstream
+  ss << number;//add number to the stream
+  return ss.str();//return a string with the contents of the stream
+}
+
 static char *gc_init_names[] =
   { "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
 static char *gc_collect_names[] =
@@ -135,8 +145,16 @@ void program_class::cgen(ostream &os)
   // spim wants comments to start with '#'
   os << "# start of generated code\n";
 
+
   initialize_constants();
-  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);
+/*  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);*/
+  Environment * env = new Environment(classes, os);
+  env->cgen_table->code();
+  for(int i = classes->first(); classes->more(i); i = classes->next(i))
+  {
+    class__class* cls = (class__class *) classes->nth(i);
+    cls->code(env);
+  }
 
   os << "\n# end of generated code\n";
 }
@@ -356,6 +374,41 @@ static void emit_gc_check(char *source, ostream &s)
 }
 
 
+
+
+void emit_init_begin(ostream &s)
+{
+  emit_addiu(SP, SP, -12, s);
+  emit_store(FP, 3, SP, s);
+  emit_store(SELF, 2, SP, s);
+  emit_store(RA, 1, SP, s);
+  emit_addiu(FP, SP, 4, s);
+  emit_move(SELF, ACC, s);
+}
+
+void emit_init_end(ostream &s)
+{
+  emit_load(FP, 3, SP, s);
+  emit_load(SELF, 2, SP, s);
+  emit_load(RA, 1, SP, s);
+  emit_addiu(SP, SP, 12, s);
+  emit_return(s);
+}
+
+void emit_arith(Expression e1, Expression e2, Environment * env)
+{
+  ostream &s = env->str;
+  //code e1, the result is written to ACC register
+  e1->code(env);
+  emit_push(ACC, s);
+  e2->code(env);
+
+  emit_jal("Object.copy", s);
+  emit_load(T2, 3, ACC, s); //the value of e2 is in T2
+  emit_load(T3, 1, SP, s);
+  emit_addiu(SP, SP, 4, s);
+  emit_load(T1, 3, T3, s);  //the value of e1 is in T1
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -701,6 +754,29 @@ void CgenClassTable::code_prototype_objects()
 
 void CgenClassTable::code_init()
 {
+  std::vector<CgenNodeP>::iterator iter;
+  for (iter=nds.begin(); iter!= nds.end(); ++iter)
+  {
+    
+    env->cur_class = *iter;
+    env->sym_table.enterscope();
+    cout<<"init111 "<<endl;
+    std::vector<attr_class *>::iterator iter2;
+    int i=0;
+    for ( iter2=(*iter)->attr_list.begin(); iter2!= (*iter)->attr_list.end(); ++iter2)
+    {
+      cout<<"init "<<i<<endl;
+      int offset = 4*i+12;
+      std::string info = int2string(offset)+std::string("($s0)");
+      cout<<"the info is"<<info<<endl;
+      env->sym_table.addid((*iter2)->name, &info);
+      i++;
+    }
+    
+    
+    
+  }
+  
 
 }
 
@@ -732,12 +808,12 @@ void CgenClassTable::code_constants()
 }
 
 
-CgenClassTable::CgenClassTable(Classes classes, ostream& s) :  str(s)
+CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :  str(s)
 {
    stringclasstag = 0 /* Change to your String class tag here */;
    intclasstag =    1 /* Change to your Int class tag here */;
    boolclasstag =   2 /* Change to your Bool class tag here */;
-
+   env = env_;
    cur_tag = 0;
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
@@ -1101,85 +1177,89 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
 //
 //*****************************************************************
 
-void assign_class::code(ostream &s) {
+void class__class::code(Environment *env)
+{
+
+}
+void assign_class::code(Environment *env) {
 }
 
-void static_dispatch_class::code(ostream &s) {
+void static_dispatch_class::code(Environment *env) {
 }
 
-void dispatch_class::code(ostream &s) {
+void dispatch_class::code(Environment *env) {
 }
 
-void cond_class::code(ostream &s) {
+void cond_class::code(Environment *env) {
 }
 
-void loop_class::code(ostream &s) {
+void loop_class::code(Environment *env) {
 }
 
-void typcase_class::code(ostream &s) {
+void typcase_class::code(Environment *env) {
 }
 
-void block_class::code(ostream &s) {
+void block_class::code(Environment *env) {
 }
 
-void let_class::code(ostream &s) {
+void let_class::code(Environment *env) {
 }
 
-void plus_class::code(ostream &s) {
+void plus_class::code(Environment *env) {
 }
 
-void sub_class::code(ostream &s) {
+void sub_class::code(Environment *env) {
 }
 
-void mul_class::code(ostream &s) {
+void mul_class::code(Environment *env) {
 }
 
-void divide_class::code(ostream &s) {
+void divide_class::code(Environment *env) {
 }
 
-void neg_class::code(ostream &s) {
+void neg_class::code(Environment *env) {
 }
 
-void lt_class::code(ostream &s) {
+void lt_class::code(Environment *env) {
 }
 
-void eq_class::code(ostream &s) {
+void eq_class::code(Environment *env) {
 }
 
-void leq_class::code(ostream &s) {
+void leq_class::code(Environment *env) {
 }
 
-void comp_class::code(ostream &s) {
+void comp_class::code(Environment *env) {
 }
 
-void int_const_class::code(ostream& s)  
+void int_const_class::code(Environment *env)  
 {
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
-  emit_load_int(ACC,inttable.lookup_string(token->get_string()),s);
+  emit_load_int(ACC,inttable.lookup_string(token->get_string()),env->str);
 }
 
-void string_const_class::code(ostream& s)
+void string_const_class::code(Environment *env)
 {
-  emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
+  emit_load_string(ACC,stringtable.lookup_string(token->get_string()),env->str);
 }
 
-void bool_const_class::code(ostream& s)
+void bool_const_class::code(Environment *env)
 {
-  emit_load_bool(ACC, BoolConst(val), s);
+  emit_load_bool(ACC, BoolConst(val), env->str);
 }
 
-void new__class::code(ostream &s) {
+void new__class::code(Environment *env) {
 }
 
-void isvoid_class::code(ostream &s) {
+void isvoid_class::code(Environment *env) {
 }
 
-void no_expr_class::code(ostream &s) {
+void no_expr_class::code(Environment *env) {
 }
 
-void object_class::code(ostream &s) {
+void object_class::code(Environment *env) {
 }
 
 
