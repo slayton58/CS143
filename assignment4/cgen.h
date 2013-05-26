@@ -91,17 +91,15 @@ class CgenNode : public class__class
 public:
 
   std::vector<CgenNodeP> children;                  // Children of class 
-  std::vector<attr_class*> attr_list;                // attributes of the class (including parents')
-  std::vector<method_class *> method_list;             // method and method's parent name of this class (including parent)
   CgenNode(Class_ c,
             Basicness bstatus,
             CgenClassTableP class_table, int tag_);
 
   /** mapping for class attributes */
-  std::vector<attr_class*> class_attr_map;
+  std::vector<attr_class*> attr_list;
 
   /** mapping for class methods */
-  std::vector<method_sign*> class_method_map;
+  std::vector<method_sign*> method_list;
 
    void add_child(CgenNodeP child);
    void set_parentnd(CgenNodeP p);

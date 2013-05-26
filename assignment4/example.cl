@@ -1,7 +1,6 @@
 
 class AAA {
     a:Int <- 111+222+333;
-	b:String <- "lalala";
     test() : Object {
         {
             if 1 + 3 = 5 then
@@ -30,6 +29,7 @@ class Main inherits AAA{
     a+b;
   }
   };
-  c:Bool <- true;
+  b:Bool <- true;
+  c:Int <- 3+4;
 
 };

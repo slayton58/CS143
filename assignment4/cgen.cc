@@ -149,6 +149,7 @@ void program_class::cgen(ostream &os)
   initialize_constants();
 /*  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);*/
   Environment * env = new Environment(classes, os);
+  //env->cgen_table->code();
   for(int i = classes->first(); classes->more(i); i = classes->next(i))
   {
     class__class* cls = (class__class *) classes->nth(i);
@@ -690,7 +691,7 @@ void CgenClassTable::code_dispatch_table()
       str << (*iter_node)->get_name() << DISPTAB_SUFFIX <<LABEL;
      // cout << "@@@@@@@@@@@@@@@" << (*iter_node)->name->get_string() << " method map size: " << (*iter_node)->class_method_map.size() << endl;
       std::vector<method_sign*>::iterator iter_method;
-      for(iter_method = (*iter_node)->class_method_map.begin(); iter_method != (*iter_node)->class_method_map.end(); ++iter_method) {
+      for(iter_method = (*iter_node)->method_list.begin(); iter_method != (*iter_node)->method_list.end(); ++iter_method) {
          str << WORD;
          str << (*iter_method)->class_name->get_string();
          str << ".";  
@@ -715,15 +716,15 @@ void CgenClassTable::code_prototype_objects()
      str << WORD << (*iter_node)->get_tag() << endl;
     
      //object size
-     str << WORD << DEFAULT_OBJFIELDS + (*iter_node)->class_attr_map.size() << endl;
+     str << WORD << DEFAULT_OBJFIELDS + (*iter_node)->attr_list.size() << endl;
      
      //dispatch table pointer
      str << WORD << (*iter_node)->get_name() << DISPTAB_SUFFIX << endl;
      
      //attributes
      std::vector<attr_class*>::iterator iter_attr;
-     cout << "@@@@@@@@@@@@@@@ " << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->class_attr_map.size() << endl;
-     for(iter_attr = (*iter_node)->class_attr_map.begin(); iter_attr != (*iter_node)->class_attr_map.end(); ++iter_attr) {
+     cout << "@@@@@@@@@@@@@@@ " << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->attr_list.size() << endl;
+     for(iter_attr = (*iter_node)->attr_list.begin(); iter_attr != (*iter_node)->attr_list.end(); ++iter_attr) {
         str << WORD;
         //generate default values
         cout << "node attr type decl is: " << (*iter_attr)->type_decl->get_string() << endl;
@@ -756,16 +757,19 @@ void CgenClassTable::code_init()
   {
     CgenNode *n = *iter;
     env->cur_class = *iter;
+    cout<<endl<<"init class: "<<n->get_name()<<endl;
+    // this sym_table records all the locations of the attributes
     env->sym_table.enterscope();
-    cout<<"init111 "<<endl;
+    
+    
     std::vector<attr_class *>::iterator iter2;
     int i=0;
     for ( iter2=(*iter)->attr_list.begin(); iter2!= (*iter)->attr_list.end(); ++iter2)
     {
-      cout<<"init "<<i<<endl;
+      cout<<"init "<<(*iter2)->name<<endl;
       int offset = 4*i+12;
       std::string info = int2string(offset)+std::string("($s0)");
-      cout<<"the info is"<<info<<endl;
+      cout<<"the info is "<<info<<endl;
       env->sym_table.addid((*iter2)->name, &info);
       i++;
     }
@@ -781,12 +785,15 @@ void CgenClassTable::code_init()
       emit_jal( (char *)address.c_str(), str);
     }
     //code attributes only for this class (not inherited)
-    int total_attr = n->class_attr_map.size();
-    int parent_attr = parent->class_attr_map.size();
+    int total_attr = n->attr_list.size();
+    int parent_attr = parent->attr_list.size();
+    
+    cout<<"total attr="<<total_attr<<"; parent attr = "<<parent_attr<<endl;
     for ( i = parent_attr; i < total_attr; i++)
     {
-      attr_class* at = n->class_attr_map[i];
+      attr_class* at = n->attr_list[i];
       //for each attribute at, code the initializing expression
+      cout<<at->name<<endl;
       at->init->code(env);
       if ( typeid( *(at->init)) == typeid(no_expr_class) )
         continue;
@@ -840,11 +847,12 @@ void CgenClassTable::code_constants()
 
 CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :  str(s)
 {
-   stringclasstag = 0 /* Change to your String class tag here */;
-   intclasstag =    1 /* Change to your Int class tag here */;
-   boolclasstag =   2 /* Change to your Bool class tag here */;
    env = env_;
    cur_tag = 0;
+   intclasstag = 2;
+   boolclasstag = 3;
+   stringclasstag = 4;
+
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
    install_basic_classes();
@@ -855,7 +863,6 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
    build_features_map();
    code();
    exitscope();
-   cout<<endl<<endl<<endl;
 }
 
 void CgenClassTable::install_basic_classes()
@@ -875,13 +882,13 @@ void CgenClassTable::install_basic_classes()
 //
   addid(No_class,
 	new CgenNode(class_(No_class,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag++));
+			    Basic,this, cur_tag));
   addid(SELF_TYPE,
 	new CgenNode(class_(SELF_TYPE,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag++));
+			    Basic,this, cur_tag));
   addid(prim_slot,
 	new CgenNode(class_(prim_slot,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag++));
+			    Basic,this, cur_tag));
 
 // 
 // The Object class has no parent class. Its methods are
@@ -996,7 +1003,7 @@ void CgenClassTable::install_class(CgenNodeP nd)
 
   // The class name is legal, so add it to the list of classes
   // and the symbol table.
-  nds.push_back(nd);
+  nds.insert(nds.begin(),nd);
 /*
   for (std::vector<CgenNodeP>::iterator iter = nds.begin(); iter!=nds.end(); ++iter)
     cout<<(*iter)->get_name()<<endl;*/
@@ -1051,14 +1058,14 @@ void CgenClassTable::build_features_map()
     {  cout << "parent node name: " << parent_node->get_name() << endl;
        cout << "current node name: " << curr_node->get_name() <<endl;
        std::vector<attr_class*>::iterator iter;
-       for(iter = parent_node->class_attr_map.begin(); iter != parent_node->class_attr_map.end(); iter++) {
-         curr_node->class_attr_map.push_back(*iter);     
+       for(iter = parent_node->attr_list.begin(); iter != parent_node->attr_list.end(); iter++) {
+         curr_node->attr_list.push_back(*iter);     
          // cout << "add parent attr: " << (*iter)->name->get_string() << endl;
        }                                                                                  
        std::vector<method_sign*>::iterator iter2;
-       for(iter2 = parent_node->class_method_map.begin(); iter2 != parent_node->class_method_map.end(); iter2++) {
-          curr_node->class_method_map.push_back(*iter2);
-          cout << "add parent method-- " << curr_node->name->get_string() << " method size: " << curr_node->class_method_map.size() << endl;
+       for(iter2 = parent_node->method_list.begin(); iter2 != parent_node->method_list.end(); iter2++) {
+          curr_node->method_list.push_back(*iter2);
+          cout << "add parent method-- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
        }
     }
 
@@ -1076,23 +1083,23 @@ void CgenClassTable::build_features_map()
         bool need_override = false;
        // cout <<  "current node class method size: " << curr_node->class_method_map.size() << endl;
        // cout <<  "current node class attr size: " << curr_node->class_attr_map.size() << endl; 
-        for(int i=0; i<curr_node->class_method_map.size(); i++ ){
-          method_sign* ms_parent = curr_node->class_method_map[i];
+        for(int i=0; i<curr_node->method_list.size(); i++ ){
+          method_sign* ms_parent = curr_node->method_list[i];
 
           if(ms->method_name == ms_parent->method_name) {
             need_override = true;
-            curr_node->class_method_map[i]= ms;
-            cout << "override --"<< curr_node->name->get_string() << " method size: " << curr_node->class_method_map.size() << endl;
+            curr_node->method_list[i]= ms;
+            cout << "override --"<< curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
           }
         }
         if(!need_override) {
-          curr_node->class_method_map.push_back(ms);   
-          cout << "just add -- " << curr_node->name->get_string() << " method size: " << curr_node->class_method_map.size() << endl;
+          curr_node->method_list.push_back(ms);   
+          cout << "just add -- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
         }
       }
       else {
-        curr_node->class_attr_map.push_back(((attr_class*) ft));
-        cout << curr_node->name->get_string() << " attr size: " << curr_node->class_attr_map.size() << endl; 
+        curr_node->attr_list.push_back(((attr_class*) ft));
+        cout << curr_node->name->get_string() << " attr size: " << curr_node->attr_list.size() << endl; 
       }
     } 
 
@@ -1100,15 +1107,15 @@ void CgenClassTable::build_features_map()
     for(iter3 = curr_node->children.begin(); iter3 != curr_node->children.end(); ++iter3) {
       s.push(*iter3);
     }
-    cout << curr_node->name->get_string() << " method size: " << curr_node->class_method_map.size() << endl;
-    cout << curr_node->name->get_string() << " attr size: " << curr_node->class_attr_map.size() << endl; 
+    cout << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+    cout << curr_node->name->get_string() << " attr size: " << curr_node->attr_list.size() << endl; 
     cout << "stack size: " << s.size()<< endl;
   }
   std::vector<CgenNodeP>::iterator iter_node;
   for(iter_node = nds.begin(); iter_node!=nds.end(); ++iter_node) 
   {
-   cout << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->class_attr_map.size() << endl;
-   cout << (*iter_node)->name->get_string() << " method map size: " << (*iter_node)->class_method_map.size() << endl;
+   cout << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->attr_list.size() << endl;
+   cout << (*iter_node)->name->get_string() << " method map size: " << (*iter_node)->method_list.size() << endl;
 
   }
 }
@@ -1132,7 +1139,7 @@ int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
    cout<<"class is: "<<n->get_name()<<" attr is: "<<attr_name<<endl;
    std::vector<attr_class*>::iterator iter;
    int i=0;
-   for (iter = n->class_attr_map.begin(); iter != n->class_attr_map.end(); ++iter)
+   for (iter = n->attr_list.begin(); iter != n->attr_list.end(); ++iter)
    {
       if ( (*iter)->name == attr_name )
         return i;
@@ -1228,7 +1235,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
    tag(tag_)
 { 
    stringtable.add_string(name->get_string());          // Add class name to string table
-   cout<<"generating class:"<<nd->get_name()<<"/"<<name->get_string()<<" tag: "<<tag<<endl;
+   cout<<"adding to string table:"<<nd->get_name()<<"/"<<name->get_string()<<" tag: "<<tag<<endl;
 }
 
 
