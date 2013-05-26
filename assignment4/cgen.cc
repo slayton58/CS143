@@ -27,7 +27,7 @@
 #include <iosfwd>
 #include <string>
 #include <sstream>
-
+#include <typeinfo>
 
 extern void emit_string_constant(ostream& str, char *s);
 extern int cgen_debug;
@@ -753,7 +753,7 @@ void CgenClassTable::code_init()
   std::vector<CgenNodeP>::iterator iter;
   for (iter=nds.begin(); iter!= nds.end(); ++iter)
   {
-    
+    CgenNode *n = *iter;
     env->cur_class = *iter;
     env->sym_table.enterscope();
     cout<<"init111 "<<endl;
@@ -768,9 +768,39 @@ void CgenClassTable::code_init()
       env->sym_table.addid((*iter2)->name, &info);
       i++;
     }
-    
-    
-    
+    //emit init table
+    str<<n->get_name()<<CLASSINIT_SUFFIX<<LABEL;
+    emit_init_begin(str);
+    //jal to parent init
+    CgenNode *parent = n->get_parentnd();
+    if (parent->get_name() != No_class)
+      emit_jal( strcat(  parent->get_name()->get_string(), CLASSINIT_SUFFIX), str);
+
+    //code attributes only for this class (not inherited)
+    int total_attr = n->class_attr_map.size();
+    int parent_attr = parent->class_attr_map.size();
+    for ( i = parent_attr; i < total_attr; i++)
+    {
+      attr_class* at = n->class_attr_map[i];
+      //for each attribute at, code the initializing expression
+      at->init->code(env);
+      if ( typeid( *(at->init)) == typeid(no_expr_class) )
+        continue;
+      //calculate the offset of this attribue in the class
+      int att_offset = 3 + get_attr_ofs(n->get_name(), at->name);
+      //store the calculated value (in $a0) to this offset
+      emit_store(ACC, att_offset, SELF, str);
+      //garbage collector
+      if(cgen_Memmgr == GC_GENGC)
+      {
+        std::string address = int2string(att_offset*4)+std::string("($s0)");
+        emit_load_address(A1, (char *)address.c_str(), str);
+        emit_jal("_GenGC_Assign", str);
+      }
+    }
+    emit_move(ACC, SELF, str);
+    emit_init_end(str);
+    env->sym_table.exitscope();
   }
   
 
@@ -1092,6 +1122,21 @@ void CgenClassTable::set_relations(CgenNodeP nd)
   parent_node->add_child(nd);
 }
 
+int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
+{
+   CgenNode * n = probe(class_name);
+   cout<<"class is: "<<n->get_name()<<" attr is: "<<attr_name<<endl;
+   std::vector<attr_class*>::iterator iter;
+   int i=0;
+   for (iter = n->class_attr_map.begin(); iter != n->class_attr_map.end(); ++iter)
+   {
+      if ( (*iter)->name == attr_name )
+        return i;
+      i++;
+   }
+   return -1;
+}
+
 void CgenNode::add_child(CgenNodeP n)
 {
   children.push_back(n);
@@ -1150,6 +1195,8 @@ CgenNodeP CgenClassTable::root()
 {
    return probe(Object);
 }
+
+
 
 
 
