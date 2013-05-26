@@ -6,6 +6,7 @@
 #include <map>
 #include <stack>
 #include <vector>
+#include <string>
 
 enum Basicness     {Basic, NotBasic};
 #define TRUE 1
@@ -59,7 +60,8 @@ private:
    void set_class_tag();
 
 public:
-   CgenClassTable(Classes, ostream& str);
+   Environment* env;
+   CgenClassTable(Classes, ostream& str, Environment* env);
    void code();
    CgenNodeP root();
    void print_inheritance_tree();
@@ -77,8 +79,8 @@ class CgenNode : public class__class
 public:
 
   std::vector<CgenNodeP> children;                  // Children of class 
-  std::vector<attr_class> attr_list;                // attributes of the class (including parents')
-  //std::vector<method_info> method_list;             // method and method's parent name of this class (including parent)
+  std::vector<attr_class*> attr_list;                // attributes of the class (including parents')
+  std::vector<method_class *> method_list;             // method and method's parent name of this class (including parent)
   CgenNode(Class_ c,
             Basicness bstatus,
             CgenClassTableP class_table, int tag_);
@@ -110,15 +112,14 @@ private:
 public:
   class__class* cur_class;
   CgenClassTable* cgen_table;
-  SymbolTable<Symbol, CgenNodeP>* sym_table;
+  SymbolTable<Symbol, std::string> sym_table;
   int cur_exp_oft;
   ostream& str;
 
   Environment(Classes classes, ostream & s ):str(s)
   {
     cur_class = NULL;
-    cgen_table = new CgenClassTable(classes, s);
-    sym_table = new SymbolTable<Symbol, CgenNodeP>();
+    cgen_table = new CgenClassTable(classes, s, this);
     label_cnt = -1;
   }
 

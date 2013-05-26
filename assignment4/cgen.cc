@@ -24,6 +24,9 @@
 
 #include "cgen.h"
 #include "cgen_gc.h"
+#include <iosfwd>
+#include <string>
+#include <sstream>
 
 
 extern void emit_string_constant(ostream& str, char *s);
@@ -106,6 +109,13 @@ static void initialize_constants(void)
   val         = idtable.add_string("_val");
 }
 
+static std::string int2string(int number)
+{
+  std::stringstream ss;//create a stringstream
+  ss << number;//add number to the stream
+  return ss.str();//return a string with the contents of the stream
+}
+
 static char *gc_init_names[] =
   { "_NoGC_Init", "_GenGC_Init", "_ScnGC_Init" };
 static char *gc_collect_names[] =
@@ -137,7 +147,14 @@ void program_class::cgen(ostream &os)
 
 
   initialize_constants();
-  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);
+/*  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);*/
+  Environment * env = new Environment(classes, os);
+  env->cgen_table->code();
+  for(int i = classes->first(); classes->more(i); i = classes->next(i))
+  {
+    class__class* cls = (class__class *) classes->nth(i);
+    cls->code(env);
+  }
 
   os << "\n# end of generated code\n";
 }
@@ -665,6 +682,29 @@ void CgenClassTable::code_prototype_objects()
 
 void CgenClassTable::code_init()
 {
+  std::vector<CgenNodeP>::iterator iter;
+  for (iter=nds.begin(); iter!= nds.end(); ++iter)
+  {
+    
+    env->cur_class = *iter;
+    env->sym_table.enterscope();
+    cout<<"init111 "<<endl;
+    std::vector<attr_class *>::iterator iter2;
+    int i=0;
+    for ( iter2=(*iter)->attr_list.begin(); iter2!= (*iter)->attr_list.end(); ++iter2)
+    {
+      cout<<"init "<<i<<endl;
+      int offset = 4*i+12;
+      std::string info = int2string(offset)+std::string("($s0)");
+      cout<<"the info is"<<info<<endl;
+      env->sym_table.addid((*iter2)->name, &info);
+      i++;
+    }
+    
+    
+    
+  }
+  
 
 }
 
@@ -696,12 +736,12 @@ void CgenClassTable::code_constants()
 }
 
 
-CgenClassTable::CgenClassTable(Classes classes, ostream& s) :  str(s)
+CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :  str(s)
 {
    stringclasstag = 0 /* Change to your String class tag here */;
    intclasstag =    1 /* Change to your Int class tag here */;
    boolclasstag =   2 /* Change to your Bool class tag here */;
-
+   env = env_;
    cur_tag = 0;
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
@@ -992,6 +1032,10 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
 //
 //*****************************************************************
 
+void class__class::code(Environment *env)
+{
+
+}
 void assign_class::code(Environment *env) {
 }
 

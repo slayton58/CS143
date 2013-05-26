@@ -162,6 +162,7 @@ public:
    }
    Class_ copy_Class_();
    void dump(ostream& stream, int n);
+   void code(Environment *env);
 
 #ifdef Class__SHARED_EXTRAS
    Class__SHARED_EXTRAS
