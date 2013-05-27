@@ -268,6 +268,7 @@ public:
    }
    Case copy_Case();
    void dump(ostream& stream, int n);
+   void code (Environment *env);
 
 #ifdef Case_SHARED_EXTRAS
    Case_SHARED_EXTRAS

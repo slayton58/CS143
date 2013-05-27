@@ -1379,14 +1379,72 @@ void class__class::code(Environment *env)
 }
 
 
-void method_class::code( Environment * )
+void method_class::code( Environment * env)
 {
+  ostream &s = env->str;
+  s<<"\t# code for method"<<endl;
+  env->sym_table.enterscope();
 
+  // argument i is at $fp+12+4(n-i)
+  int nFormal = formals->len();
+  for(int i = formals->first(); formals->more(i); i = formals->next(i)) 
+  {
+    formal_class* f = (formal_class *)formals->nth(i);
+    int offset = 8 + 4 * (nFormal - i);
+    std::string address = int2string(offset) + std::string("($fp)");
+    // update the "Environment" i.e. the location of each variable
+    env->sym_table.addid(f->name, &address);
+  }
+  //method lable
+  emit_method_ref(env->cur_class->name, this->name, s); // that's the reason why we need env->cur_class
+  s<<LABEL;
+
+  //push stored registers
+  emit_push(FP, s);
+  emit_push(SELF, s);
+  emit_push(RA, s);
+  emit_addiu(FP, SP, 4, s);
+  emit_move(SELF, ACC, s);  // self is passed in $a0, save it to $s0, which is guranteed to recover after function call
+
+  s<<"\t# begin of expression in method"<<endl;
+  env->cur_exp_oft = 0;
+  expr->code(env);
+  s<<"\t# end of expression in method"<<endl;
+
+  //pop and recover
+  emit_load(RA, 1, SP, s);
+  emit_load(SELF, 2, SP, s);
+  emit_load(FP, 3, SP, s);
+  emit_addiu(SP, SP, 4*formals->len()+12, s);
+  emit_return(s);
+
+  env->sym_table.exitscope();
+
+}
+
+void branch_class::code (Environment *env)
+{
+  this->expr->code(env); 
 }
 
 
 
 void assign_class::code(Environment *env) {
+  ostream &s =env->str;
+  s<<"\t#code for assign"<<endl;
+
+  this->expr->code(env); //return value in ACC:
+  // Read the "Environment":
+  std::string address = *(env->sym_table.lookup(this->name));
+  // Change the "Store": store the newly assigned variable to this adress
+  s<<SW<<ACC<<"\t"<<(char *)(address.c_str());
+
+  if (cgen_Memmgr == GC_GENGC)
+  {
+    emit_load_address(A1, (char *)(address.c_str()), env->str);
+    emit_jal("_GenGC_Assign", env->str);
+  }
+  
 }
 
 void static_dispatch_class::code(Environment *env) {
