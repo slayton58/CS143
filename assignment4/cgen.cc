@@ -369,6 +369,36 @@ static void emit_fetch_int(char *dest, char *source, ostream& s)
 static void emit_store_int(char *source, char *dest, ostream& s)
 { emit_store(source, DEFAULT_OBJFIELDS, dest, s); }
 
+static void emit_dispatch_prep(Expressions actual, Expression expr, Symbol name, int line_number, Environment* env)
+{
+  ostream &s = env->str;
+  for(int i = actual->first(); actual->more(i); i = actual->next(i))
+  {  
+    Expression e = (Expression) actual->nth(i);
+    //code each actual:
+    e->code(env);
+    //push argument to the stack:
+    emit_push(ACC,s);
+  }
+  expr->code(env); // return value in $a0 
+  //check dispatch on void error
+  int label = env->get_label_cnt();
+  emit_bne(ACC, ZERO, label, s);
+
+  // la $a0 str_const0 => file name
+  s<<LA<<ACC<<"\t";
+  std::string filename = env->cur_class->filename->get_string();
+  stringtable.lookup_string((char *)(filename.c_str()))->code_ref(s);
+  s<<endl;
+  // li $t1 <line number>
+  emit_load_imm(T1, line_number, s);
+  // jal _dispatch_abort
+  emit_jal("_dispatch_abort", s);
+
+  // label<continue>
+  emit_label_def(label, s);
+}
+
 
 static void emit_test_collector(ostream &s)
 {
@@ -1187,7 +1217,6 @@ void CgenClassTable::set_relations(CgenNodeP nd)
 int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
 {
    CgenNode * n = probe(class_name);
-   cout<<"class is: "<<n->get_name()<<" attr is: "<<attr_name<<endl;
    std::vector<attr_class*>::iterator iter;
    int i=0;
    for (iter = n->attr_list.begin(); iter != n->attr_list.end(); ++iter)
@@ -1198,6 +1227,22 @@ int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
    }
    return -1;
 }
+
+int CgenClassTable::get_method_ofs(Symbol class_name, Symbol method_name)
+{
+  CgenNode * n = probe(class_name);
+  std::vector<method_sign*>::iterator iter;
+  int i=0;
+  for (iter = n->method_list.begin(); iter != n->method_list.end(); ++iter)
+  {
+    if ( (*iter)->method_name->name == method_name )
+      return i;
+    i++;
+  }
+  return -1;
+}
+
+
 
 void CgenNode::add_child(CgenNodeP n)
 {
@@ -1448,24 +1493,66 @@ void assign_class::code(Environment *env) {
 }
 
 void static_dispatch_class::code(Environment *env) {
+  ostream &s = env->str;
+  s<<"\t# code for static_dispatch"<<endl;
+
+  emit_dispatch_prep(actual, expr, name, line_number, env);
+
+
+  // get which class's dispatch table, cal the offset, jalr to the offset
+  Symbol class_name = type_name; // @which class
+  if (class_name == SELF_TYPE)
+    class_name = env->cur_class->name;
+  //ClassName_disptab  
+  std::string address = class_name->get_string()+std::string(DISPTAB_SUFFIX);
+  // la $t1, ClassName_disptab
+  emit_load_address(T1, (char *)(address.c_str()), s);
+  int offset = env->cgen_table->get_method_ofs(class_name, name);
+  // lw $t1, offset($t1) 
+  emit_load(T1, offset, T1, s);
+  // jalr $t1
+  emit_jalr(T1, s);
+    
 }
 
 void dispatch_class::code(Environment *env) {
+  ostream &s = env->str;
+  s<<"\t# code for dispatch"<<endl;
+  emit_dispatch_prep(actual, expr, name, line_number, env);
+
+  Symbol class_name = expr->get_type();
+  if (type_name == SELF_TYPE)
+    class_name = env->cur_class->name;
+
+  // load the base of the dispatch table: simply find from current class @offset 2*4=8
+  emit_load(T1, 2, ACC, s);
+  int offset = env->cgen_table->get_method_ofs(class_name, name);
+  emit_load(T1, offset, T1, s);
+  emit_jalr(T1, s);
 }
 
 void cond_class::code(Environment *env) {
+
 }
 
 void loop_class::code(Environment *env) {
+
 }
 
 void typcase_class::code(Environment *env) {
+
 }
 
 void block_class::code(Environment *env) {
+  for(int i = body->first(); body->more(i); i = body->next(i))
+  {
+    Expression e = body->nth(i);
+    e->code(env);
+  }
 }
 
 void let_class::code(Environment *env) {
+
 }
 
 void plus_class::code(Environment *env) {

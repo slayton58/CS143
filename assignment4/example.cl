@@ -1,7 +1,7 @@
 
 class AAA {
     a:Int <- 111+222+333;
-    test() : Object {
+    test(a:Int, b:Int) : Object {
         {
             if 1 + 3 = 5 then
                 (new IO).out_string("!!!case1\n")
@@ -9,6 +9,7 @@ class AAA {
                 (new IO).out_string("!!!case2\n")
             fi;
             1 = 2;
+			a = a+b;
             "abc" = "abc";
             true = false;
         }
@@ -19,7 +20,7 @@ class Main inherits AAA{
   {
     a <- 111*222; 
     a <- add(8, 9);
-    test();
+    test(a, c);
 	5;
   }
   
