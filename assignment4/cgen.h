@@ -75,6 +75,7 @@ public:
    CgenNodeP root();
    void print_inheritance_tree();
    int get_attr_ofs(Symbol, Symbol);
+   int get_method_ofs(Symbol, Symbol);
    CgenNodeP get_node_by_name (Symbol);
 };
 
@@ -133,13 +134,12 @@ public:
   {
     cur_class = NULL;
     cgen_table = new CgenClassTable(classes, s, this);
-    label_cnt = -1;
+    label_cnt = 0;
   }
 
   int get_label_cnt()
   {
-    label_cnt ++;
-    return label_cnt;
+    return label_cnt++;
   }
 
 };
