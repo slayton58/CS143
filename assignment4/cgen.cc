@@ -1532,18 +1532,27 @@ void dispatch_class::code(Environment *env) {
 }
 
 void cond_class::code(Environment *env) {
+
 }
 
 void loop_class::code(Environment *env) {
+
 }
 
 void typcase_class::code(Environment *env) {
+
 }
 
 void block_class::code(Environment *env) {
+  for(int i = body->first(); body->more(i); i = body->next(i))
+  {
+    Expression e = body->nth(i);
+    e->code(env);
+  }
 }
 
 void let_class::code(Environment *env) {
+
 }
 
 void plus_class::code(Environment *env) {
