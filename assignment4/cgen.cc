@@ -1500,7 +1500,16 @@ void divide_class::code(Environment *env) {
 }
 
 void neg_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for neg" << endl;
 
+  e1->code(env);
+
+  emit_jal("Object.copy", s);
+
+  emit_load(T1, 3, ACC, s);
+  emit_neg(T1, T1, s);
+  emit_store(T1, 3, ACC, s);
 }
 
 void lt_class::code(Environment *env) {
@@ -1515,6 +1524,35 @@ void lt_class::code(Environment *env) {
 }
 
 void eq_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for equality" << endl;
+
+   //check for pointer equality
+  e1->code(env);
+
+  emit_store(ACC, 0, SP, s);
+  emit_addiu(SP, SP, -4, s);
+
+  e2->code(env);
+
+  emit_move(T2, ACC, s);
+  emit_load(ACC, 1, SP, s);
+  emit_addiu(SP, SP, 4, s);
+  emit_move(T1, ACC, s);
+
+  s << LA << ACC << "\t";
+  BoolConst(1).code_ref(s);
+  s << endl;
+
+  emit_beq(T1, T2, env->get_label_cnt(), s);
+
+  s << LA << A1 << "\t";
+  BoolConst(0).code_ref(s);
+  s << endl;
+
+  emit_jal("equality_test", s);
+
+  emit_label_def(env->get_label_cnt(), s);
 }
 
 void leq_class::code(Environment *env) {
@@ -1534,6 +1572,7 @@ void comp_class::code(Environment *env) {
 
   e1->code(env);
 
+  // lw$t1 12($a0)
   emit_load(T1, 3, ACC, s);
 
   s << LA << ACC << "\t";
