@@ -1363,15 +1363,80 @@ void bool_const_class::code(Environment *env)
 }
 
 void new__class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for new" << endl;
+
+  // load prototype object into $a0
+  Symbol type_ =  type_name;
+  if(type_ == SELF_TYPE) {
+     emit_load_address(T1, "class_objTab", s);
+     emit_load(T2, 0, SELF, s);
+     emit_sll(T2, T2, 3, s);
+     emit_addu(T1, T1, T2, s);
+     emit_store(T1, 0, SP, s);
+     emit_addiu(SP, SP, -4, s);
+     emit_load(ACC, 0, T1, s);
+     emit_jal("Object.copy", s);
+     emit_load(T2, 1, SP, s);
+     emit_addiu(SP, SP, 4, s);
+     emit_load(T1, 1, T2, s);
+     emit_jalr(T1, s);
+  }
+  else {
+    std::string proto_address = type->get_string()+std::string(PROTOBJ_SUFFIX);
+    emit_load_address(ACC, (char *)proto_address.c_str(), s);
+    emit_jal("Object.copy", s);
+    std::string init_address = type->get_string() + std::string(CLASSINIT_SUFFIX);
+    emit_jal((char*)init_address.c_str(), s);
+  }
 }
 
 void isvoid_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for isvoid" << endl;
+  e1->code(env);
+
+  //move $t1, a0
+  emit_move(T1, ACC, s);
+
+  //la $a0, bool_const1
+  s << LA << ACC << "\t";
+  BoolConst(1).code_ref(s);
+  s << endl;
+
+  //beqz $t1 label<end>
+  emit_beqz(T1, env->get_label_cnt(), s);
+
+  //la $a0 bool_const0 
+  s << LA << ACC << "\t";
+  BoolConst(0).code_ref(s);
+  s << endl;
+
+  //label<end>
+  emit_label_def(env->get_label_cnt(), s) ;
 }
 
 void no_expr_class::code(Environment *env) {
+  ostream &s = env->str;
+  emit_load_imm(ACC, 0, s);
 }
 
 void object_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for object identifier" << endl;
+
+  if(name == self) {
+    emit_move(ACC, SELF, s);
+  }
+  else {
+    std::string address = *( env->sym_table.lookup(name));
+    if(address.compare(NULL)==0) {
+      cout << "__" << endl;  
+      cout << name << endl; 
+     // cout <<  env->sym_table << endl;
+    }
+    emit_load(ACC, 0, ((char*)address.c_str()), s);
+  }
 }
 
 
