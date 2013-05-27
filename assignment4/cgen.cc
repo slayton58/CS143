@@ -767,30 +767,32 @@ void CgenClassTable::code_prototype_objects()
 
 void CgenClassTable::code_init()
 {
+  //iterate through all the class nodes:
   std::vector<CgenNodeP>::iterator iter;
   for (iter=nds.begin(); iter!= nds.end(); ++iter)
   {
-    CgenNode *n = *iter;
+    CgenNodeP n = *iter;
     env->cur_class = *iter;
     cout<<endl<<"init class: "<<n->get_name()<<endl;
     // this sym_table records all the locations of the attributes
+
     env->sym_table.enterscope();
     
-    
+    // for this class, add all attributes to the scope:
     std::vector<attr_class *>::iterator iter2;
     int i=0;
-    for ( iter2=(*iter)->attr_list.begin(); iter2!= (*iter)->attr_list.end(); ++iter2)
+    for (iter2=(*iter)->attr_list.begin(); iter2!= (*iter)->attr_list.end(); ++iter2)
     {
-      cout<<"init "<<(*iter2)->name<<endl;
       int offset = 4*i+12;
       std::string info = int2string(offset)+std::string("($s0)");
-      cout<<"the info is "<<info<<endl;
       env->sym_table.addid((*iter2)->name, &info);
       i++;
     }
+
     //emit init table
     str<<n->get_name()<<CLASSINIT_SUFFIX<<LABEL;
     emit_init_begin(str);
+
     //jal to parent init
     CgenNode *parent = n->get_parentnd();
     if (parent->get_name() != No_class)
@@ -799,16 +801,14 @@ void CgenClassTable::code_init()
                           + std::string(CLASSINIT_SUFFIX);
       emit_jal( (char *)address.c_str(), str);
     }
+
     //code attributes only for this class (not inherited)
     int total_attr = n->attr_list.size();
     int parent_attr = parent->attr_list.size();
-    
-    cout<<"total attr="<<total_attr<<"; parent attr = "<<parent_attr<<endl;
-    for ( i = parent_attr; i < total_attr; i++)
+    for ( int i = parent_attr; i < total_attr; i++)
     {
       attr_class* at = n->attr_list[i];
       //for each attribute at, code the initializing expression
-      cout<<at->name<<endl;
       at->init->code(env);
       if ( typeid( *(at->init)) == typeid(no_expr_class) )
         continue;
@@ -864,15 +864,17 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
 {
    env = env_;
    cur_tag = 0;
-   intclasstag = 5;
-   boolclasstag = 6;
-   stringclasstag = 7;
+   intclasstag = 0;
+   boolclasstag = 0;
+   stringclasstag = 0;
 
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
+   set_tags();
+
    print_inheritance_tree() ;
 
    build_features_map();
@@ -897,13 +899,13 @@ void CgenClassTable::install_basic_classes()
 //
   addid(No_class,
 	new CgenNode(class_(No_class,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag++));
+			    Basic,this));
   addid(SELF_TYPE,
 	new CgenNode(class_(SELF_TYPE,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag++));
+			    Basic,this));
   addid(prim_slot,
 	new CgenNode(class_(prim_slot,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag++));
+			    Basic,this));
 
 // 
 // The Object class has no parent class. Its methods are
@@ -924,7 +926,7 @@ void CgenClassTable::install_basic_classes()
            single_Features(method(type_name, nil_Formals(), Str, no_expr()))),
            single_Features(method(copy, nil_Formals(), SELF_TYPE, no_expr()))),
 	   filename),
-    Basic,this, cur_tag++));
+    Basic,this));
 
 // 
 // The IO class inherits from Object. Its methods are
@@ -947,7 +949,7 @@ void CgenClassTable::install_basic_classes()
             single_Features(method(in_string, nil_Formals(), Str, no_expr()))),
             single_Features(method(in_int, nil_Formals(), Int, no_expr()))),
 	   filename),	    
-    Basic,this, cur_tag++));
+    Basic,this));
 
 //
 // The Int class has no methods and only a single attribute, the
@@ -959,7 +961,7 @@ void CgenClassTable::install_basic_classes()
 	    Object,
             single_Features(attr(val, prim_slot, no_expr())),
 	    filename),
-     Basic,this, cur_tag++));
+     Basic,this));
 
 //
 // Bool also has only the "val" slot.
@@ -967,7 +969,7 @@ void CgenClassTable::install_basic_classes()
     install_class(
      new CgenNode(
       class_(Bool, Object, single_Features(attr(val, prim_slot, no_expr())),filename),
-      Basic,this, cur_tag++));
+      Basic,this));
 
 //
 // The class Str has a number of slots and operations:
@@ -998,7 +1000,7 @@ void CgenClassTable::install_basic_classes()
 				   Str, 
 				   no_expr()))),
 	     filename),
-        Basic,this, cur_tag++));
+        Basic,this));
 
 }
 
@@ -1033,7 +1035,7 @@ void CgenClassTable::install_class(CgenNodeP nd)
 void CgenClassTable::install_classes(Classes cs)
 {
   for(int i = cs->first(); cs->more(i); i = cs->next(i))
-    install_class(new CgenNode(cs->nth(i),NotBasic,this, cur_tag++));
+    install_class(new CgenNode(cs->nth(i),NotBasic,this));
 }
 
 //
@@ -1238,6 +1240,55 @@ CgenNodeP CgenClassTable::root()
    return probe(Object);
 }
 
+void CgenClassTable::set_tags()
+{
+  CgenNodeP n = root();
+  std::stack<CgenNodeP> stk;
+  stk.push(n);
+  while( ! stk.empty())
+  {
+    //pop:
+    n = stk.top();
+    stk.pop();
+
+    // visit this:
+    if (n->get_name() == Int)
+      intclasstag = cur_tag;
+    else if (n->get_name() == Str)
+      stringclasstag = cur_tag;
+    else if (n->get_name() == Bool)
+      boolclasstag = cur_tag;
+    n->set_tag (cur_tag++);
+    cout<<"setting tag for:"<<n->get_name()<<" tag is:"<<cur_tag-1<<endl;
+    
+
+    // push all children:
+    std::vector<CgenNodeP>::iterator iter;
+    for (iter = n->children.begin(); iter != n->children.end(); ++iter)
+    {
+      stk.push( *iter );
+      cout<<"pushing child:"<<(*iter)->name<<endl;
+    }
+  }
+
+}
+
+CgenNodeP CgenClassTable::get_node_by_name( Symbol class_name)
+{ 
+  std::vector<CgenNodeP>::iterator iter;
+  for (iter = nds.begin(); iter != nds.end(); ++iter)
+  {
+    if ( class_name == (*iter)->get_name() )
+      return (*iter);
+  }
+  return NULL;
+
+
+
+}
+
+
+
 
 
 
@@ -1248,12 +1299,12 @@ CgenNodeP CgenClassTable::root()
 //
 ///////////////////////////////////////////////////////////////////////
 
-CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
+CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
    class__class((const class__class &) *nd),
    parentnd(NULL),
-   basic_status(bstatus),
-   tag(tag_)
+   basic_status(bstatus)  
 { 
+   tag = 0;
    stringtable.add_string(name->get_string());          // Add class name to string table
    cout<<"adding to string table:"<<nd->get_name()<<"/"<<name->get_string()<<" tag: "<<tag<<endl;
 }
@@ -1271,8 +1322,41 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct, int tag_) :
 
 void class__class::code(Environment *env)
 {
+  env->cur_class = this;
+  env->sym_table.enterscope();
+
+  //add attributes to sym_table:
+  CgenNodeP n = env->cgen_table->get_node_by_name(this->name);
+  cout<<"================generating code for class:"<<n->get_name()<<endl;
+  std::vector<attr_class*>::iterator iter;
+  std::vector<method_sign*>::iterator iter2;
+  int i=0;
+  for (iter = n->attr_list.begin(); iter != n->attr_list.end(); ++iter)
+  {
+    int offset = 4 * i + 12;
+    std::string info = int2string(offset)+std::string("($s0)");
+    env->sym_table.addid( (*iter)->name, &info);
+    cout<<"  attr_name:"<<(*iter)->name<<endl;
+    i++;
+  }
+
+  //traverse methods and generate code:
+  for(int i = features->first(); features->more(i); i = features->next(i))
+    if (features->nth(i)->get_is_method() )
+    {
+      ((method_class *)(features->nth(i)))->code(env);
+      cout<<"  method_name:"<<((method_class *)(features->nth(i)))->name<<endl;
+    }
+}
+
+
+void method_class::code( Environment * )
+{
 
 }
+
+
+
 void assign_class::code(Environment *env) {
 }
 

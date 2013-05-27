@@ -66,6 +66,7 @@ private:
    void build_inheritance_tree();
    void set_relations(CgenNodeP nd);
    void build_features_map();
+   void set_tags();
 
 public:
    Environment* env;
@@ -74,6 +75,7 @@ public:
    CgenNodeP root();
    void print_inheritance_tree();
    int get_attr_ofs(Symbol, Symbol);
+   CgenNodeP get_node_by_name (Symbol);
 };
 
 // Each class corresponds to a CgenNode, records the children, the parent
@@ -84,16 +86,13 @@ class CgenNode : public class__class
    Basicness basic_status;                    // `Basic' if class is basic
                                              // `NotBasic' otherwise
    int tag;                                   // tag for the class(unique number)
-
-
-
    
 public:
 
   std::vector<CgenNodeP> children;                  // Children of class 
   CgenNode(Class_ c,
             Basicness bstatus,
-            CgenClassTableP class_table, int tag_);
+            CgenClassTableP class_table);
 
   /** mapping for class attributes */
   std::vector<attr_class*> attr_list;
@@ -106,6 +105,7 @@ public:
    CgenNodeP get_parentnd() { return parentnd; }
    int basic() { return (basic_status == Basic); }
    int get_tag() {return tag;}
+   void set_tag(int t) {tag = t;}
 };
 
 class BoolConst 
