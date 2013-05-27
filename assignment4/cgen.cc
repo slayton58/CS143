@@ -471,7 +471,7 @@ void StringEntry::code_def(ostream& s, int stringclasstag)
 
 
  /***** Add dispatch information for class String ******/
-
+      s << "String_dispTab";
       s << endl;                                              // dispatch table
       s << WORD;  lensym->code_ref(s);  s << endl;            // string length
   emit_string_constant(s,str);                                // ascii string
@@ -515,7 +515,7 @@ void IntEntry::code_def(ostream &s, int intclasstag)
       << WORD; 
 
  /***** Add dispatch information for class Int ******/
-
+      s << "Int_dispTab";
       s << endl;                                          // dispatch table
       s << WORD << str << endl;                           // integer value
 }
@@ -559,7 +559,7 @@ void BoolConst::code_def(ostream& s, int boolclasstag)
       << WORD;
 
  /***** Add dispatch information for class Bool ******/
-
+      s<<"Bool_dispTab";
       s << endl;                                            // dispatch table
       s << WORD << val << endl;                             // value (0 or 1)
 }
@@ -864,9 +864,9 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
 {
    env = env_;
    cur_tag = 0;
-   intclasstag = 2;
-   boolclasstag = 3;
-   stringclasstag = 4;
+   intclasstag = 5;
+   boolclasstag = 6;
+   stringclasstag = 7;
 
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
@@ -897,13 +897,13 @@ void CgenClassTable::install_basic_classes()
 //
   addid(No_class,
 	new CgenNode(class_(No_class,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag));
+			    Basic,this, cur_tag++));
   addid(SELF_TYPE,
 	new CgenNode(class_(SELF_TYPE,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag));
+			    Basic,this, cur_tag++));
   addid(prim_slot,
 	new CgenNode(class_(prim_slot,No_class,nil_Features(),filename),
-			    Basic,this, cur_tag));
+			    Basic,this, cur_tag++));
 
 // 
 // The Object class has no parent class. Its methods are
@@ -1018,7 +1018,7 @@ void CgenClassTable::install_class(CgenNodeP nd)
 
   // The class name is legal, so add it to the list of classes
   // and the symbol table.
-  nds.insert(nds.begin(),nd);
+  nds.push_back(nd);
 
  // std::vector<CgenNodeP>::iterator iter;
  // for(iter=nds.begin();iter!=nds.end(); iter++) {
@@ -1298,7 +1298,10 @@ void let_class::code(Environment *env) {
 }
 
 void plus_class::code(Environment *env) {
+
   ostream &s = env->str;
+  s<<" #coding for add"<<endl;
+  cout<<                      " #coding for add"<<endl;
   emit_arith(e1, e2, env);
   emit_add(T1, T1, T2, s);
   emit_store(T1, 3, ACC, s);
@@ -1326,6 +1329,7 @@ void divide_class::code(Environment *env) {
 }
 
 void neg_class::code(Environment *env) {
+
 }
 
 void lt_class::code(Environment *env) {

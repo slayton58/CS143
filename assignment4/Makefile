@@ -48,7 +48,7 @@ submit: cgen
 	$(CLASSDIR)/bin/pa_submit PA4 .
 
 clean:
-	rm -f cgen ${OBJS}
+	rm -f cgen ${OBJS}  *.swp *.txt *.s
 
 # build rules
 
