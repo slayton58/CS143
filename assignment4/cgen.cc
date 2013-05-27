@@ -423,6 +423,35 @@ void emit_arith(Expression e1, Expression e2, Environment * env)
   emit_load(T1, 3, T3, s);  //the value of e1 is in T1
 }
 
+void emit_comp_begin(Expression e1, Expression e2, Environment* env) {
+  ostream &s = env->str;
+
+  e1->code(env);
+  emit_store(ACC, 0, SP, s);
+  emit_addiu(SP, SP, -4, s);
+
+  e2->code(env);
+  emit_load(T2, 3, ACC, s);
+  emit_load(T1, 1, SP, s);
+  emit_addiu(SP, SP, 4, s);
+  emit_load(T1, 3, T1, s);
+
+  s << LA << ACC << "\t";
+  BoolConst(1).code_ref(s);
+  s << endl;
+}
+
+void emit_comp_end( int label, Environment* env) {
+   ostream &s = env->str;
+
+   s << LA << ACC << "\t";
+   BoolConst(0).code_ref(s);
+   s << endl;
+
+   emit_label_ref(label, s);
+   s << LABEL;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // coding strings, ints, and booleans
@@ -1333,15 +1362,49 @@ void neg_class::code(Environment *env) {
 }
 
 void lt_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for lt" << endl;
+
+  emit_comp_begin(e1, e2, env);
+
+  emit_blt(T1, T2, env->get_label_cnt(), s);
+
+  emit_comp_end(env->get_label_cnt(), env);
 }
 
 void eq_class::code(Environment *env) {
 }
 
 void leq_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for leq" << endl;
+
+  emit_comp_begin(e1, e2, env);
+
+  emit_bleq(T1, T2, env->get_label_cnt(), s);
+
+  emit_comp_end(env->get_label_cnt(), env);
 }
 
 void comp_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for comp" <<endl;
+
+  e1->code(env);
+
+  emit_load(T1, 3, ACC, s);
+
+  s << LA << ACC << "\t";
+  BoolConst(1).code_ref(s);
+  s << endl;
+
+  emit_beqz(T1, env->get_label_cnt(), s);
+
+  s << LA << ACC << "\t";
+  BoolConst(0).code_ref(s);
+  s << endl;
+
+  emit_label_def(env->get_label_cnt(), s);
 }
 
 void int_const_class::code(Environment *env)  
