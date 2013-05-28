@@ -29,6 +29,8 @@
 #include <sstream>
 #include <typeinfo>
 #include <algorithm>
+#include <stdlib.h>
+#include <stdio.h>
 
 extern void emit_string_constant(ostream& str, char *s);
 extern int cgen_debug;
@@ -844,8 +846,12 @@ void CgenClassTable::code_init()
     for (iter2=(*iter)->attr_list.begin(); iter2!= (*iter)->attr_list.end(); ++iter2)
     {
       int offset = 4*i+12;
-      std::string info = int2string(offset)+std::string("($s0)");
-      env->sym_table.addid((*iter2)->name, &info);
+      //std::string info = int2string(offset)+std::string("($s0)");
+      char *info = new char[20];
+      //itoa(offset, info, 10);
+      sprintf(info, "%d", offset);
+      strcat(info, "($s0)");
+      env->sym_table.addid((*iter2)->name, info);
       i++;
     }
 
@@ -939,7 +945,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
 
    build_features_map();
    code();
-   exitscope();
+   //exitscope();
 }
 
 void CgenClassTable::install_basic_classes()
@@ -1217,7 +1223,7 @@ void CgenClassTable::set_relations(CgenNodeP nd)
 
 int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
 {
-   CgenNode * n = probe(class_name);
+   CgenNode * n = lookup(class_name);
    std::vector<attr_class*>::iterator iter;
    int i=0;
    for (iter = n->attr_list.begin(); iter != n->attr_list.end(); ++iter)
@@ -1231,7 +1237,9 @@ int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
 
 int CgenClassTable::get_method_ofs(Symbol class_name, Symbol method_name)
 {
-  CgenNode * n = probe(class_name);
+  cout<<"probing:"<<class_name<<endl;
+  CgenNode * n = lookup(class_name);
+  cout<<"find "<<n->name<<endl;
   std::vector<method_sign*>::iterator iter;
   int i=0;
   for (iter = n->method_list.begin(); iter != n->method_list.end(); ++iter)
@@ -1409,19 +1417,24 @@ void class__class::code(Environment *env)
   for (iter = n->attr_list.begin(); iter != n->attr_list.end(); ++iter)
   {
     int offset = 4 * i + 12;
-    std::string info = int2string(offset)+std::string("($s0)");
-    env->sym_table.addid( (*iter)->name, &info);
-    cout<<"  attr_name:"<<(*iter)->name<<endl;
+    //std::string info = int2string(offset)+std::string("($s0)");
+    char *info = new char[20];
+    //itoa(offset, info, 10);
+    sprintf(info, "%d", offset);
+    strcat(info, "($s0)");
+    env->sym_table.addid((*iter)->name, info);
+    //env->sym_table.addid( (*iter)->name, &((char *)info.c_str()));
     i++;
   }
-
   //traverse methods and generate code:
   for(int i = features->first(); features->more(i); i = features->next(i))
     if (features->nth(i)->get_is_method() )
     {
-      ((method_class *)(features->nth(i)))->code(env);
       cout<<"  method_name:"<<((method_class *)(features->nth(i)))->name<<endl;
+      ((method_class *)(features->nth(i)))->code(env);
     }
+
+  cout<<"all done!!"<<endl;
 }
 
 
@@ -1433,13 +1446,23 @@ void method_class::code( Environment * env)
 
   // argument i is at $fp+12+4(n-i)
   int nFormal = formals->len();
+  
   for(int i = formals->first(); formals->more(i); i = formals->next(i)) 
   {
     formal_class* f = (formal_class *)formals->nth(i);
     int offset = 8 + 4 * (nFormal - i);
-    std::string address = int2string(offset) + std::string("($fp)");
+
+    char *info = new char[20];
+    cout << "offset: " << offset << endl; 
+
+    //itoa(offset, info, 10);
+    sprintf(info, "%d", offset);
+    strcat(info, "($fp)");
+    env->sym_table.addid(f->name, info);
+    cout<<"adding formal to environment: "<<f->name<<" ofs:"<<info<<endl;
+    cout<<"try dump:"<<endl;
+    env->sym_table.dump();
     // update the "Environment" i.e. the location of each variable
-    env->sym_table.addid(f->name, &address);
   }
   //method lable
   emit_method_ref(env->cur_class->name, this->name, s); // that's the reason why we need env->cur_class
@@ -1453,8 +1476,10 @@ void method_class::code( Environment * env)
   emit_move(SELF, ACC, s);  // self is passed in $a0, save it to $s0, which is guranteed to recover after function call
 
   s<<"\t# begin of expression in method"<<endl;
+  cout<<"code expression start"<<endl;
   env->cur_exp_oft = 0;
   expr->code(env);
+  cout<<"code expression end"<<endl;
   s<<"\t# end of expression in method"<<endl;
 
   //pop and recover
@@ -1481,15 +1506,15 @@ void assign_class::code(Environment *env) {
 
   this->expr->code(env); //return value in ACC:
   // Read the "Environment":
-  cout<<"before assign"<<endl;
-  std::string address = *(env->sym_table.lookup(this->name));
-  cout<<"after assign"<<endl;
+  cout<<"before"<<endl;
+  char * address = (env->sym_table.lookup(name));
+  cout<<"after"<<endl;
   // Change the "Store": store the newly assigned variable to this adress
-  s<<SW<<ACC<<"\t"<<(char *)(address.c_str());
+  s<<SW<<ACC<<"\t"<<address<<endl;
 
   if (cgen_Memmgr == GC_GENGC)
   {
-    emit_load_address(A1, (char *)(address.c_str()), env->str);
+    emit_load_address(A1, address, env->str);
     emit_jal("_GenGC_Assign", env->str);
   }
   
@@ -1524,12 +1549,13 @@ void dispatch_class::code(Environment *env) {
   emit_dispatch_prep(actual, expr, name, line_number, env);
 
   Symbol class_name = expr->get_type();
-  if (type_name == SELF_TYPE)
+  if (class_name == SELF_TYPE)
     class_name = env->cur_class->name;
 
   // load the base of the dispatch table: simply find from current class @offset 2*4=8
   emit_load(T1, 2, ACC, s);
   int offset = env->cgen_table->get_method_ofs(class_name, name);
+  cout<<"dispatch offset:"<<offset<<endl;
   emit_load(T1, offset, T1, s);
   emit_jalr(T1, s);
 }
@@ -1681,8 +1707,15 @@ void let_class::code(Environment *env) {
 
   emit_push(ACC, s);
   env->cur_exp_oft +=4;
-  std::string expr_address =  int2string(env->cur_exp_oft)+ (std::string)"($fp)";
-  env->sym_table.addid(identifier, &expr_address);
+  //std::string expr_address =  int2string(env->cur_exp_oft)+ (std::string)"($fp)";
+
+  char *info = new char[20];
+  //itoa(env->cur_exp_oft, info, 10);
+  sprintf(info, "%d", env->cur_exp_oft);
+  strcat(info, "($fp)");
+  env->sym_table.addid(identifier, info);
+
+  //env->sym_table.addid(identifier, &expr_address);
 
   body->code(env);
 
@@ -1694,7 +1727,8 @@ void let_class::code(Environment *env) {
 void plus_class::code(Environment *env) {
 
   ostream &s = env->str;
-  s<<" #coding for add"<<endl;
+  cout<<                      " #coding for add"<<endl;
+  s<<" #coding for plus"<<endl;
   emit_arith(e1, e2, env);
   emit_add(T1, T1, T2, s);
   emit_store(T1, 3, ACC, s);
@@ -1710,7 +1744,7 @@ void sub_class::code(Environment *env) {
 void mul_class::code(Environment *env) {
   ostream &s = env->str;
   emit_arith(e1, e2, env);
-  emit_div(T1, T1, T2, s);
+  emit_mul(T1, T1, T2, s);
   emit_store(T1, 3, ACC, s);
 }
 
@@ -1747,6 +1781,7 @@ void lt_class::code(Environment *env) {
 }
 
 void eq_class::code(Environment *env) {
+  cout<<"code for equality"<<endl;
   ostream &s = env->str;
   s << "\t# code for equality" << endl;
 
@@ -1895,18 +1930,25 @@ void no_expr_class::code(Environment *env) {
 void object_class::code(Environment *env) {
   ostream &s = env->str;
   s << "\t# code for object identifier" << endl;
-
+  cout << "\t# code for object identifier" << endl;  
   if(name == self) {
     emit_move(ACC, SELF, s);
   }
   else {
-    std::string address = *( env->sym_table.lookup(name));
-    if(address.compare(NULL)==0) {
+    cout<<"name is:"<<name<<endl;
+    //env->sym_table.dump();
+    //cout<<*(env->sym_table.lookup(name))<<endl;
+    char * address = (env->sym_table.lookup(name));
+    cout<<"adress is:"<<address<<endl;
+    env->sym_table.dump();
+  
+    if( address == NULL ) {
       cout << "__" << endl;  
       cout << name << endl; 
      // cout <<  env->sym_table << endl;
     }
-    emit_load(ACC, 0, ((char*)address.c_str()), s);
+    //emit_load(ACC, 0, address, s);
+    s << LW << ACC << " " << address << endl;
   }
 }
 

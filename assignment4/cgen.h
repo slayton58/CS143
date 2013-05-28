@@ -126,7 +126,7 @@ private:
 public:
   class__class* cur_class;
   CgenClassTable* cgen_table;
-  SymbolTable<Symbol, std::string> sym_table;
+  SymbolTable<Symbol, char> sym_table;
   int cur_exp_oft;
   ostream& str;
 
