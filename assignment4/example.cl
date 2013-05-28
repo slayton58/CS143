@@ -30,7 +30,11 @@ class Main inherits AAA{
     a+b;
   }
   };
+
+(*  let a:Int <- 3 in 
+	{
+	  a+1;
+	}*)
   b:Bool <- true;
   c:Int <- 3+4;
-
-};
+  };

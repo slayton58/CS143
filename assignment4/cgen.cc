@@ -1532,11 +1532,50 @@ void dispatch_class::code(Environment *env) {
 }
 
 void cond_class::code(Environment *env) {
+   ostream &s = env->str;
+   s << "\t# code for if-else" << endl;
 
+   int false_branch_label = env->get_label_cnt();
+   int end_cond_label = env->get_label_cnt();
+
+   pred->code(env);
+   // lw $t1 12($a0)
+   // beqz $t1 <false_branch_label> 
+   emit_load(T1, 3, ACC, s);
+   emit_beqz(T1, false_branch_label, s);
+
+   then_exp->code(env);
+   // b <end_cond_label>
+   emit_branch(end_cond_label, s);
+
+   emit_label_def(false_branch_label, s);
+   else_exp->code(env);
+
+   emit_label_def(end_cond_label, s);
 }
 
 void loop_class::code(Environment *env) {
+   ostream &s = env->str;
+   s << "\t# code for loop" << endl;
 
+   int start_label = env->get_label_cnt();
+   int end_label = env->get_label_cnt();
+
+   emit_label_def(start_label, s);
+   pred->code(env);
+
+   // lw $t1 12($a0)
+   // beqz $t1 <end label>
+   emit_load(T1, 3, ACC ,s);
+   emit_beqz(T1, end_label, s);
+
+   body->code(env);
+   // b <start label>
+   // emit end label
+   emit_branch(start_label, s);
+   emit_label_def(end_label, s);
+   //set loop type to void
+   emit_move(ACC, ZERO, s);
 }
 
 void typcase_class::code(Environment *env) {
@@ -1552,7 +1591,35 @@ void block_class::code(Environment *env) {
 }
 
 void let_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for let" << endl;
 
+  env->sym_table.enterscope();
+
+  if(typeid(init) == typeid(no_expr_class)) {
+     std::string type_name = type_decl->get_string();
+     if( !type_name.compare("Int") || !type_name.compare("Bool")
+       || !type_name.compare("Str")|| !type_name.compare("IO")) {
+         std::string proto_address = type_name + (std::string)PROTOBJ_SUFFIX;
+         emit_load_address(ACC, (char*)proto_address.c_str(), s);
+         emit_jal("Object.copy", s);
+         std::string init_address = type_name = (std::string)CLASSINIT_SUFFIX;
+         emit_jal((char*)init_address.c_str(), s);
+     }
+     else init->code(env);
+  }
+  else init->code(env);
+
+  emit_push(ACC, s);
+  env->cur_exp_oft +=4;
+  std::string expr_address =  int2string(env->cur_exp_oft)+ (std::string)"($fp)";
+  env->sym_table.addid(identifier, &expr_address);
+
+  body->code(env);
+
+  emit_pop(s);
+  env->cur_exp_oft += 4;
+  env->sym_table.exitscope();
 }
 
 void plus_class::code(Environment *env) {
@@ -1605,9 +1672,10 @@ void lt_class::code(Environment *env) {
 
   emit_comp_begin(e1, e2, env);
 
-  emit_blt(T1, T2, env->get_label_cnt(), s);
+  int label_cnt = env->get_label_cnt();
+  emit_blt(T1, T2, label_cnt, s);
 
-  emit_comp_end(env->get_label_cnt(), env);
+  emit_comp_end(label_cnt, env);
 }
 
 void eq_class::code(Environment *env) {
@@ -1631,7 +1699,8 @@ void eq_class::code(Environment *env) {
   BoolConst(1).code_ref(s);
   s << endl;
 
-  emit_beq(T1, T2, env->get_label_cnt(), s);
+  int label_cnt =  env->get_label_cnt();
+  emit_beq(T1, T2, label_cnt, s);
 
   s << LA << A1 << "\t";
   BoolConst(0).code_ref(s);
@@ -1639,7 +1708,7 @@ void eq_class::code(Environment *env) {
 
   emit_jal("equality_test", s);
 
-  emit_label_def(env->get_label_cnt(), s);
+  emit_label_def(label_cnt, s);
 }
 
 void leq_class::code(Environment *env) {
@@ -1648,9 +1717,10 @@ void leq_class::code(Environment *env) {
 
   emit_comp_begin(e1, e2, env);
 
-  emit_bleq(T1, T2, env->get_label_cnt(), s);
+  int label_cnt = env->get_label_cnt();
+  emit_bleq(T1, T2, label_cnt, s);
 
-  emit_comp_end(env->get_label_cnt(), env);
+  emit_comp_end(label_cnt, env);
 }
 
 void comp_class::code(Environment *env) {
@@ -1666,13 +1736,14 @@ void comp_class::code(Environment *env) {
   BoolConst(1).code_ref(s);
   s << endl;
 
-  emit_beqz(T1, env->get_label_cnt(), s);
+  int label_cnt = env->get_label_cnt();
+  emit_beqz(T1, label_cnt, s);
 
   s << LA << ACC << "\t";
   BoolConst(0).code_ref(s);
   s << endl;
 
-  emit_label_def(env->get_label_cnt(), s);
+  emit_label_def(label_cnt, s);
 }
 
 void int_const_class::code(Environment *env)  
@@ -1734,9 +1805,10 @@ void isvoid_class::code(Environment *env) {
   s << LA << ACC << "\t";
   BoolConst(1).code_ref(s);
   s << endl;
-
+  
+  int label_cnt =  env->get_label_cnt();
   //beqz $t1 label<end>
-  emit_beqz(T1, env->get_label_cnt(), s);
+  emit_beqz(T1, label_cnt, s);
 
   //la $a0 bool_const0 
   s << LA << ACC << "\t";
@@ -1744,7 +1816,7 @@ void isvoid_class::code(Environment *env) {
   s << endl;
 
   //label<end>
-  emit_label_def(env->get_label_cnt(), s) ;
+  emit_label_def(label_cnt, s) ;
 }
 
 void no_expr_class::code(Environment *env) {
