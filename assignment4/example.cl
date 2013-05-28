@@ -3,11 +3,21 @@ class AAA {
     a:Int <- 111+222+333;
     test(a:Int, b:Int) : Object {
         {
-            if 1 + 3 = 5 then
+        (*    if 1 + 3 = 5 then
                 (new IO).out_string("!!!case1\n")
             else
                 (new IO).out_string("!!!case2\n")
-            fi;
+            fi;*)
+               case a of
+
+			
+			    y1 : AAA => 1;
+			
+				y2 : Int => 2;
+				
+				y3 : Object => 3;
+																																	                                  esac;
+
             1 = 2;
 			a = a+b;
             "abc" = "abc";

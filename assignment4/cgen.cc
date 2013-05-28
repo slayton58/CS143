@@ -28,6 +28,7 @@
 #include <string>
 #include <sstream>
 #include <typeinfo>
+#include <algorithm>
 
 extern void emit_string_constant(ostream& str, char *s);
 extern int cgen_debug;
@@ -1480,7 +1481,9 @@ void assign_class::code(Environment *env) {
 
   this->expr->code(env); //return value in ACC:
   // Read the "Environment":
+  cout<<"before assign"<<endl;
   std::string address = *(env->sym_table.lookup(this->name));
+  cout<<"after assign"<<endl;
   // Change the "Store": store the newly assigned variable to this adress
   s<<SW<<ACC<<"\t"<<(char *)(address.c_str());
 
@@ -1578,8 +1581,74 @@ void loop_class::code(Environment *env) {
    emit_move(ACC, ZERO, s);
 }
 
+/*
+bool is_tag_smaller(CgenNodeP n1, CgenNodeP n2)
+{
+  int tag1 = n1->get_tag();
+  int tag2 = n2->get_tag();
+  return tag1 < tag2;
+}*/
 void typcase_class::code(Environment *env) {
+  ostream &s = env->str;
+  s << "\t# code for typcase" << endl;
 
+  std::map<int, branch_class*> branch_map;
+  for(int i = cases->first(); cases->more(i); i=cases->next(i)) {
+     branch_class* b = (branch_class*) cases->nth(i);
+     CgenNodeP n = env->cgen_table->get_node_by_name(b->name);
+     int branch_tag = n->get_tag();
+     branch_map[branch_tag] = b;
+  }
+   std::map<int, branch_class*>::iterator iter;
+   for (iter = branch_map.begin(); iter != branch_map.end(); ++iter)
+   {
+     cout<<iter->first<<":"<<iter->second->name<<endl;
+
+   }
+
+  //std::vector<branch_class*> branch_vector;
+  //std::vector<branch_class*>::iterator iter;
+  //for(int i = cases->first(); cases->more(i); i=cases->next(i)) {
+  //  branch_class* b = (branch_class*) cases->nth(i);
+  //  branch_vector.push_back(b);
+  //}
+  //sort(branch_vector.begin(), branch_vector.end(), is_tag_smaller);
+  //for(iter = branch_vector.begin(); iter != branch_vector.end(); ++iter)
+  //{
+  //  cout<<"current class "<<(*iter)->name<<" tag:"<<(*iter)->
+  //}
+
+
+
+
+/*
+
+  expr->code(env);
+  emit_push(ACC, s);
+  env->cur_exp_oft += -4;
+
+  int label_begin = env->get_label_cnt();
+  emit_bne(ACC, ZERO, label_begin, s);
+
+  //error handling (case on void)
+  s << LA << ACC << "\t";
+  std::string filename = env->cur_class->get_filename()->get_string();
+  stringtable.lookup_string((char*)filename.c_str())->code_ref(s);
+  s << endl;
+  //li $t1 <line number>
+  emit_load_imm(T1, line_number, s);
+  emit_jal("_case_abort2", s);
+  emit_label_def(label_begin, s);
+  emit_load(T2, 0, ACC ,s);
+
+  int label_end = env->get_label_cnt();
+  for(int j = 0; j < branch_map->size(); j++) {
+    branch_class* b = (branch_class*) branch_map[j];
+
+    env->sym_table.enterscope();
+
+    int class_tag = env->cgen_table->
+  }*/
 }
 
 void block_class::code(Environment *env) {
@@ -1626,7 +1695,6 @@ void plus_class::code(Environment *env) {
 
   ostream &s = env->str;
   s<<" #coding for add"<<endl;
-  cout<<                      " #coding for add"<<endl;
   emit_arith(e1, e2, env);
   emit_add(T1, T1, T2, s);
   emit_store(T1, 3, ACC, s);
