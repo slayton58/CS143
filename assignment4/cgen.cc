@@ -1360,8 +1360,8 @@ CgenNodeP CgenClassTable::get_node_by_name( Symbol class_name)
 { 
   std::vector<CgenNodeP>::iterator iter;
   for (iter = nds.begin(); iter != nds.end(); ++iter)
-  {
-    if ( class_name == (*iter)->get_name() )
+  { 
+    if ( class_name == (*iter)->get_name() ) 
       return (*iter);
   }
   return NULL;
@@ -1460,8 +1460,6 @@ void method_class::code( Environment * env)
     strcat(info, "($fp)");
     env->sym_table.addid(f->name, info);
     cout<<"adding formal to environment: "<<f->name<<" ofs:"<<info<<endl;
-    cout<<"try dump:"<<endl;
-    env->sym_table.dump();
     // update the "Environment" i.e. the location of each variable
   }
   //method lable
@@ -1617,34 +1615,23 @@ bool is_tag_smaller(CgenNodeP n1, CgenNodeP n2)
 void typcase_class::code(Environment *env) {
   ostream &s = env->str;
   s << "\t# code for typcase" << endl;
+  cout << "\t# code for typecase" << endl;
 
-  std::map<int, branch_class*> branch_map;
+  std::map<int, CgenNodeP> branch_map;
   for(int i = cases->first(); cases->more(i); i=cases->next(i)) {
      branch_class* b = (branch_class*) cases->nth(i);
-     CgenNodeP n = env->cgen_table->get_node_by_name(b->name);
-     int branch_tag = n->get_tag();
-     branch_map[branch_tag] = b;
+     CgenNodeP n = env->cgen_table->get_node_by_name(b->type_decl);   
+     int branch_tag = n->get_tag();    
+     branch_map[branch_tag] = n;
   }
-   std::map<int, branch_class*>::iterator iter;
+
+
+   std::map<int, CgenNodeP>::iterator iter;
    for (iter = branch_map.begin(); iter != branch_map.end(); ++iter)
    {
      cout<<iter->first<<":"<<iter->second->name<<endl;
 
    }
-
-  //std::vector<branch_class*> branch_vector;
-  //std::vector<branch_class*>::iterator iter;
-  //for(int i = cases->first(); cases->more(i); i=cases->next(i)) {
-  //  branch_class* b = (branch_class*) cases->nth(i);
-  //  branch_vector.push_back(b);
-  //}
-  //sort(branch_vector.begin(), branch_vector.end(), is_tag_smaller);
-  //for(iter = branch_vector.begin(); iter != branch_vector.end(); ++iter)
-  //{
-  //  cout<<"current class "<<(*iter)->name<<" tag:"<<(*iter)->
-  //}
-
-
 
 
 /*
@@ -1936,11 +1923,8 @@ void object_class::code(Environment *env) {
   }
   else {
     cout<<"name is:"<<name<<endl;
-    //env->sym_table.dump();
-    //cout<<*(env->sym_table.lookup(name))<<endl;
     char * address = (env->sym_table.lookup(name));
     cout<<"adress is:"<<address<<endl;
-    env->sym_table.dump();
   
     if( address == NULL ) {
       cout << "__" << endl;  
