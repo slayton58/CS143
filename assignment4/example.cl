@@ -7,7 +7,7 @@ class AAA
     test(a:Int, b:Int) : Object 
     {
       {  
-       (*   let x:Int <- 5, y:Int <- 7 in 
+          let x:Int <- 5, y:Int <- 7 in 
           {
 		        a = x + y;
           };
@@ -17,7 +17,7 @@ class AAA
           else
             (new IO).out_string("!!!case2\n")
           fi;
-         *) 
+          
           case a of
             y1 : AAA => 1;
             y2 : Int => 2;
@@ -25,7 +25,7 @@ class AAA
           esac;
           
 
-          1 = 2;
+         -- 1 = 2;
           a = a+b;
           "abc" = "abc";
           true = false;

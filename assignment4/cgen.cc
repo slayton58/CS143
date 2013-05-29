@@ -1697,7 +1697,6 @@ void typcase_class::code(Environment *env) {
   emit_label_def(label_end ,s);
 
   env->cur_exp_oft += 4;
-  env->sym_table.exitscope();
 }
 
 void block_class::code(Environment *env) {
@@ -1778,7 +1777,7 @@ void mul_class::code(Environment *env) {
 void divide_class::code(Environment *env) {
   ostream &s = env->str;
   emit_arith(e1, e2, env);
-  emit_add(T1, T1, T2, s);
+  emit_div(T1, T1, T2, s);
   emit_store(T1, 3, ACC, s);
 }
 
@@ -1971,9 +1970,11 @@ void object_class::code(Environment *env) {
   else 
   {
     // load from symbol table
+    cout<<"code for object identifier"<<endl;
+    env->sym_table.dump();
     char * address = (env->sym_table.lookup(name));
-    //cout<<"name is:"<<name<<endl;
-    //cout<<"adress is:"<<address<<endl;
+    cout<<"name is:"<<name<<endl;
+    cout<<"adress is:"<<address<<endl;
   
     if( address == NULL ) 
     {

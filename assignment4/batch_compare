@@ -4,7 +4,7 @@ import sys
 import re
 
 def main(argv):
-    os.system('make cgen')
+  #  os.system('make cgen')
     os.system('rm -f *.txt *.s')
 
     for f in os.listdir(argv[1]):
@@ -14,8 +14,8 @@ def main(argv):
 
         os.system('./mycoolc %s -o 1.s' %(fname))
         os.system('./coolc   %s -o 2.s' %(fname))
-        os.system('./spim -file 1.s > 1.txt')
-        os.system('./spim -file 2.s > 2.txt')
+        os.system('spim  1.s > 1.txt')
+        os.system('spim  2.s > 2.txt')
         os.system('diff 1.txt 2.txt > 3.txt')
         display_diff_output('3.txt', fname)
         print ''
