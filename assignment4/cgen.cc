@@ -247,7 +247,7 @@ static void emit_sll(char *dest, char *src1, int num, ostream& s)
 { s << SLL << dest << " " << src1 << " " << num << endl; }
 
 static void emit_jalr(char *dest, ostream& s)
-{ s << JALR << "\t" << dest << endl; }
+{ s << JALR << dest << endl; }
 
 static void emit_jal(char *address,ostream &s)
 { s << JAL << address << endl; }
@@ -375,15 +375,18 @@ static void emit_store_int(char *source, char *dest, ostream& s)
 static void emit_dispatch_prep(Expressions actual, Expression expr, Symbol name, int line_number, Environment* env)
 {
   ostream &s = env->str;
+
+  /*code each actual and push argument to the stack e1,e2,...en:*/
   for(int i = actual->first(); actual->more(i); i = actual->next(i))
   {  
     Expression e = (Expression) actual->nth(i);
-    //code each actual:
     e->code(env);
-    //push argument to the stack:
     emit_push(ACC,s);
   }
-  expr->code(env); // return value in $a0 
+   
+  /*code the body expression for the e0 */
+  expr->code(env); // return value in $a0
+
   //check dispatch on void error
   int label = env->get_label_cnt();
   emit_bne(ACC, ZERO, label, s);
@@ -1420,31 +1423,27 @@ void class__class::code(Environment *env)
   env->cur_class = this;
   env->sym_table.enterscope();
 
-  //add attributes to sym_table:
   CgenNodeP n = env->cgen_table->get_node_by_name(this->name);
-  cout<<"================generating code for class:"<<n->get_name()<<endl;
+  cout<<"======================generating code for class:"<<n->get_name()<<"==========================="<<endl;
   std::vector<attr_class*>::iterator iter;
   std::vector<method_sign*>::iterator iter2;
   int i=0;
+
+  //traverse attributes and add id:
   for (iter = n->attr_list.begin(); iter != n->attr_list.end(); ++iter)
   {
     int offset = 4 * i + 12;
-    //std::string info = int2string(offset)+std::string("($s0)");
     char *info = new char[20];
-    //itoa(offset, info, 10);
     sprintf(info, "%d", offset);
     strcat(info, "($s0)");
     env->sym_table.addid((*iter)->name, info);
-    //env->sym_table.addid( (*iter)->name, &((char *)info.c_str()));
     i++;
   }
+
   //traverse methods and generate code:
   for(int i = features->first(); features->more(i); i = features->next(i))
     if (features->nth(i)->get_is_method() )
-    {
-      cout<<"  method_name:"<<((method_class *)(features->nth(i)))->name<<endl;
       ((method_class *)(features->nth(i)))->code(env);
-    }
 
   cout<<"all done!!"<<endl;
 }
@@ -1452,47 +1451,45 @@ void class__class::code(Environment *env)
 
 void method_class::code( Environment * env)
 {
+  cout<<endl<<"===== coding method:"<<name<<"========"<<endl;
   ostream &s = env->str;
   s<<"\t# code for method"<<endl;
   env->sym_table.enterscope();
 
   // argument i is at $fp+12+4(n-i)
   int nFormal = formals->len();
-  
+
+  /* (1) update the "Environment" i.e. the location of each variable*/
   for(int i = formals->first(); formals->more(i); i = formals->next(i)) 
   {
     formal_class* f = (formal_class *)formals->nth(i);
     int offset = 8 + 4 * (nFormal - i);
-
     char *info = new char[20];
-    cout << "offset: " << offset << endl; 
 
-    //itoa(offset, info, 10);
     sprintf(info, "%d", offset);
     strcat(info, "($fp)");
     env->sym_table.addid(f->name, info);
     cout<<"adding formal to environment: "<<f->name<<" ofs:"<<info<<endl;
-    // update the "Environment" i.e. the location of each variable
   }
+
   //method lable
   emit_method_ref(env->cur_class->name, this->name, s); // that's the reason why we need env->cur_class
   s<<LABEL;
 
-  //push stored registers
+  /*(2) push callee saved registers*/
   emit_push(FP, s);
   emit_push(SELF, s);
   emit_push(RA, s);
   emit_addiu(FP, SP, 4, s);
   emit_move(SELF, ACC, s);  // self is passed in $a0, save it to $s0, which is guranteed to recover after function call
 
-  s<<"\t# begin of expression in method"<<endl;
-  cout<<"code expression start"<<endl;
+  /*code body*/
   env->cur_exp_oft = 0;
+  s<<"\t# begin of expression in method"<<endl;
   expr->code(env);
-  cout<<"code expression end"<<endl;
   s<<"\t# end of expression in method"<<endl;
 
-  //pop and recover
+  /*(3) pop and recover*/
   emit_load(RA, 1, SP, s);
   emit_load(SELF, 2, SP, s);
   emit_load(FP, 3, SP, s);
@@ -1500,6 +1497,7 @@ void method_class::code( Environment * env)
   emit_return(s);
 
   env->sym_table.exitscope();
+  cout<<"===== finish coding method:"<<name<<"========"<<endl<<endl;
 
 }
 
@@ -1512,7 +1510,7 @@ void branch_class::code (Environment *env)
 
 void assign_class::code(Environment *env) {
   ostream &s =env->str;
-  s<<"\t#code for assign"<<endl;
+  s<<"\t# code for assign"<<endl;
 
   this->expr->code(env); //return value in ACC:
   // Read the "Environment":
@@ -1553,9 +1551,12 @@ void static_dispatch_class::code(Environment *env) {
     
 }
 
-void dispatch_class::code(Environment *env) {
+void dispatch_class::code(Environment *env) 
+{
+  cout<<endl<<"===== coding dispatch:"<<name<<"========"<<endl;
   ostream &s = env->str;
   s<<"\t# code for dispatch"<<endl;
+
   emit_dispatch_prep(actual, expr, name, line_number, env);
 
   Symbol class_name = expr->get_type();
@@ -1570,7 +1571,8 @@ void dispatch_class::code(Environment *env) {
   emit_jalr(T1, s);
 }
 
-void cond_class::code(Environment *env) {
+void cond_class::code(Environment *env) 
+{
    ostream &s = env->str;
    s << "\t# code for if-else" << endl;
 
@@ -1593,7 +1595,8 @@ void cond_class::code(Environment *env) {
    emit_label_def(end_cond_label, s);
 }
 
-void loop_class::code(Environment *env) {
+void loop_class::code(Environment *env) 
+{
    ostream &s = env->str;
    s << "\t# code for loop" << endl;
 
@@ -1610,6 +1613,7 @@ void loop_class::code(Environment *env) {
 
    body->code(env);
    // b <start label>
+
    // emit end label
    emit_branch(start_label, s);
    emit_label_def(end_label, s);
@@ -1617,13 +1621,7 @@ void loop_class::code(Environment *env) {
    emit_move(ACC, ZERO, s);
 }
 
-/*
-bool is_tag_smaller(CgenNodeP n1, CgenNodeP n2)
-{
-  int tag1 = n1->get_tag();
-  int tag2 = n2->get_tag();
-  return tag1 < tag2;
-}*/
+
 void typcase_class::code(Environment *env) {
   ostream &s = env->str;
   s << "\t# code for typcase" << endl;
@@ -1638,12 +1636,6 @@ void typcase_class::code(Environment *env) {
   }
 
 
-   //std::map<int, CgenNodeP>::iterator iter;
-   //for (iter = branch_map.begin(); iter != branch_map.end(); ++iter)
-   //{
-   //  cout<<iter->first<<":"<<iter->second->name<<endl;
-
-   //}
 
   expr->code(env);    
   emit_push(ACC, s);
@@ -1721,37 +1713,42 @@ void block_class::code(Environment *env) {
   }
 }
 
-void let_class::code(Environment *env) {
+void let_class::code(Environment *env) 
+{
   ostream &s = env->str;
   s << "\t# code for let" << endl;
-
   env->sym_table.enterscope();
 
-  if(typeid(init) == typeid(no_expr_class)) {
+  if(typeid(init) == typeid(no_expr_class)) 
+  {
+     /* no initialization, for basic class, new a location is just copy from the prototype object */
      std::string type_name = type_decl->get_string();
-     if( !type_name.compare("Int") || !type_name.compare("Bool")
-       || !type_name.compare("Str")|| !type_name.compare("IO")) {
+     if( !type_name.compare("Int") || !type_name.compare("Bool") || 
+         !type_name.compare("Str") || !type_name.compare("IO")  ) 
+     {
          std::string proto_address = type_name + (std::string)PROTOBJ_SUFFIX;
          emit_load_address(ACC, (char*)proto_address.c_str(), s);
          emit_jal("Object.copy", s);
          std::string init_address = type_name = (std::string)CLASSINIT_SUFFIX;
          emit_jal((char*)init_address.c_str(), s);
      }
-     else init->code(env);
+     else 
+       init->code(env);
   }
+  /*otherwise the new location is the return value $a0 of the init expression*/
   else init->code(env);
 
-  emit_push(ACC, s);
-  env->cur_exp_oft +=4;
-  //std::string expr_address =  int2string(env->cur_exp_oft)+ (std::string)"($fp)";
 
+  /*push the newly defined variable on stack*/
+  emit_push(ACC, s);
+  env->cur_exp_oft -=4;
+
+  /*add the new identifier's location to the environment's SymbolTable to make it accessible by the body of
+  let*/
   char *info = new char[20];
-  //itoa(env->cur_exp_oft, info, 10);
   sprintf(info, "%d", env->cur_exp_oft);
   strcat(info, "($fp)");
   env->sym_table.addid(identifier, info);
-
-  //env->sym_table.addid(identifier, &expr_address);
 
   body->code(env);
 
@@ -1763,7 +1760,6 @@ void let_class::code(Environment *env) {
 void plus_class::code(Environment *env) {
 
   ostream &s = env->str;
-  cout<<                      " #coding for add"<<endl;
   s<<" #coding for plus"<<endl;
   emit_arith(e1, e2, env);
   emit_add(T1, T1, T2, s);
@@ -1796,7 +1792,6 @@ void neg_class::code(Environment *env) {
   s << "\t# code for neg" << endl;
 
   e1->code(env);
-
   emit_jal("Object.copy", s);
 
   emit_load(T1, 3, ACC, s);
@@ -1887,6 +1882,7 @@ void comp_class::code(Environment *env) {
 
 void int_const_class::code(Environment *env)  
 {
+  env->str<<"\t# code for int_const"<<endl;
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
@@ -1895,32 +1891,41 @@ void int_const_class::code(Environment *env)
 
 void string_const_class::code(Environment *env)
 {
+  env->str<<"\t# code for string_const"<<endl;
   emit_load_string(ACC,stringtable.lookup_string(token->get_string()),env->str);
 }
 
 void bool_const_class::code(Environment *env)
 {
+  env->str<<"\t# code for bool_const"<<endl;
   emit_load_bool(ACC, BoolConst(val), env->str);
 }
 
-void new__class::code(Environment *env) {
+void new__class::code(Environment *env) 
+{
   ostream &s = env->str;
   s << "\t# code for new" << endl;
 
   // load prototype object into $a0
   Symbol type_ =  type_name;
   if(type_ == SELF_TYPE) {
+     /*load address of the class object table*/
      emit_load_address(T1, "class_objTab", s);
+     /*load the class tag*/
      emit_load(T2, 0, SELF, s);
+     /*multiply by 8, add this displacement to the object table*/
      emit_sll(T2, T2, 3, s);
      emit_addu(T1, T1, T2, s);
+     //push to stack
      emit_store(T1, 0, SP, s);
      emit_addiu(SP, SP, -4, s);
      emit_load(ACC, 0, T1, s);
      emit_jal("Object.copy", s);
      emit_load(T2, 1, SP, s);
      emit_addiu(SP, SP, 4, s);
+     /*get the address of the object init function*/
      emit_load(T1, 1, T2, s);
+     /*jump to that initial routine*/
      emit_jalr(T1, s);
   }
   else {
@@ -1966,16 +1971,17 @@ void no_expr_class::code(Environment *env) {
 void object_class::code(Environment *env) {
   ostream &s = env->str;
   s << "\t# code for object identifier" << endl;
-  cout << "\t# code for object identifier" << endl;  
-  if(name == self) {
+  if(name == self) 
     emit_move(ACC, SELF, s);
-  }
-  else {
-    cout<<"name is:"<<name<<endl;
+  else 
+  {
+    // load from symbol table
     char * address = (env->sym_table.lookup(name));
-    cout<<"adress is:"<<address<<endl;
+    //cout<<"name is:"<<name<<endl;
+    //cout<<"adress is:"<<address<<endl;
   
-    if( address == NULL ) {
+    if( address == NULL ) 
+    {
       cout << "__" << endl;  
       cout << name << endl; 
      // cout <<  env->sym_table << endl;
