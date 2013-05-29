@@ -159,6 +159,7 @@ void program_class::cgen(ostream &os)
     cls->code(env);
   }
 
+  cout<<"all done!"<<endl;
   os << "\n# end of generated code\n";
 }
 
@@ -1445,7 +1446,6 @@ void class__class::code(Environment *env)
     if (features->nth(i)->get_is_method() )
       ((method_class *)(features->nth(i)))->code(env);
 
-  cout<<"all done!!"<<endl;
 }
 
 
@@ -1627,15 +1627,14 @@ void typcase_class::code(Environment *env) {
   s << "\t# code for typcase" << endl;
   cout << "\t# code for typecase" << endl;
 
-  std::map<int, CgenNodeP> branch_map;
-  for(int i = cases->first(); cases->more(i); i=cases->next(i)) {
+  std::map<int, branch_class*> branch_map;
+  for(int i = cases->first(); cases->more(i); i=cases->next(i)) 
+  {
      branch_class* b = (branch_class*) cases->nth(i);
      CgenNodeP n = env->cgen_table->get_node_by_name(b->type_decl);   
      int branch_tag = n->get_tag();    
-     branch_map[branch_tag] = n;
+     branch_map[branch_tag] = b;
   }
-
-
 
   expr->code(env);    
   emit_push(ACC, s);
@@ -1655,23 +1654,21 @@ void typcase_class::code(Environment *env) {
   emit_label_def(label_begin, s);
   emit_load(T2, 0, ACC ,s);
 
-  std::map<int, CgenNodeP>::reverse_iterator iter2;
+  std::map<int, branch_class*>::reverse_iterator iter2;
   for (iter2 = branch_map.rbegin(); iter2 != branch_map.rend(); ++iter2)
-  {
     cout<<iter2->first<<":"<<iter2->second->name<<endl;
 
-  }
-
   int label_end = env->get_label_cnt();
-  std::map<int, CgenNodeP>::reverse_iterator iter;
-  for (iter = branch_map.rbegin(); iter != branch_map.rend(); iter++) {
-    CgenNodeP b =  iter->second;
-     cout << "current come to the tag: " << iter->first  << "   class name: " <<b->name->get_string() <<endl;
+  std::map<int, branch_class*>::reverse_iterator iter;
+  for (iter = branch_map.rbegin(); iter != branch_map.rend(); iter++) 
+  {
+    branch_class * b =  iter->second;
+     cout << "current come to the tag: " << iter->first  << "   class name: " <<b->type_decl->get_string() <<endl;
     env->sym_table.enterscope();
 
     int class_tag = iter->first;    
     cout << "class tag: " << class_tag << endl;
-    int max_tag = env->cgen_table->get_max_descen_tag(b->name); 
+    int max_tag = env->cgen_table->get_max_descen_tag(b->type_decl); 
     cout << "max tag: " << max_tag << endl;
     int label_next = env->get_label_cnt();
     cout << "label next: " << label_next << endl; 
@@ -1686,13 +1683,11 @@ void typcase_class::code(Environment *env) {
 
     char *info = new char[20];
     cout << "offset: " << env->cur_exp_oft << endl; 
-
-    //itoa(offset, info, 10);
     sprintf(info, "%d", env->cur_exp_oft);
     strcat(info, "($fp)");
     env->sym_table.addid(b->name, info);
 
-    b->code(env);
+    b->expr->code(env);
     emit_pop(s);
     emit_branch(label_end, s);
     emit_label_def(label_next, s);
