@@ -1370,7 +1370,19 @@ CgenNodeP CgenClassTable::get_node_by_name( Symbol class_name)
 
 }
 
+int CgenClassTable::get_max_descen_tag(Symbol class_name) {
 
+   CgenNodeP n = env->cgen_table->get_node_by_name(class_name);
+
+   int max_tag = n->get_tag();  
+   std::vector<CgenNodeP>::iterator iter;
+   for(iter = n->children.begin(); iter != n->children.end(); iter++) {
+      int temp_tag = (*iter)->get_tag();
+      if(temp_tag > max_tag) 
+        max_tag = temp_tag;
+   }  cout << "max tag: " << max_tag << endl;
+   return max_tag;
+}
 
 
 
@@ -1626,17 +1638,14 @@ void typcase_class::code(Environment *env) {
   }
 
 
-   std::map<int, CgenNodeP>::iterator iter;
-   for (iter = branch_map.begin(); iter != branch_map.end(); ++iter)
-   {
-     cout<<iter->first<<":"<<iter->second->name<<endl;
+   //std::map<int, CgenNodeP>::iterator iter;
+   //for (iter = branch_map.begin(); iter != branch_map.end(); ++iter)
+   //{
+   //  cout<<iter->first<<":"<<iter->second->name<<endl;
 
-   }
+   //}
 
-
-/*
-
-  expr->code(env);
+  expr->code(env);    
   emit_push(ACC, s);
   env->cur_exp_oft += -4;
 
@@ -1654,14 +1663,54 @@ void typcase_class::code(Environment *env) {
   emit_label_def(label_begin, s);
   emit_load(T2, 0, ACC ,s);
 
-  int label_end = env->get_label_cnt();
-  for(int j = 0; j < branch_map->size(); j++) {
-    branch_class* b = (branch_class*) branch_map[j];
+  std::map<int, CgenNodeP>::reverse_iterator iter2;
+  for (iter2 = branch_map.rbegin(); iter2 != branch_map.rend(); ++iter2)
+  {
+    cout<<iter2->first<<":"<<iter2->second->name<<endl;
 
+  }
+
+  int label_end = env->get_label_cnt();
+  std::map<int, CgenNodeP>::reverse_iterator iter;
+  for (iter = branch_map.rbegin(); iter != branch_map.rend(); iter++) {
+    CgenNodeP b =  iter->second;
+     cout << "current come to the tag: " << iter->first  << "   class name: " <<b->name->get_string() <<endl;
     env->sym_table.enterscope();
 
-    int class_tag = env->cgen_table->
-  }*/
+    int class_tag = iter->first;    
+    cout << "class tag: " << class_tag << endl;
+    int max_tag = env->cgen_table->get_max_descen_tag(b->name); 
+    cout << "max tag: " << max_tag << endl;
+    int label_next = env->get_label_cnt();
+    cout << "label next: " << label_next << endl; 
+
+ 
+
+    //blt $t2 class_tag label_next
+    emit_blti(T2, class_tag, label_next, s);
+
+    //bgt $t2, max_tag label_next
+    emit_bgti(T2, max_tag, label_next, s);
+
+    char *info = new char[20];
+    cout << "offset: " << env->cur_exp_oft << endl; 
+
+    //itoa(offset, info, 10);
+    sprintf(info, "%d", env->cur_exp_oft);
+    strcat(info, "($fp)");
+    env->sym_table.addid(b->name, info);
+
+    b->code(env);
+    emit_pop(s);
+    emit_branch(label_end, s);
+    emit_label_def(label_next, s);
+    env->sym_table.exitscope();
+  }
+  emit_jal("_case_abort", s);
+  emit_label_def(label_end ,s);
+
+  env->cur_exp_oft += 4;
+  env->sym_table.exitscope();
 }
 
 void block_class::code(Environment *env) {

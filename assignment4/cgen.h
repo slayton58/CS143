@@ -77,6 +77,7 @@ public:
    int get_attr_ofs(Symbol, Symbol);
    int get_method_ofs(Symbol, Symbol);
    CgenNodeP get_node_by_name (Symbol);
+   int get_max_descen_tag(Symbol class_name);
 };
 
 // Each class corresponds to a CgenNode, records the children, the parent
