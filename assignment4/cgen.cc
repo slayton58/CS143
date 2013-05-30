@@ -1178,15 +1178,17 @@ void CgenClassTable::build_features_map()
         for(int i=0; i<curr_node->method_list.size(); i++ ){
           method_sign* ms_parent = curr_node->method_list[i];
 
-          if(ms->method_name == ms_parent->method_name) {
+          if(ms->method_name->name == ms_parent->method_name->name) {
             need_override = true;
             curr_node->method_list[i]= ms;
             cout << "override --"<< curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+            cout << "override methoed--" << ms_parent->method_name->name->get_string() << endl;
           }
         }
         if(!need_override) {
           curr_node->method_list.push_back(ms);   
           cout << "just add -- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+          cout << "just add -- " << ms->method_name->name ->get_string() << endl;
         }
       }
       else {
@@ -1971,7 +1973,7 @@ void object_class::code(Environment *env) {
   {
     // load from symbol table
     cout<<"code for object identifier"<<endl;
-    env->sym_table.dump();
+   // env->sym_table.dump();
     char * address = (env->sym_table.lookup(name));
     cout<<"name is:"<<name<<endl;
     cout<<"adress is:"<<address<<endl;
