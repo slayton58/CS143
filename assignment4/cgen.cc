@@ -159,7 +159,7 @@ void program_class::cgen(ostream &os)
     cls->code(env);
   }
 
-  cout<<"all done!"<<endl;
+  //cout<<"all done!"<<endl;
   os << "\n# end of generated code\n";
 }
 
@@ -553,7 +553,7 @@ void StrTable::code_string_table(ostream& s, int stringclasstag)
 {  
   for (List<StringEntry> *l = tbl; l; l = l->tl()) {
     l->hd()->code_def(s,stringclasstag);
-    cout << "what in the string table:   "  << l->hd()->get_string() << endl;
+    //cout << "what in the string table:   "  << l->hd()->get_string() << endl;
   }
 }
 
@@ -728,16 +728,16 @@ void CgenClassTable::code_select_gc()
 void CgenClassTable::code_class_nameTab()
 {
    str << CLASSNAMETAB << LABEL;
-   cout<<endl<<" there are totally "<<cur_tag<<" tags"<<endl;
+   //cout<<endl<<" there are totally "<<cur_tag<<" tags"<<endl;
    for(int i =0; i < cur_tag; i++) 
    {
      std::vector<CgenNodeP>::iterator iter;
      for (iter = nds.begin(); iter!= nds.end(); ++iter)
      { 
        if(i == (*iter)->get_tag()) 
-       {   cout<<" want to look up string:  "<< (*iter)->get_name()->get_string() <<endl;
+       {   //cout<<" want to look up string:  "<< (*iter)->get_name()->get_string() <<endl;
            StringEntry* se =(StringEntry *)stringtable.lookup_string((*iter)->get_name()->get_string());
-           cout << "print string" << endl;
+           //cout << "print string" << endl;
            str << WORD;
            se->code_ref(str);
            str<< endl;
@@ -804,11 +804,11 @@ void CgenClassTable::code_prototype_objects()
      
      //attributes
      std::vector<attr_class*>::iterator iter_attr;
-     cout << "@@@@@@@@@@@@@@@ " << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->attr_list.size() << endl;
+     //cout << "@@@@@@@@@@@@@@@ " << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->attr_list.size() << endl;
      for(iter_attr = (*iter_node)->attr_list.begin(); iter_attr != (*iter_node)->attr_list.end(); ++iter_attr) {
         str << WORD;
         //generate default values
-        cout << "node attr type decl is: " << (*iter_attr)->type_decl->get_string() << endl;
+        //cout << "node attr type decl is: " << (*iter_attr)->type_decl->get_string() << endl;
         if((*iter_attr)->type_decl == Int) {
            IntEntry* ie = (IntEntry*)inttable.add_int(0);
            ie->code_ref(str);
@@ -839,7 +839,7 @@ void CgenClassTable::code_init()
   {
     CgenNodeP n = *iter;
     env->cur_class = *iter;
-    cout<<endl<<"init class: "<<n->get_name()<<endl;
+    //cout<<endl<<"init class: "<<n->get_name()<<endl;
     // this sym_table records all the locations of the attributes
 
     env->sym_table.enterscope();
@@ -939,13 +939,13 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
    stringclasstag = 0;
 
    enterscope();
-   if (cgen_debug) cout << "Building CgenClassTable" << endl;
+   if (cgen_debug) //cout << "Building CgenClassTable" << endl;
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
    set_tags();
 
-   print_inheritance_tree() ;
+   //print_inheritance_tree() ;
 
    build_features_map();
    code();
@@ -1094,7 +1094,7 @@ void CgenClassTable::install_class(CgenNodeP nd)
 
  // std::vector<CgenNodeP>::iterator iter;
  // for(iter=nds.begin();iter!=nds.end(); iter++) {
-  cout << "add node " << nd->get_name()->get_string() << " to string table" << endl;
+  //cout << "add node " << nd->get_name()->get_string() << " to string table" << endl;
  // }
 /*
   for (std::vector<CgenNodeP>::iterator iter = nds.begin(); iter!=nds.end(); ++iter)
@@ -1118,7 +1118,7 @@ void CgenClassTable::build_inheritance_tree()
       set_relations(*iter);
 }
 
-void CgenClassTable::print_inheritance_tree()
+/*void CgenClassTable::print_inheritance_tree()
 {
   std::vector<CgenNodeP>::iterator iter;
   std::vector<CgenNodeP>::iterator iter2;
@@ -1129,10 +1129,10 @@ void CgenClassTable::print_inheritance_tree()
     cout<<c->get_name()<<":"<<endl;
     cout<<"  parent: "<<c->get_parentnd()->get_name()<<endl<<"  child : ";
     for (iter2 = c->children.begin(); iter2 != c->children.end(); ++iter2)
-      cout<<(*iter2)->get_name()<<", ";
+        cout<<(*iter2)->get_name()<<", ";
     cout<<endl;
   }
-}
+}  */
 
 
 void CgenClassTable::build_features_map()
@@ -1147,8 +1147,8 @@ void CgenClassTable::build_features_map()
 
     // include parent attributes and methods 
     if(parent_node->get_name()!= No_class) 
-    {  cout << "parent node name: " << parent_node->get_name() << endl;
-       cout << "current node name: " << curr_node->get_name() <<endl;
+    {  //cout << "parent node name: " << parent_node->get_name() << endl;
+       //cout << "current node name: " << curr_node->get_name() <<endl;
        std::vector<attr_class*>::iterator iter;
        for(iter = parent_node->attr_list.begin(); iter != parent_node->attr_list.end(); iter++) {
          curr_node->attr_list.push_back(*iter);     
@@ -1157,7 +1157,7 @@ void CgenClassTable::build_features_map()
        std::vector<method_sign*>::iterator iter2;
        for(iter2 = parent_node->method_list.begin(); iter2 != parent_node->method_list.end(); iter2++) {
           curr_node->method_list.push_back(*iter2);
-          cout << "add parent method-- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+          //cout << "add parent method-- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
        }
     }
 
@@ -1166,12 +1166,12 @@ void CgenClassTable::build_features_map()
     for(int n = curr_node->get_features()->first(); curr_node->get_features()->more(n); n = curr_node->get_features()->next(n)) 
     {
       Feature ft = curr_node->get_features()->nth(n);
-      cout << "is method? "<< ft->get_is_method()<< endl; 
+      //cout << "is method? "<< ft->get_is_method()<< endl; 
       if(ft->get_is_method()) 
       {
  
         method_sign* ms = new method_sign(curr_node->get_name(), (method_class*)ft ); 
-        cout << "method name: " << ((method_class*)ft)->name->get_string()<< endl;
+        //cout << "method name: " << ((method_class*)ft)->name->get_string()<< endl;
         bool need_override = false;
        // cout <<  "current node class method size: " << curr_node->class_method_map.size() << endl;
        // cout <<  "current node class attr size: " << curr_node->class_attr_map.size() << endl; 
@@ -1181,19 +1181,19 @@ void CgenClassTable::build_features_map()
           if(ms->method_name->name == ms_parent->method_name->name) {
             need_override = true;
             curr_node->method_list[i]= ms;
-            cout << "override --"<< curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
-            cout << "override methoed--" << ms_parent->method_name->name->get_string() << endl;
+           // cout << "override --"<< curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+            //cout << "override methoed--" << ms_parent->method_name->name->get_string() << endl;
           }
         }
         if(!need_override) {
           curr_node->method_list.push_back(ms);   
-          cout << "just add -- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
-          cout << "just add -- " << ms->method_name->name ->get_string() << endl;
+          //cout << "just add -- " << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+          //cout << "just add -- " << ms->method_name->name ->get_string() << endl;
         }
       }
       else {
         curr_node->attr_list.push_back(((attr_class*) ft));
-        cout << curr_node->name->get_string() << " attr size: " << curr_node->attr_list.size() << endl; 
+        //cout << curr_node->name->get_string() << " attr size: " << curr_node->attr_list.size() << endl; 
       }
     } 
 
@@ -1201,15 +1201,15 @@ void CgenClassTable::build_features_map()
     for(iter3 = curr_node->children.begin(); iter3 != curr_node->children.end(); ++iter3) {
       s.push(*iter3);
     }
-    cout << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
-    cout << curr_node->name->get_string() << " attr size: " << curr_node->attr_list.size() << endl; 
-    cout << "stack size: " << s.size()<< endl;
+    //cout << curr_node->name->get_string() << " method size: " << curr_node->method_list.size() << endl;
+    //cout << curr_node->name->get_string() << " attr size: " << curr_node->attr_list.size() << endl; 
+    //cout << "stack size: " << s.size()<< endl;
   }
   std::vector<CgenNodeP>::iterator iter_node;
   for(iter_node = nds.begin(); iter_node!=nds.end(); ++iter_node) 
   {
-   cout << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->attr_list.size() << endl;
-   cout << (*iter_node)->name->get_string() << " method map size: " << (*iter_node)->method_list.size() << endl;
+   //cout << (*iter_node)->name->get_string() << " attr map size: " << (*iter_node)->attr_list.size() << endl;
+   //cout << (*iter_node)->name->get_string() << " method map size: " << (*iter_node)->method_list.size() << endl;
 
   }
 }
@@ -1243,9 +1243,9 @@ int CgenClassTable::get_attr_ofs(Symbol class_name, Symbol attr_name)
 
 int CgenClassTable::get_method_ofs(Symbol class_name, Symbol method_name)
 {
-  cout<<"probing:"<<class_name<<endl;
+ // cout<<"probing:"<<class_name<<endl;
   CgenNode * n = lookup(class_name);
-  cout<<"find "<<n->name<<endl;
+ // cout<<"find "<<n->name<<endl;
   std::vector<method_sign*>::iterator iter;
   int i=0;
   for (iter = n->method_list.begin(); iter != n->method_list.end(); ++iter)
@@ -1275,9 +1275,9 @@ void CgenNode::set_parentnd(CgenNodeP p)
 
 void CgenClassTable::code()
 {
-  std::vector<CgenNodeP>::iterator iter;
-  for (iter = nds.begin(); iter != nds.end(); ++iter)
-    cout<< " ---------------testing--------"<<(*iter)->name<<endl;
+ // std::vector<CgenNodeP>::iterator iter;
+ // for (iter = nds.begin(); iter != nds.end(); ++iter)
+ //   cout<< " ---------------testing--------"<<(*iter)->name<<endl;
 
 
   if (cgen_debug) cout << "coding global data" << endl;
@@ -1348,7 +1348,7 @@ void CgenClassTable::set_tags()
     else if (n->get_name() == Bool)
       boolclasstag = cur_tag;
     n->set_tag (cur_tag++);
-    cout<<"setting tag for:"<<n->get_name()<<" tag is:"<<cur_tag-1<<endl;
+  //  cout<<"setting tag for:"<<n->get_name()<<" tag is:"<<cur_tag-1<<endl;
     
 
     // push all children:
@@ -1356,7 +1356,7 @@ void CgenClassTable::set_tags()
     for (iter = n->children.begin(); iter != n->children.end(); ++iter)
     {
       stk.push( *iter );
-      cout<<"pushing child:"<<(*iter)->name<<endl;
+    //  cout<<"pushing child:"<<(*iter)->name<<endl;
     }
   }
 
@@ -1383,11 +1383,11 @@ int CgenClassTable::get_max_descen_tag(Symbol class_name) {
    int max_tag = n->get_tag();  
    std::vector<CgenNodeP>::iterator iter;
    for(iter = n->children.begin(); iter != n->children.end(); iter++) {
-     cout << "#################  my childern has:   " << (*iter)->name->get_string() << endl;
+    // cout << "#################  my childern has:   " << (*iter)->name->get_string() << endl;
       int temp_tag = get_max_descen_tag((*iter)->name);
       if(temp_tag > max_tag) 
         max_tag = temp_tag;
-   }  cout << "max tag: " << max_tag << endl;
+   }  //cout << "max tag: " << max_tag << endl;
    return max_tag;
 }
 
@@ -1408,7 +1408,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 { 
    tag = 0;
    stringtable.add_string(name->get_string());          // Add class name to string table
-   cout<<"adding to string table:"<<nd->get_name()<<"/"<<name->get_string()<<" tag: "<<tag<<endl;
+   //cout<<"adding to string table:"<<nd->get_name()<<"/"<<name->get_string()<<" tag: "<<tag<<endl;
 }
 
 
@@ -1428,7 +1428,7 @@ void class__class::code(Environment *env)
   env->sym_table.enterscope();
 
   CgenNodeP n = env->cgen_table->get_node_by_name(this->name);
-  cout<<"======================generating code for class:"<<n->get_name()<<"==========================="<<endl;
+  //cout<<"======================generating code for class:"<<n->get_name()<<"==========================="<<endl;
   std::vector<attr_class*>::iterator iter;
   std::vector<method_sign*>::iterator iter2;
   int i=0;
@@ -1454,7 +1454,7 @@ void class__class::code(Environment *env)
 
 void method_class::code( Environment * env)
 {
-  cout<<endl<<"===== coding method:"<<name<<"========"<<endl;
+  //cout<<endl<<"===== coding method:"<<name<<"========"<<endl;
   ostream &s = env->str;
   s<<"\t# code for method"<<endl;
   env->sym_table.enterscope();
@@ -1472,7 +1472,7 @@ void method_class::code( Environment * env)
     sprintf(info, "%d", offset);
     strcat(info, "($fp)");
     env->sym_table.addid(f->name, info);
-    cout<<"adding formal to environment: "<<f->name<<" ofs:"<<info<<endl;
+    //cout<<"adding formal to environment: "<<f->name<<" ofs:"<<info<<endl;
   }
 
   //method lable
@@ -1500,7 +1500,7 @@ void method_class::code( Environment * env)
   emit_return(s);
 
   env->sym_table.exitscope();
-  cout<<"===== finish coding method:"<<name<<"========"<<endl<<endl;
+  //cout<<"===== finish coding method:"<<name<<"========"<<endl<<endl;
 
 }
 
@@ -1517,9 +1517,9 @@ void assign_class::code(Environment *env) {
 
   this->expr->code(env); //return value in ACC:
   // Read the "Environment":
-  cout<<"before"<<endl;
+  //cout<<"before"<<endl;
   char * address = (env->sym_table.lookup(name));
-  cout<<"after"<<endl;
+  //cout<<"after"<<endl;
   // Change the "Store": store the newly assigned variable to this adress
   s<<SW<<ACC<<"\t"<<address<<endl;
 
@@ -1556,7 +1556,7 @@ void static_dispatch_class::code(Environment *env) {
 
 void dispatch_class::code(Environment *env) 
 {
-  cout<<endl<<"===== coding dispatch:"<<name<<"========"<<endl;
+  //cout<<endl<<"===== coding dispatch:"<<name<<"========"<<endl;
   ostream &s = env->str;
   s<<"\t# code for dispatch"<<endl;
 
@@ -1569,7 +1569,7 @@ void dispatch_class::code(Environment *env)
   // load the base of the dispatch table: simply find from current class @offset 2*4=8
   emit_load(T1, 2, ACC, s);
   int offset = env->cgen_table->get_method_ofs(class_name, name);
-  cout<<"dispatch offset:"<<offset<<endl;
+  //cout<<"dispatch offset:"<<offset<<endl;
   emit_load(T1, offset, T1, s);
   emit_jalr(T1, s);
 }
@@ -1628,7 +1628,7 @@ void loop_class::code(Environment *env)
 void typcase_class::code(Environment *env) {
   ostream &s = env->str;
   s << "\t# code for typcase" << endl;
-  cout << "\t# code for typecase" << endl;
+  //cout << "\t# code for typecase" << endl;
 
   std::map<int, branch_class*> branch_map;
   for(int i = cases->first(); cases->more(i); i=cases->next(i)) 
@@ -1657,24 +1657,24 @@ void typcase_class::code(Environment *env) {
   emit_label_def(label_begin, s);
   emit_load(T2, 0, ACC ,s);
 
-  std::map<int, branch_class*>::reverse_iterator iter2;
-  for (iter2 = branch_map.rbegin(); iter2 != branch_map.rend(); ++iter2)
-    cout<<iter2->first<<":"<<iter2->second->name<<endl;
+  //std::map<int, branch_class*>::reverse_iterator iter2;
+ // for (iter2 = branch_map.rbegin(); iter2 != branch_map.rend(); ++iter2)
+    //cout<<iter2->first<<":"<<iter2->second->name<<endl;
 
   int label_end = env->get_label_cnt();
   std::map<int, branch_class*>::reverse_iterator iter;
   for (iter = branch_map.rbegin(); iter != branch_map.rend(); iter++) 
   {
     branch_class * b =  iter->second;
-     cout << "current come to the tag: " << iter->first  << "   class name: " <<b->type_decl->get_string() <<endl;
+   //  cout << "current come to the tag: " << iter->first  << "   class name: " <<b->type_decl->get_string() <<endl;
     env->sym_table.enterscope();
 
     int class_tag = iter->first;    
-    cout << "class tag: " << class_tag << endl;
+   // cout << "class tag: " << class_tag << endl;
     int max_tag = env->cgen_table->get_max_descen_tag(b->type_decl); 
-    cout << "max tag: " << max_tag << endl;
+   // cout << "max tag: " << max_tag << endl;
     int label_next = env->get_label_cnt();
-    cout << "label next: " << label_next << endl; 
+   // cout << "label next: " << label_next << endl; 
 
  
 
@@ -1685,7 +1685,7 @@ void typcase_class::code(Environment *env) {
     emit_bgti(T2, max_tag, label_next, s);
 
     char *info = new char[20];
-    cout << "offset: " << env->cur_exp_oft << endl; 
+    //cout << "offset: " << env->cur_exp_oft << endl; 
     sprintf(info, "%d", env->cur_exp_oft);
     strcat(info, "($fp)");
     env->sym_table.addid(b->name, info);
@@ -1715,18 +1715,19 @@ void let_class::code(Environment *env)
   ostream &s = env->str;
   s << "\t# code for let" << endl;
   env->sym_table.enterscope();
-
-  if(typeid(init) == typeid(no_expr_class)) 
-  {
+   
+  if(typeid(*init) == typeid(no_expr_class)) 
+  {   
      /* no initialization, for basic class, new a location is just copy from the prototype object */
      std::string type_name = type_decl->get_string();
-     if( !type_name.compare("Int") || !type_name.compare("Bool") || 
-         !type_name.compare("Str") || !type_name.compare("IO")  ) 
+    cout << " type name: " << type_name <<endl;
+     if( (type_name == "Int") || (type_name == "Bool") || 
+         (type_name == "String") || (type_name == "IO")  ) 
      {
          std::string proto_address = type_name + (std::string)PROTOBJ_SUFFIX;
          emit_load_address(ACC, (char*)proto_address.c_str(), s);
          emit_jal("Object.copy", s);
-         std::string init_address = type_name = (std::string)CLASSINIT_SUFFIX;
+         std::string init_address = type_name + (std::string)CLASSINIT_SUFFIX;
          emit_jal((char*)init_address.c_str(), s);
      }
      else 
@@ -1809,7 +1810,7 @@ void lt_class::code(Environment *env) {
 }
 
 void eq_class::code(Environment *env) {
-  cout<<"code for equality"<<endl;
+  //cout<<"code for equality"<<endl;
   ostream &s = env->str;
   s << "\t# code for equality" << endl;
 
@@ -1973,16 +1974,16 @@ void object_class::code(Environment *env) {
   else 
   {
     // load from symbol table
-    cout<<"code for object identifier"<<endl;
+    //cout<<"code for object identifier"<<endl;
    // env->sym_table.dump();
     char * address = (env->sym_table.lookup(name));
-    cout<<"name is:"<<name<<endl;
-    cout<<"adress is:"<<address<<endl;
+    //cout<<"name is:"<<name<<endl;
+    //cout<<"adress is:"<<address<<endl;
   
     if( address == NULL ) 
     {
-      cout << "__" << endl;  
-      cout << name << endl; 
+      //cout << "__" << endl;  
+      //cout << name << endl; 
      // cout <<  env->sym_table << endl;
     }
     //emit_load(ACC, 0, address, s);
