@@ -1383,7 +1383,8 @@ int CgenClassTable::get_max_descen_tag(Symbol class_name) {
    int max_tag = n->get_tag();  
    std::vector<CgenNodeP>::iterator iter;
    for(iter = n->children.begin(); iter != n->children.end(); iter++) {
-      int temp_tag = (*iter)->get_tag();
+     cout << "#################  my childern has:   " << (*iter)->name->get_string() << endl;
+      int temp_tag = get_max_descen_tag((*iter)->name);
       if(temp_tag > max_tag) 
         max_tag = temp_tag;
    }  cout << "max tag: " << max_tag << endl;
