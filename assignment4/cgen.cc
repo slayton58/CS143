@@ -1720,7 +1720,7 @@ void let_class::code(Environment *env)
   {   
      /* no initialization, for basic class, new a location is just copy from the prototype object */
      std::string type_name = type_decl->get_string();
-    cout << " type name: " << type_name <<endl;
+  //  cout << " type name: " << type_name <<endl;
      if( (type_name == "Int") || (type_name == "Bool") || 
          (type_name == "String") || (type_name == "IO")  ) 
      {
