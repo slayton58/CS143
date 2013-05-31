@@ -16,41 +16,37 @@ README file for Programming Assignment 4  (C++ edition)
 Below is a number of structures we implemented to hold global
 information on classes,  attributes and methods.
 
-class CgenNode : public class__class 
-{
- private: 
-   CgenNodeP parentnd;                        // Parent of class
-   Basicness basic_status;                    // `Basic' if class is basic
-                                             // `NotBasic' otherwise
-   int tag;                                   // tag for the class(unique number)
-   
-public:
+data structures in CgenNode:
+{   
+  CgenNodeP parentnd;                      /* parent node */
+  Basicness basic_status;                  /* is basic class */
+  int tag;                                 /* class tag */
 
-  std::vector<CgenNodeP> children;                  // Children of class 
-  CgenNode(Class_ c,
-            Basicness bstatus,
-            CgenClassTableP class_table);
+  /* vector of children nodes*/ 
+  std::vector<CgenNodeP> children; 
 
-  /** mapping for class attributes */
+  /* mapping for class attributes */
   std::vector<attr_class*> attr_list;
 
-  /** mapping for class methods */
+  /* mapping for class methods */
   std::vector<method_sign*> method_list;
   ...
 }
 
 class method_sign
 {
-public:
+ public:
   Symbol class_name;
   method_class* method_name;
-  method_sign(Symbol c, method_class* m) {
+  
+  method_sign(Symbol c, method_class* m) 
+  {
     class_name = c;
     method_name = m;
   }
 };
 
-In this way, we get ride of addtional maps, but embeded those information inside
+In this way, we get ride of additional maps, but embedded those information inside
 CgenNode, it is easy to query its tag, methods and attributes. When assign 
 class tag to each CgenNode, we use the depth-first-search algorithm to go through
 the inheritance graph, so that we can guarantee, children's tags are larger than 
@@ -60,7 +56,7 @@ for each class, which is collected by function build_features_map, and will be
 used later to generate prototype objects and dispatch tables. Note, during the 
 collection, we also need to add parent class's attributes and methods to the 
 processing class's list and if method has the same name with any parent class's 
-method, this method need to be overrided. 
+method, this method need to be overridden. 
 
 Armed with these structures, we have all the information needed to generate
 code for global constants and tables(including code_class_nameTab, code_class_objTab
@@ -87,10 +83,10 @@ As pointed out in lecture, there are three contexts need for operational semanti
 3). self object
 
 In our implementation, the Environment is implemented in the data structure of Environment:
-  int label_cnt;                        // the label counter
-  class__class* cur_class;              // the current class
-  CgenClassTable* cgen_table;           // the table contains all the class nodes
-  SymbolTable<Symbol, char> sym_table;  // this is the mapping of variables to memory locations
+  int label_cnt;                       // the label counter
+  class__class* cur_class;             // the current class
+  CgenClassTable* cgen_table;          // the table contains all the class nodes
+  SymbolTable<Symbol, char> sym_table; // this is the mapping of variables to memory locations
   
 There are several cases when a new variable is introduced, and they should be added
 to the environment:
@@ -135,13 +131,13 @@ table. The next step is to get the offset of the method from the dispatch table
 and jump to that method. 
 
            ------------
-          |    Arg1    |    (0, 3)     High Address
+          |    Arg1    |    <-SP(0, 3)     High Address
            ------------
           |    Arg2    |
            ------------
                 :
            ------------
-          |    ArgN    |    (1)
+          |    ArgN    |    <-SP(1)
            ------------
           |  old $fp   |
            ------------
@@ -149,7 +145,7 @@ and jump to that method.
            ------------
   FP ->   |    $ra     |    
            ------------
-  SP ->   |            |    (2)      Low Address
+          |            |    <-SP(2)        Low Address
            ------------
            
 Whem generating code for method, first update the "Environment" i.e. the location
