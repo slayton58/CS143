@@ -3,7 +3,7 @@
 rm -rf *.txt *.s
 ./mycoolc -g -t $* -o 1.s  
 cd ~/dragon/assignment4 
-./mycoolc -g -t  $* -o 2.s
+./mycoolc -g -t $* -o 2.s
 mv 2.s ~/143/assignment4
 cd ~/143/assignment4
 diff 1.s 2.s > 3.txt 

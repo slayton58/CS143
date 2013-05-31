@@ -231,6 +231,9 @@ If none of the branches can match the given expression, a 'missing branch'
 exception is thrown. We added an extra label to the end of the code for the case 
 expression to handle this exception.
 
-
-
-
+===============================================================================
+    5 Garbage Collection
+===============================================================================
+We start with not using the collector. After design finished, we verified our code 
+using varied garbage collection flags, -g, -t and -T. In the end, our code is able
+to work with garbage collector under any circumstances.
