@@ -1,6 +1,20 @@
 user:songhan
 user:xuany
 
+
+
+
+
+
+
+part 2,3 is done, please finish 1,4
+
+
+
+
+
+
+
 README file for Programming Assignment 4  (C++ edition)
 =======================================================
 
@@ -29,7 +43,7 @@ As pointed out in lecture, there are three contexts need for operational semanti
 2). Store: map memory locations to values
 3). self object
 
-In our implementation, the Environment is implented in the data structure of Environment:
+In our implementation, the Environment is implemented in the data structure of Environment:
   int label_cnt;                        // the label counter
   class__class* cur_class;              // the current class
   CgenClassTable* cgen_table;           // the table contains all the class nodes
@@ -50,10 +64,10 @@ to the environment:
 ----------------------------------
        3.1 Stack Machine Model 
 ----------------------------------
-We used the statck machine model to implement the code generator. Whenever a new
+We used the stack machine model to implement the code generator. Whenever a new
 variable is newed or and expression is evaluated, the return value (as an object
 pointer) is always stored in $a0 and pushed to stack. Before and after evaluating
-each expression, it is guranteed that the state of the stack remain unchanged. 
+each expression, it is guaranteed that the state of the stack remain unchanged. 
 
 
 The invariants used in our implementation are:
@@ -104,13 +118,49 @@ shall recover to the original location (3)
 
 
 ----------------------------------
-        3.2 Let Expression
+        3.3 Let Expression
 ----------------------------------
+
+The let expression usually have a bunch of nationalizations. However, Cool treats them
+recursively. So in each let expression we need to consider only one new variable.
+The initialization of the new variable, if any, is first coded. Then the value returned
+by $a0 is pushed to stack and added to the environment. Note the offset relative to the
+$fp is stored in the variable cur_exp_oft. After the let expression is finished, the 
+environment calls exit scope to delete the address of the new introduced variables.
 
 
 ----------------------------------
-        3.3 Case Expression
+        3.4 Case Expression
 ----------------------------------
+
+The difficult part of generating code for case expression is finding the closest
+parent. This is achieved by comparison of class tags. To make this effective, we
+allocate each tag by DFS the inheritance graph, so the tags looks like this:
+              
+              0
+          4       1
+       6    5   3   2
+
+This scheme has the property that, for any child, its parent tag is smaller than it;
+for any parent, all the children has consecutive tag numbers. So to determine if
+C is a child of P, we just need to see if the tag of C falls within the range of
+P and P's largest child tag, which is obtained recursively. Since we need to find 
+the smallest parent, all the case branches are sorted in the beginning. This is
+pretty simple since we created a map from tag number to branch class pointer, and 
+map inserting is sorted inserting in C++ stl. In this way, the first parent that
+we find is guaranteed to be the smallest parent. 
+
+----------------------------------
+        3.5 New Expression
+----------------------------------
+
+The new expression need to check if the new type is a SELF_TYPE. If so, we need first load
+the address of the class object table, then load the class tag from offset 0, 
+multiply this tag by 8, add this displacement to the object table to get the class's
+prototype, then load this prototype address to $a0, and call Object.copy routine.
+If not a SELF_TYPE, we directly get the prototype address by string concatenation,
+load this address to $a0, and calls the Object.copy routine. For both cases, the 
+final step is to jump to the class's init method.
 
 
 ===============================================================================
