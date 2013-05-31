@@ -3,18 +3,6 @@ user:xuany
 
 
 
-
-
-
-
-part 2,3 is done, please finish 1,4
-
-
-
-
-
-
-
 README file for Programming Assignment 4  (C++ edition)
 =======================================================
 
@@ -25,13 +13,68 @@ README file for Programming Assignment 4  (C++ edition)
 -------------------------------------------------------------------------------
         1.1 CgenClassTable Structures
 -------------------------------------------------------------------------------
+Below is a number of structures we implemented to hold global
+information on classes,  attributes and methods.
 
+class CgenNode : public class__class 
+{
+ private: 
+   CgenNodeP parentnd;                        // Parent of class
+   Basicness basic_status;                    // `Basic' if class is basic
+                                             // `NotBasic' otherwise
+   int tag;                                   // tag for the class(unique number)
+   
+public:
+
+  std::vector<CgenNodeP> children;                  // Children of class 
+  CgenNode(Class_ c,
+            Basicness bstatus,
+            CgenClassTableP class_table);
+
+  /** mapping for class attributes */
+  std::vector<attr_class*> attr_list;
+
+  /** mapping for class methods */
+  std::vector<method_sign*> method_list;
+  ...
+}
+
+class method_sign
+{
+public:
+  Symbol class_name;
+  method_class* method_name;
+  method_sign(Symbol c, method_class* m) {
+    class_name = c;
+    method_name = m;
+  }
+};
+
+In this way, we get ride of addtional maps, but embeded those information inside
+CgenNode, it is easy to query its tag, methods and attributes. When assign 
+class tag to each CgenNode, we use the depth-first-search algorithm to go through
+the inheritance graph, so that we can guarantee, children's tags are larger than 
+their parent's tag, this tag assignment methodology will help us in later code 
+generation for case.  attr_list and method_list contains a list of attr/method
+for each class, which is collected by function build_features_map, and will be 
+used later to generate prototype objects and dispatch tables. Note, during the 
+collection, we also need to add parent class's attributes and methods to the 
+processing class's list and if method has the same name with any parent class's 
+method, this method need to be overrided. 
+
+Armed with these structures, we have all the information needed to generate
+code for global constants and tables(including code_class_nameTab, code_class_objTab
+code_dispatch_table, code_prototype_objects).We need to follow the specifications in
+Cool Runtime manual to design the layout and write the code. 
 
 -------------------------------------------------------------------------------
         1.2 Code Generation for Object Init methods
 -------------------------------------------------------------------------------
 
-
+Since there are optional expressions in attribute initialization code in Cool,
+we left the code generation of Object Init methods in a separate pass, after
+all global information in CgenClassTable is collected. As a result, we can use
+other environment structures to generate code for initialization expressions.
 
 
 ===============================================================================
@@ -166,22 +209,27 @@ final step is to jump to the class's init method.
 ===============================================================================
     4 Error Checking and Handling
 ===============================================================================
-
+Error checking and handling is added for the generated program to let the program
+exits gracefully when an exception occurs.
 
 ----------------------------------
         4.1 dispatch on void
 ----------------------------------
-
+The program should abort when it tries to dispatch on a void object. Through checking 
+of the base address with zero, we are able to discover and report this exception. 
 
 ----------------------------------
         4.2 case on void
 ----------------------------------
-
+The 'case on void' exception is similar to 'dispatch on void'. We used 'Bne' to 
+compare the result of the expression with zero register.
 
 ----------------------------------
         4.3 missing branch
 ----------------------------------
-
+If none of the branches can match the given expression, a 'missing branch' 
+exception is thrown. We added an extra label to the end of the code for the case 
+expression to handle this exception.
 
 
 
