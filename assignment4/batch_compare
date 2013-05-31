@@ -5,12 +5,12 @@ import re
 
 def main(argv):
   #  os.system('make cgen')
-    os.system('rm -f *.txt *.s')
+       #os.system('rm -f *.txt *.s')
 
-    for f in os.listdir(argv[1]):
-        if not (f.endswith('.cl') or f.endswith('.in')):
-            continue
-        fname = argv[1] + '/' + f
+#    for f in os.listdir(argv[1]):
+#        if not (f.endswith('.cl') or f.endswith('.in')):
+#            continue
+        fname = argv[1] #+ '/' + f
 
         os.system('./mycoolc %s -o 1.s' %(fname))
         os.system('./coolc   %s -o 2.s' %(fname))
