@@ -152,7 +152,7 @@ void program_class::cgen(ostream &os)
   initialize_constants();
 /*  CgenClassTable *codegen_classtable = new CgenClassTable(classes,os);*/
   Environment * env = new Environment(classes, os);
-  //env->cgen_table->code();
+  env->cgen_table->code();
   for(int i = classes->first(); classes->more(i); i = classes->next(i))
   {
     class__class* cls = (class__class *) classes->nth(i);
@@ -948,7 +948,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
    //print_inheritance_tree() ;
 
    build_features_map();
-   code();
+   //code();
    //exitscope();
 }
 
