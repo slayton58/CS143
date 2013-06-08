@@ -1,0 +1,63 @@
+#4
+_program
+  #4
+  _class
+    Main
+    IO
+    "shadow-attr-case.cl"
+    (
+    #6
+    _attr
+      var
+      String
+      #6
+      _string
+        "bad"
+      : String
+    #8
+    _method
+      main
+      Object
+      #10
+      _block
+        #11
+        _typcase
+          #11
+          _string
+            "good"
+          : String
+          #12
+          _branch
+            var
+            String
+            #13
+            _dispatch
+              #13
+              _object
+                self
+              : SELF_TYPE
+              out_string
+              (
+              #13
+              _object
+                var
+              : String
+              )
+            : SELF_TYPE
+        : SELF_TYPE
+        #16
+        _dispatch
+          #16
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #16
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

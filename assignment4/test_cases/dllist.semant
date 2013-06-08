@@ -1,0 +1,474 @@
+#1
+_program
+  #1
+  _class
+    Node
+    Object
+    "dllist.cl"
+    (
+    #2
+    _attr
+      next
+      Node
+      #0
+      _no_expr
+      : _no_type
+    #3
+    _attr
+      prev
+      Node
+      #0
+      _no_expr
+      : _no_type
+    #4
+    _attr
+      n
+      Int
+      #4
+      _int
+        1
+      : Int
+    #5
+    _method
+      setPrev
+      #5
+      _formal
+        node
+        Node
+      Node
+      #6
+      _assign
+        prev
+        #6
+        _object
+          node
+        : Node
+      : Node
+    #8
+    _method
+      setNext
+      #8
+      _formal
+        node
+        Node
+      Node
+      #9
+      _assign
+        next
+        #9
+        _object
+          node
+        : Node
+      : Node
+    #11
+    _method
+      getNext
+      Node
+      #12
+      _object
+        next
+      : Node
+    #14
+    _method
+      getN
+      Int
+      #15
+      _object
+        n
+      : Int
+    #17
+    _method
+      setN
+      #17
+      _formal
+        x
+        Int
+      Int
+      #18
+      _assign
+        n
+        #18
+        _object
+          x
+        : Int
+      : Int
+    )
+  #22
+  _class
+    List
+    Object
+    "dllist.cl"
+    (
+    #23
+    _attr
+      head
+      Node
+      #0
+      _no_expr
+      : _no_type
+    #24
+    _attr
+      tail
+      Node
+      #0
+      _no_expr
+      : _no_type
+    #25
+    _method
+      add
+      #25
+      _formal
+        node
+        Node
+      Node
+      #26
+      _cond
+        #26
+        _isvoid
+          #26
+          _object
+            head
+          : Node
+        : Bool
+        #26
+        _block
+          #27
+          _assign
+            head
+            #27
+            _object
+              node
+            : Node
+          : Node
+          #28
+          _assign
+            tail
+            #28
+            _object
+              node
+            : Node
+          : Node
+        : Node
+        #29
+        _block
+          #30
+          _dispatch
+            #30
+            _object
+              tail
+            : Node
+            setNext
+            (
+            #30
+            _object
+              node
+            : Node
+            )
+          : Node
+          #31
+          _dispatch
+            #31
+            _object
+              node
+            : Node
+            setPrev
+            (
+            #31
+            _object
+              tail
+            : Node
+            )
+          : Node
+          #32
+          _assign
+            tail
+            #32
+            _object
+              node
+            : Node
+          : Node
+        : Node
+      : Node
+    #36
+    _method
+      print
+      #36
+      _formal
+        out
+        IO
+      Node
+      #37
+      _let
+        l
+        Node
+        #37
+        _object
+          head
+        : Node
+        #37
+        _block
+          #38
+          _loop
+            #38
+            _comp
+              #38
+              _isvoid
+                #38
+                _object
+                  l
+                : Node
+              : Bool
+            : Bool
+            #38
+            _block
+              #39
+              _dispatch
+                #39
+                _object
+                  out
+                : IO
+                out_int
+                (
+                #39
+                _dispatch
+                  #39
+                  _object
+                    l
+                  : Node
+                  getN
+                  (
+                  )
+                : Int
+                )
+              : IO
+              #40
+              _dispatch
+                #40
+                _object
+                  out
+                : IO
+                out_string
+                (
+                #40
+                _string
+                  " "
+                : String
+                )
+              : IO
+              #41
+              _assign
+                l
+                #41
+                _dispatch
+                  #41
+                  _object
+                    l
+                  : Node
+                  getNext
+                  (
+                  )
+                : Node
+              : Node
+            : Node
+          : Object
+          #43
+          _object
+            l
+          : Node
+        : Node
+      : Node
+    )
+  #48
+  _class
+    Main
+    IO
+    "dllist.cl"
+    (
+    #49
+    _method
+      main
+      IO
+      #50
+      _block
+        #51
+        _let
+          i
+          Int
+          #51
+          _int
+            0
+          : Int
+          #52
+          _loop
+            #52
+            _lt
+              #52
+              _object
+                i
+              : Int
+              #52
+              _int
+                3
+              : Int
+            : Bool
+            #52
+            _block
+              #53
+              _let
+                i
+                Int
+                #53
+                _int
+                  0
+                : Int
+                #54
+                _let
+                  list
+                  List
+                  #54
+                  _new
+                    List
+                  : List
+                  #54
+                  _block
+                    #55
+                    _dispatch
+                      #55
+                      _object
+                        list
+                      : List
+                      add
+                      (
+                      #55
+                      _new
+                        Node
+                      : Node
+                      )
+                    : Node
+                    #56
+                    _loop
+                      #56
+                      _lt
+                        #56
+                        _object
+                          i
+                        : Int
+                        #56
+                        _int
+                          100
+                        : Int
+                      : Bool
+                      #56
+                      _block
+                        #57
+                        _let
+                          a
+                          Node
+                          #57
+                          _new
+                            Node
+                          : Node
+                          #57
+                          _block
+                            #58
+                            _dispatch
+                              #58
+                              _object
+                                a
+                              : Node
+                              setN
+                              (
+                              #58
+                              _object
+                                i
+                              : Int
+                              )
+                            : Int
+                            #59
+                            _dispatch
+                              #59
+                              _object
+                                list
+                              : List
+                              add
+                              (
+                              #59
+                              _object
+                                a
+                              : Node
+                              )
+                            : Node
+                          : Node
+                        : Node
+                        #61
+                        _assign
+                          i
+                          #61
+                          _plus
+                            #61
+                            _object
+                              i
+                            : Int
+                            #61
+                            _int
+                              1
+                            : Int
+                          : Int
+                        : Int
+                      : Int
+                    : Object
+                    #63
+                    _dispatch
+                      #63
+                      _object
+                        list
+                      : List
+                      print
+                      (
+                      #63
+                      _object
+                        self
+                      : SELF_TYPE
+                      )
+                    : Node
+                    #64
+                    _dispatch
+                      #64
+                      _object
+                        self
+                      : SELF_TYPE
+                      out_string
+                      (
+                      #64
+                      _string
+                        "\n"
+                      : String
+                      )
+                    : SELF_TYPE
+                  : SELF_TYPE
+                : SELF_TYPE
+              : SELF_TYPE
+              #66
+              _assign
+                i
+                #66
+                _plus
+                  #66
+                  _object
+                    i
+                  : Int
+                  #66
+                  _int
+                    1
+                  : Int
+                : Int
+              : Int
+            : Int
+          : Object
+        : Object
+        #68
+        _object
+          self
+        : SELF_TYPE
+      : SELF_TYPE
+    )

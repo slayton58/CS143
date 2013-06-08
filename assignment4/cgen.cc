@@ -949,7 +949,6 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
 
    build_features_map();
    //code();
-   //exitscope();
 }
 
 void CgenClassTable::install_basic_classes()

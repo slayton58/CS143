@@ -1,0 +1,35 @@
+19,21c19,48
+<   Exception 7  [Bad address in data/stack read]  Execution aborted
+< Stats -- #instructions : 10963
+<          #reads : 2051  #writes 1910  #branches 2149  #other 4853
+---
+> vT3.m82
+> vT3.m91
+> vT3.m115
+> vT3.m108
+> 13724251
+> vT3.m114
+> vT3.m116
+> vT4.m82
+> vT4.m83
+> vT4.m117
+> vT4.m121
+> 565
+> vT5.m82
+> vT5.m122
+> 2009467841
+> vT5.m124
+> vT6.m77
+> vT6.m82
+> vT6.m83
+> vT7.m87
+> vT7.m127
+> -182523797
+> vT8.m135
+> vT8.m140
+> vT8.m146
+> 77284
+> vT8.m153
+> COOL program successfully executed
+> Stats -- #instructions : 39584
+>          #reads : 7765  #writes 6634  #branches 8183  #other 17002

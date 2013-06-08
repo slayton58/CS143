@@ -1,0 +1,49 @@
+#4
+_program
+  #4
+  _class
+    Main
+    IO
+    "voiddisp.cl"
+    (
+    #6
+    _method
+      main
+      Object
+      #8
+      _let
+        nothing
+        Object
+        #8
+        _loop
+          #8
+          _bool
+            0
+          : Bool
+          #8
+          _int
+            1
+          : Int
+        : Object
+        #9
+        _dispatch
+          #9
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #9
+          _dispatch
+            #9
+            _object
+              nothing
+            : Object
+            type_name
+            (
+            )
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

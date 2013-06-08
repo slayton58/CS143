@@ -1,0 +1,295 @@
+#1
+_program
+  #1
+  _class
+    Main
+    Object
+    "selfdispmulti.cl"
+    (
+    #2
+    _method
+      main
+      Object
+      #3
+      _block
+        #4
+        _dispatch
+          #4
+          _new
+            A
+          : A
+          a
+          (
+          )
+        : Object
+      : Object
+    )
+  #9
+  _class
+    A
+    B
+    "selfdispmulti.cl"
+    (
+    #10
+    _method
+      a
+      Object
+      #11
+      _dispatch
+        #11
+        _dispatch
+          #11
+          _dispatch
+            #11
+            _dispatch
+              #11
+              _dispatch
+                #11
+                _dispatch
+                  #11
+                  _dispatch
+                    #11
+                    _dispatch
+                      #11
+                      _dispatch
+                        #11
+                        _dispatch
+                          #11
+                          _dispatch
+                            #11
+                            _dispatch
+                              #11
+                              _dispatch
+                                #11
+                                _dispatch
+                                  #11
+                                  _object
+                                    self
+                                  : SELF_TYPE
+                                  a_fun
+                                  (
+                                  )
+                                : SELF_TYPE
+                                a_fun
+                                (
+                                )
+                              : SELF_TYPE
+                              a_fun
+                              (
+                              )
+                            : SELF_TYPE
+                            a_fun
+                            (
+                            )
+                          : SELF_TYPE
+                          a_fun
+                          (
+                          )
+                        : SELF_TYPE
+                        a_fun
+                        (
+                        )
+                      : SELF_TYPE
+                      a_fun
+                      (
+                      )
+                    : SELF_TYPE
+                    a_fun
+                    (
+                    )
+                  : SELF_TYPE
+                  a_fun
+                  (
+                  )
+                : SELF_TYPE
+                a_fun
+                (
+                )
+              : SELF_TYPE
+              a_fun
+              (
+              )
+            : SELF_TYPE
+            a_fun
+            (
+            )
+          : SELF_TYPE
+          a_fun
+          (
+          )
+        : SELF_TYPE
+        b
+        (
+        )
+      : Object
+    #14
+    _method
+      a_fun
+      SELF_TYPE
+      #15
+      _block
+        #16
+        _dispatch
+          #16
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #16
+          _string
+            "a_fun\n"
+          : String
+          )
+        : SELF_TYPE
+        #17
+        _object
+          self
+        : SELF_TYPE
+      : SELF_TYPE
+    )
+  #23
+  _class
+    B
+    IO
+    "selfdispmulti.cl"
+    (
+    #24
+    _method
+      b
+      Object
+      #25
+      _dispatch
+        #25
+        _dispatch
+          #25
+          _dispatch
+            #25
+            _dispatch
+              #25
+              _dispatch
+                #25
+                _dispatch
+                  #25
+                  _dispatch
+                    #25
+                    _dispatch
+                      #25
+                      _dispatch
+                        #25
+                        _dispatch
+                          #25
+                          _dispatch
+                            #25
+                            _dispatch
+                              #25
+                              _dispatch
+                                #25
+                                _dispatch
+                                  #25
+                                  _object
+                                    self
+                                  : SELF_TYPE
+                                  b_fun
+                                  (
+                                  )
+                                : SELF_TYPE
+                                b_fun
+                                (
+                                )
+                              : SELF_TYPE
+                              b_fun
+                              (
+                              )
+                            : SELF_TYPE
+                            b_fun
+                            (
+                            )
+                          : SELF_TYPE
+                          b_fun
+                          (
+                          )
+                        : SELF_TYPE
+                        b_fun
+                        (
+                        )
+                      : SELF_TYPE
+                      b_fun
+                      (
+                      )
+                    : SELF_TYPE
+                    b_fun
+                    (
+                    )
+                  : SELF_TYPE
+                  b_fun
+                  (
+                  )
+                : SELF_TYPE
+                b_fun
+                (
+                )
+              : SELF_TYPE
+              b_fun
+              (
+              )
+            : SELF_TYPE
+            b_fun
+            (
+            )
+          : SELF_TYPE
+          b_fun
+          (
+          )
+        : SELF_TYPE
+        b_out
+        (
+        )
+      : Object
+    #28
+    _method
+      b_fun
+      SELF_TYPE
+      #29
+      _block
+        #30
+        _dispatch
+          #30
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #30
+          _string
+            "b_fun\n"
+          : String
+          )
+        : SELF_TYPE
+        #31
+        _object
+          self
+        : SELF_TYPE
+      : SELF_TYPE
+    #35
+    _method
+      b_out
+      Object
+      #36
+      _block
+        #37
+        _dispatch
+          #37
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #37
+          _string
+            "finally...\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

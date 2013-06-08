@@ -1,0 +1,103 @@
+#1
+_program
+  #1
+  _class
+    IO2
+    IO
+    "io-override.cl"
+    (
+    #2
+    _method
+      out_string
+      #2
+      _formal
+        s
+        String
+      SELF_TYPE
+      #2
+      _static_dispatch
+        #2
+        _object
+          self
+        : SELF_TYPE
+        IO
+        out_int
+        (
+        #2
+        _dispatch
+          #2
+          _object
+            s
+          : String
+          length
+          (
+          )
+        : Int
+        )
+      : SELF_TYPE
+    #3
+    _method
+      out_int
+      #3
+      _formal
+        i
+        Int
+      SELF_TYPE
+      #3
+      _static_dispatch
+        #3
+        _object
+          self
+        : SELF_TYPE
+        IO
+        out_string
+        (
+        #3
+        _string
+          "an int"
+        : String
+        )
+      : SELF_TYPE
+    )
+  #6
+  _class
+    Main
+    IO2
+    "io-override.cl"
+    (
+    #7
+    _method
+      main
+      Object
+      #7
+      _block
+        #8
+        _dispatch
+          #8
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #8
+          _string
+            "my string"
+          : String
+          )
+        : SELF_TYPE
+        #9
+        _dispatch
+          #9
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #9
+          _int
+            42
+          : Int
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

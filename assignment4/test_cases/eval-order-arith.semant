@@ -1,0 +1,276 @@
+#4
+_program
+  #4
+  _class
+    Main
+    IO
+    "eval-order-arith.cl"
+    (
+    #6
+    _method
+      recite
+      #6
+      _formal
+        value
+        Int
+      Int
+      #8
+      _block
+        #9
+        _dispatch
+          #9
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #9
+          _object
+            value
+          : Int
+          )
+        : SELF_TYPE
+        #10
+        _dispatch
+          #10
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #10
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #11
+        _object
+          value
+        : Int
+      : Int
+    #15
+    _method
+      main
+      Object
+      #17
+      _block
+        #18
+        _plus
+          #18
+          _dispatch
+            #18
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #18
+            _int
+              1
+            : Int
+            )
+          : Int
+          #18
+          _dispatch
+            #18
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #18
+            _int
+              2
+            : Int
+            )
+          : Int
+        : Int
+        #19
+        _sub
+          #19
+          _dispatch
+            #19
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #19
+            _int
+              3
+            : Int
+            )
+          : Int
+          #19
+          _dispatch
+            #19
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #19
+            _int
+              4
+            : Int
+            )
+          : Int
+        : Int
+        #20
+        _mul
+          #20
+          _dispatch
+            #20
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #20
+            _int
+              5
+            : Int
+            )
+          : Int
+          #20
+          _dispatch
+            #20
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #20
+            _int
+              6
+            : Int
+            )
+          : Int
+        : Int
+        #21
+        _divide
+          #21
+          _dispatch
+            #21
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #21
+            _int
+              7
+            : Int
+            )
+          : Int
+          #21
+          _dispatch
+            #21
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #21
+            _int
+              8
+            : Int
+            )
+          : Int
+        : Int
+        #22
+        _lt
+          #22
+          _dispatch
+            #22
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #22
+            _int
+              9
+            : Int
+            )
+          : Int
+          #22
+          _dispatch
+            #22
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #22
+            _int
+              10
+            : Int
+            )
+          : Int
+        : Bool
+        #23
+        _eq
+          #23
+          _dispatch
+            #23
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #23
+            _int
+              11
+            : Int
+            )
+          : Int
+          #23
+          _dispatch
+            #23
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #23
+            _int
+              12
+            : Int
+            )
+          : Int
+        : Bool
+        #24
+        _leq
+          #24
+          _dispatch
+            #24
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #24
+            _int
+              13
+            : Int
+            )
+          : Int
+          #24
+          _dispatch
+            #24
+            _object
+              self
+            : SELF_TYPE
+            recite
+            (
+            #24
+            _int
+              14
+            : Int
+            )
+          : Int
+        : Bool
+      : Bool
+    )

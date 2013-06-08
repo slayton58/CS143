@@ -1,0 +1,56 @@
+18,20c18,68
+< No match in case statement for Class T1
+< Stats -- #instructions : 20893
+<          #reads : 3809  #writes 3831  #branches 3958  #other 9295
+---
+> -158
+> vT1.m143
+> vT1.m149
+> vT1.m157
+> vT2.m171
+> vT2.m143
+> vT2.m149
+> vT2.m161
+> 650160730
+> vT2.m164
+> vT3.m129
+> vT3.m131
+> 276
+> vT3.m176
+> 431
+> vT4.m116
+> vT4.m132
+> 
+> vT4.m181
+> 
+> vT4.m189
+> vT4.m196
+> vT5.m197
+> -19188792
+> vT5.m203
+> vT5.m207
+> 888
+> vT5.m210
+> 
+> vT6.m171
+> vT6.m137
+> 468
+> vT6.m214
+> Increasing heap...
+> vT6.m217
+> vT6.m219
+> 468
+> vT7.m116
+> vT7.m121
+> -129
+> vT7.m176
+> 147
+> vT7.m226
+> vT7.m221
+> 431
+> vT8.m234
+> vT8.m241
+> vT8.m248
+> COOL program successfully executed
+> Stats -- #instructions : 227844
+>          #reads : 41773  #writes 42150  #branches 44116  #other 99805

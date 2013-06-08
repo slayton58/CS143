@@ -1,0 +1,53 @@
+SPIM Version 6.5 of January 4, 2003
+Copyright 1990-2003 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/class/cs143/lib/trap.handler
+vT0.m97
+vT0.m105
+vT0.m111
+vT1.m116
+vT1.m122
+vT1.m125
+vT1.m128
+114168992
+vT2.m129
+vT2.m140
+349
+vT2.m132
+vT2.m136
+vT3.m129
+vT3.m140
+234165886
+vT3.m132
+vT3.m142
+vT3.m150
+
+vT4.m154
+1180
+vT4.m140
+660
+vT4.m167
+vT4.m160
+vT5.m122
+vT5.m128
+0
+vT5.m169
+vT5.m172
+vT6.m97
+vT6.m111
+vT6.m180
+-313217
+vT7.m132
+vT7.m136
+vT7.m186
+vT8.m129
+vT8.m140
+-109200
+vT8.m132
+vT8.m136
+vT8.m191
+-240
+COOL program successfully executed
+Stats -- #instructions : 158361
+         #reads : 30127  #writes 28039  #branches 31810  #other 68385

@@ -1,0 +1,465 @@
+#1
+_program
+  #1
+  _class
+    A
+    IO
+    "init.cl"
+    (
+    #2
+    _attr
+      attr1
+      Int
+      #2
+      _plus
+        #2
+        _object
+          attr2
+        : Int
+        #2
+        _object
+          attr3
+        : Int
+      : Int
+    #3
+    _attr
+      attr2
+      Int
+      #3
+      _int
+        1
+      : Int
+    #4
+    _attr
+      attr3
+      Int
+      #4
+      _int
+        2
+      : Int
+    #5
+    _attr
+      attr4
+      Int
+      #5
+      _plus
+        #5
+        _mul
+          #5
+          _object
+            attr2
+          : Int
+          #5
+          _int
+            2
+          : Int
+        : Int
+        #5
+        _object
+          attr3
+        : Int
+      : Int
+    #6
+    _method
+      foo
+      SELF_TYPE
+      #7
+      _block
+        #8
+        _dispatch
+          #8
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #8
+          _object
+            attr1
+          : Int
+          )
+        : SELF_TYPE
+        #9
+        _dispatch
+          #9
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #9
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #10
+        _dispatch
+          #10
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #10
+          _object
+            attr2
+          : Int
+          )
+        : SELF_TYPE
+        #11
+        _dispatch
+          #11
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #11
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #12
+        _dispatch
+          #12
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #12
+          _object
+            attr3
+          : Int
+          )
+        : SELF_TYPE
+        #13
+        _dispatch
+          #13
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #13
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #14
+        _dispatch
+          #14
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #14
+          _object
+            attr4
+          : Int
+          )
+        : SELF_TYPE
+        #15
+        _dispatch
+          #15
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #15
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    #18
+    _method
+      boo
+      SELF_TYPE
+      #18
+      _object
+        self
+      : SELF_TYPE
+    )
+  #21
+  _class
+    B
+    IO
+    "init.cl"
+    (
+    #22
+    _attr
+      a1
+      Int
+      #22
+      _int
+        1
+      : Int
+    #23
+    _attr
+      a2
+      Int
+      #23
+      _int
+        2
+      : Int
+    #24
+    _attr
+      a3
+      Int
+      #24
+      _let
+        a1
+        Int
+        #24
+        _int
+          2
+        : Int
+        #24
+        _let
+          a2
+          Int
+          #24
+          _sub
+            #24
+            _object
+              a1
+            : Int
+            #24
+            _int
+              1
+            : Int
+          : Int
+          #24
+          _plus
+            #24
+            _mul
+              #24
+              _object
+                a1
+              : Int
+              #24
+              _int
+                2
+              : Int
+            : Int
+            #24
+            _object
+              a2
+            : Int
+          : Int
+        : Int
+      : Int
+    #25
+    _attr
+      a4
+      Int
+      #25
+      _let
+        ii
+        Int
+        #25
+        _int
+          5
+        : Int
+        #25
+        _let
+          result
+          Int
+          #25
+          _int
+            0
+          : Int
+          #25
+          _block
+            #26
+            _loop
+              #26
+              _lt
+                #26
+                _int
+                  0
+                : Int
+                #26
+                _object
+                  ii
+                : Int
+              : Bool
+              #26
+              _block
+                #27
+                _assign
+                  result
+                  #27
+                  _plus
+                    #27
+                    _object
+                      result
+                    : Int
+                    #27
+                    _typcase
+                      #27
+                      _dispatch
+                        #27
+                        _new
+                          A
+                        : A
+                        boo
+                        (
+                        )
+                      : A
+                      #27
+                      _branch
+                        id
+                        IO
+                        #27
+                        _int
+                          2
+                        : Int
+                      #27
+                      _branch
+                        id
+                        Object
+                        #27
+                        _int
+                          1
+                        : Int
+                      #27
+                      _branch
+                        id
+                        A
+                        #27
+                        _int
+                          3
+                        : Int
+                    : Int
+                  : Int
+                : Int
+                #28
+                _assign
+                  ii
+                  #28
+                  _sub
+                    #28
+                    _object
+                      ii
+                    : Int
+                    #28
+                    _int
+                      1
+                    : Int
+                  : Int
+                : Int
+              : Int
+            : Object
+            #29
+            _object
+              result
+            : Int
+          : Int
+        : Int
+      : Int
+    #30
+    _method
+      foo
+      SELF_TYPE
+      #31
+      _block
+        #32
+        _dispatch
+          #32
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #32
+          _object
+            a3
+          : Int
+          )
+        : SELF_TYPE
+        #33
+        _dispatch
+          #33
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #33
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #34
+        _dispatch
+          #34
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #34
+          _object
+            a4
+          : Int
+          )
+        : SELF_TYPE
+        #35
+        _dispatch
+          #35
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #35
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )
+  #40
+  _class
+    Main
+    Object
+    "init.cl"
+    (
+    #41
+    _method
+      main
+      Object
+      #41
+      _block
+        #41
+        _dispatch
+          #41
+          _new
+            A
+          : A
+          foo
+          (
+          )
+        : A
+        #41
+        _dispatch
+          #41
+          _new
+            B
+          : B
+          foo
+          (
+          )
+        : B
+      : B
+    )

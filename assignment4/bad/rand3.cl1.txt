@@ -1,0 +1,20 @@
+SPIM Version 6.5 of January 4, 2003
+Copyright 1990-2003 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/class/cs143/lib/trap.handler
+vT0.m116
+vT0.m129
+vT0.m121
+791
+vT0.m131
+791
+vT0.m132
+
+vT0.m134
+276
+vT1.m136
+vT1.m137
+No match in case statement for Class T1
+Stats -- #instructions : 20893
+         #reads : 3809  #writes 3831  #branches 3958  #other 9295

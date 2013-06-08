@@ -1,0 +1,157 @@
+#4
+_program
+  #4
+  _class
+    Main
+    Base
+    "superinit.cl"
+    (
+    #6
+    _attr
+      y
+      Object
+      #6
+      _dispatch
+        #6
+        _object
+          self
+        : SELF_TYPE
+        recite
+        (
+        #6
+        _int
+          3
+        : Int
+        )
+      : Object
+    #7
+    _attr
+      z
+      Object
+      #7
+      _dispatch
+        #7
+        _object
+          self
+        : SELF_TYPE
+        recite
+        (
+        #7
+        _int
+          4
+        : Int
+        )
+      : Object
+    #8
+    _attr
+      c
+      Object
+      #8
+      _dispatch
+        #8
+        _object
+          self
+        : SELF_TYPE
+        recite
+        (
+        #8
+        _int
+          5
+        : Int
+        )
+      : Object
+    #10
+    _method
+      main
+      Object
+      #12
+      _object
+        self
+      : SELF_TYPE
+    )
+  #16
+  _class
+    Base
+    IO
+    "superinit.cl"
+    (
+    #18
+    _method
+      recite
+      #18
+      _formal
+        value
+        Int
+      Object
+      #20
+      _block
+        #21
+        _dispatch
+          #21
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #21
+          _object
+            value
+          : Int
+          )
+        : SELF_TYPE
+        #22
+        _dispatch
+          #22
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #22
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #23
+        _object
+          self
+        : SELF_TYPE
+      : SELF_TYPE
+    #27
+    _attr
+      x
+      Object
+      #27
+      _dispatch
+        #27
+        _object
+          self
+        : SELF_TYPE
+        recite
+        (
+        #27
+        _int
+          1
+        : Int
+        )
+      : Object
+    #28
+    _attr
+      b
+      Object
+      #28
+      _dispatch
+        #28
+        _object
+          self
+        : SELF_TYPE
+        recite
+        (
+        #28
+        _int
+          2
+        : Int
+        )
+      : Object
+    )

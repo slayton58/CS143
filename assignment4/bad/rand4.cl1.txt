@@ -1,0 +1,21 @@
+SPIM Version 6.5 of January 4, 2003
+Copyright 1990-2003 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/class/cs143/lib/trap.handler
+vT0.m77
+vT0.m82
+vT0.m83
+vT0.m87
+vT1.m97
+-173
+vT1.m82
+vT1.m87
+vT1.m91
+vT2.m99
+-57589427
+vT2.m103
+vT2.m104
+  Exception 7  [Bad address in data/stack read]  Execution aborted
+Stats -- #instructions : 10963
+         #reads : 2051  #writes 1910  #branches 2149  #other 4853

@@ -1,0 +1,168 @@
+#5
+_program
+  #5
+  _class
+    Base
+    IO
+    "typename.cl"
+    (
+    #7
+    _method
+      identify
+      #7
+      _formal
+        thing
+        Object
+      Object
+      #9
+      _block
+        #10
+        _dispatch
+          #10
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #10
+          _dispatch
+            #10
+            _object
+              thing
+            : Object
+            type_name
+            (
+            )
+          : String
+          )
+        : SELF_TYPE
+        #11
+        _dispatch
+          #11
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #11
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    #15
+    _method
+      test
+      Object
+      #17
+      _block
+        #18
+        _dispatch
+          #18
+          _object
+            self
+          : SELF_TYPE
+          identify
+          (
+          #18
+          _new
+            Base
+          : Base
+          )
+        : Object
+        #19
+        _dispatch
+          #19
+          _object
+            self
+          : SELF_TYPE
+          identify
+          (
+          #19
+          _new
+            Derived
+          : Derived
+          )
+        : Object
+        #20
+        _dispatch
+          #20
+          _object
+            self
+          : SELF_TYPE
+          identify
+          (
+          #20
+          _new
+            Main
+          : Main
+          )
+        : Object
+        #22
+        _let
+          poly
+          Base
+          #22
+          _new
+            Derived
+          : Derived
+          #23
+          _dispatch
+            #23
+            _object
+              self
+            : SELF_TYPE
+            identify
+            (
+            #23
+            _object
+              poly
+            : Base
+            )
+          : Object
+        : Object
+        #25
+        _dispatch
+          #25
+          _object
+            self
+          : SELF_TYPE
+          identify
+          (
+          #25
+          _object
+            self
+          : SELF_TYPE
+          )
+        : Object
+      : Object
+    )
+  #31
+  _class
+    Derived
+    Base
+    "typename.cl"
+    (
+    )
+  #36
+  _class
+    Main
+    Object
+    "typename.cl"
+    (
+    #38
+    _method
+      main
+      Object
+      #40
+      _dispatch
+        #40
+        _new
+          Derived
+        : Derived
+        test
+        (
+        )
+      : Object
+    )

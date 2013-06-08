@@ -1,0 +1,61 @@
+#1
+_program
+  #1
+  _class
+    Main
+    IO
+    "abort.cl"
+    (
+    #2
+    _attr
+      x
+      Int
+      #0
+      _no_expr
+      : _no_type
+    #3
+    _method
+      main
+      Object
+      #3
+      _block
+        #4
+        _dispatch
+          #4
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #4
+          _string
+            "print me\n"
+          : String
+          )
+        : SELF_TYPE
+        #5
+        _dispatch
+          #5
+          _object
+            x
+          : Int
+          abort
+          (
+          )
+        : Object
+        #6
+        _dispatch
+          #6
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #6
+          _string
+            "don't print me\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

@@ -1,0 +1,232 @@
+#1
+_program
+  #1
+  _class
+    Main
+    Object
+    "newdispmulti.cl"
+    (
+    #2
+    _method
+      main
+      Object
+      #3
+      _block
+        #4
+        _dispatch
+          #4
+          _new
+            A
+          : A
+          a
+          (
+          )
+        : Object
+      : Object
+    )
+  #9
+  _class
+    A
+    IO
+    "newdispmulti.cl"
+    (
+    #10
+    _method
+      a
+      Object
+      #11
+      _dispatch
+        #11
+        _new
+          B
+        : B
+        b
+        (
+        )
+      : Object
+    #14
+    _method
+      a_out
+      Object
+      #15
+      _block
+        #16
+        _dispatch
+          #16
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #16
+          _string
+            "finally...\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )
+  #21
+  _class
+    B
+    Object
+    "newdispmulti.cl"
+    (
+    #22
+    _method
+      b
+      Object
+      #23
+      _dispatch
+        #23
+        _new
+          C
+        : C
+        c
+        (
+        )
+      : Object
+    #26
+    _method
+      b_out
+      Object
+      #27
+      _block
+        #28
+        _dispatch
+          #28
+          _new
+            A
+          : A
+          a_out
+          (
+          )
+        : Object
+      : Object
+    )
+  #33
+  _class
+    C
+    Object
+    "newdispmulti.cl"
+    (
+    #34
+    _method
+      c
+      Object
+      #35
+      _dispatch
+        #35
+        _new
+          D
+        : D
+        d
+        (
+        )
+      : Object
+    #38
+    _method
+      c_out
+      Object
+      #39
+      _dispatch
+        #39
+        _new
+          B
+        : B
+        b_out
+        (
+        )
+      : Object
+    )
+  #43
+  _class
+    D
+    Object
+    "newdispmulti.cl"
+    (
+    #44
+    _method
+      d
+      Object
+      #45
+      _dispatch
+        #45
+        _new
+          E
+        : E
+        e
+        (
+        )
+      : Object
+    #48
+    _method
+      d_out
+      Object
+      #49
+      _dispatch
+        #49
+        _new
+          C
+        : C
+        c_out
+        (
+        )
+      : Object
+    )
+  #53
+  _class
+    E
+    Object
+    "newdispmulti.cl"
+    (
+    #54
+    _method
+      e
+      Object
+      #55
+      _dispatch
+        #55
+        _new
+          F
+        : F
+        f
+        (
+        )
+      : Object
+    #58
+    _method
+      e_out
+      Object
+      #59
+      _dispatch
+        #59
+        _new
+          D
+        : D
+        d_out
+        (
+        )
+      : Object
+    )
+  #63
+  _class
+    F
+    Object
+    "newdispmulti.cl"
+    (
+    #64
+    _method
+      f
+      Object
+      #65
+      _dispatch
+        #65
+        _new
+          E
+        : E
+        e_out
+        (
+        )
+      : Object
+    )

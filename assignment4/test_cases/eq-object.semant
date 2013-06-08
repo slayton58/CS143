@@ -1,0 +1,279 @@
+#1
+_program
+  #1
+  _class
+    A
+    Object
+    "eq-object.cl"
+    (
+    #2
+    _attr
+      x
+      Int
+      #2
+      _int
+        5
+      : Int
+    #3
+    _method
+      foo
+      #3
+      _formal
+        y
+        Int
+      SELF_TYPE
+      #3
+      _block
+        #3
+        _assign
+          x
+          #3
+          _object
+            y
+          : Int
+        : Int
+        #3
+        _object
+          self
+        : SELF_TYPE
+      : SELF_TYPE
+    )
+  #5
+  _class
+    B
+    A
+    "eq-object.cl"
+    (
+    )
+  #8
+  _class
+    Main
+    Object
+    "eq-object.cl"
+    (
+    #9
+    _method
+      main
+      Object
+      #9
+      _block
+        #10
+        _let
+          x
+          B
+          #10
+          _new
+            B
+          : B
+          #10
+          _block
+            #11
+            _cond
+              #11
+              _eq
+                #11
+                _object
+                  x
+                : B
+                #11
+                _object
+                  x
+                : B
+              : Bool
+              #11
+              _int
+                0
+              : Int
+              #11
+              _dispatch
+                #11
+                _object
+                  self
+                : SELF_TYPE
+                abort
+                (
+                )
+              : Object
+            : Object
+            #12
+            _cond
+              #12
+              _eq
+                #12
+                _object
+                  x
+                : B
+                #12
+                _new
+                  B
+                : B
+              : Bool
+              #12
+              _dispatch
+                #12
+                _object
+                  self
+                : SELF_TYPE
+                abort
+                (
+                )
+              : Object
+              #12
+              _int
+                0
+              : Int
+            : Object
+            #13
+            _cond
+              #13
+              _eq
+                #13
+                _new
+                  A
+                : A
+                #13
+                _new
+                  A
+                : A
+              : Bool
+              #13
+              _dispatch
+                #13
+                _object
+                  self
+                : SELF_TYPE
+                abort
+                (
+                )
+              : Object
+              #13
+              _int
+                0
+              : Int
+            : Object
+            #14
+            _let
+              y
+              A
+              #14
+              _object
+                x
+              : B
+              #14
+              _block
+                #15
+                _cond
+                  #15
+                  _eq
+                    #15
+                    _object
+                      y
+                    : A
+                    #15
+                    _object
+                      x
+                    : B
+                  : Bool
+                  #15
+                  _int
+                    0
+                  : Int
+                  #15
+                  _dispatch
+                    #15
+                    _object
+                      self
+                    : SELF_TYPE
+                    abort
+                    (
+                    )
+                  : Object
+                : Object
+                #16
+                _cond
+                  #16
+                  _eq
+                    #16
+                    _dispatch
+                      #16
+                      _object
+                        y
+                      : A
+                      foo
+                      (
+                      #16
+                      _int
+                        3
+                      : Int
+                      )
+                    : A
+                    #16
+                    _object
+                      x
+                    : B
+                  : Bool
+                  #16
+                  _int
+                    0
+                  : Int
+                  #16
+                  _dispatch
+                    #16
+                    _object
+                      self
+                    : SELF_TYPE
+                    abort
+                    (
+                    )
+                  : Object
+                : Object
+              : Object
+            : Object
+          : Object
+        : Object
+        #19
+        _let
+          x
+          A
+          #0
+          _no_expr
+          : _no_type
+          #19
+          _let
+            y
+            B
+            #0
+            _no_expr
+            : _no_type
+            #19
+            _cond
+              #19
+              _eq
+                #19
+                _object
+                  x
+                : A
+                #19
+                _object
+                  y
+                : B
+              : Bool
+              #19
+              _int
+                0
+              : Int
+              #19
+              _dispatch
+                #19
+                _object
+                  self
+                : SELF_TYPE
+                abort
+                (
+                )
+              : Object
+            : Object
+          : Object
+        : Object
+      : Object
+    )

@@ -1,0 +1,38 @@
+#!/usr/bin/python -tt
+import os
+import sys
+import re
+
+def main(argv):
+  #  os.system('make cgen')
+    os.system('rm -f *.txt *.s')
+
+    for f in os.listdir(argv[1]):
+        if not (f.endswith('.cl') ):
+            continue
+        fname = argv[1] + '/' + f
+        print fname
+        os.system('./mycoolc %s -o 1.s' %(fname))
+        os.system('./ori_coolc   %s -o 2.s' %(fname))
+        os.system('spim  1.s > %s1.txt' %(fname))
+        os.system('spim  2.s > %s2.txt'%(fname))
+        os.system('diff %s1.txt %s2.txt > %s3.txt' %(fname, fname, fname))
+        display_diff_output('%s3.txt' %(fname), fname)
+        print ''
+
+def display_diff_output(filename, testcasename):
+	for line in open(filename):
+        # skip diff on the end statistics
+		if re.match("^---", line):
+			continue
+		if re.match("^\d+,\d+c\d+,\d+", line):
+			continue
+		if line.find("#instructions :") != -1 or line.find("#reads :") != -1:
+			continue
+		
+		print testcasename + '\t' + line.strip() 
+
+		
+if __name__ == '__main__':
+    main(sys.argv)
+

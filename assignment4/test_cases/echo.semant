@@ -1,0 +1,56 @@
+#1
+_program
+  #1
+  _class
+    Main
+    IO
+    "echo.cl"
+    (
+    #2
+    _method
+      main
+      Object
+      #2
+      _block
+        #3
+        _dispatch
+          #3
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #3
+          _dispatch
+            #3
+            _object
+              self
+            : SELF_TYPE
+            in_int
+            (
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #4
+        _dispatch
+          #4
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #4
+          _dispatch
+            #4
+            _object
+              self
+            : SELF_TYPE
+            in_string
+            (
+            )
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

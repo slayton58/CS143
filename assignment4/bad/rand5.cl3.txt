@@ -1,0 +1,24 @@
+34,36c34,52
+< No match in case statement for Class T0
+< Stats -- #instructions : 86643
+<          #reads : 16326  #writes 15194  #branches 17079  #other 38044
+---
+> vT6.m169
+> 157
+> vT6.m171
+> vT6.m178
+> vT6.m185
+> -88083951
+> vT6.m197
+> vT6.m189
+> -525215133
+> vT7.m110
+> 107
+> vT7.m115
+> vT8.m109
+> vT8.m112
+> vT8.m199
+> vT8.m202
+> COOL program successfully executed
+> Stats -- #instructions : 118700
+>          #reads : 22659  #writes 20729  #branches 24005  #other 51307

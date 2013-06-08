@@ -1,0 +1,12 @@
+We made two minor changes to our code:
+1. a typo of comment:
+-  if (cgen_debug) //cout << "Building CgenClassTable" << endl;
++  if (cgen_debug) cout << "Building CgenClassTable" << endl;
+
+2. The code() function was called at the wrong place. Just moved a single line of code.
+in cgen.cc:951
+-  code();
+in cgen.cc:155
++  env->cgen_table->code();
+
+after these two changes, all tests except rand1~rand5 should all pass. 

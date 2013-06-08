@@ -1,0 +1,579 @@
+#1
+_program
+  #1
+  _class
+    A
+    IO
+    "override.cl"
+    (
+    #2
+    _method
+      a
+      SELF_TYPE
+      #3
+      _dispatch
+        #3
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #3
+        _string
+          "A_a\n"
+        : String
+        )
+      : SELF_TYPE
+    #5
+    _method
+      b
+      SELF_TYPE
+      #6
+      _dispatch
+        #6
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #6
+        _string
+          "A_b\n"
+        : String
+        )
+      : SELF_TYPE
+    #8
+    _method
+      c
+      SELF_TYPE
+      #9
+      _dispatch
+        #9
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #9
+        _string
+          "A_c\n"
+        : String
+        )
+      : SELF_TYPE
+    #11
+    _method
+      s
+      SELF_TYPE
+      #12
+      _object
+        self
+      : SELF_TYPE
+    )
+  #15
+  _class
+    B
+    A
+    "override.cl"
+    (
+    #16
+    _method
+      b
+      SELF_TYPE
+      #17
+      _dispatch
+        #17
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #17
+        _string
+          "B_b\n"
+        : String
+        )
+      : SELF_TYPE
+    #19
+    _method
+      c
+      SELF_TYPE
+      #20
+      _dispatch
+        #20
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #20
+        _string
+          "B_c\n"
+        : String
+        )
+      : SELF_TYPE
+    #22
+    _method
+      d
+      SELF_TYPE
+      #23
+      _dispatch
+        #23
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #23
+        _string
+          "B_d\n"
+        : String
+        )
+      : SELF_TYPE
+    )
+  #26
+  _class
+    C
+    B
+    "override.cl"
+    (
+    #27
+    _method
+      c
+      SELF_TYPE
+      #28
+      _dispatch
+        #28
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #28
+        _string
+          "C_c\n"
+        : String
+        )
+      : SELF_TYPE
+    #30
+    _method
+      e
+      SELF_TYPE
+      #31
+      _dispatch
+        #31
+        _object
+          self
+        : SELF_TYPE
+        out_string
+        (
+        #31
+        _string
+          "C_e\n"
+        : String
+        )
+      : SELF_TYPE
+    )
+  #34
+  _class
+    Main
+    Object
+    "override.cl"
+    (
+    #35
+    _method
+      main
+      Object
+      #36
+      _block
+        #37
+        _let
+          x
+          C
+          #37
+          _dispatch
+            #37
+            _new
+              C
+            : C
+            s
+            (
+            )
+          : C
+          #37
+          _block
+            #37
+            _dispatch
+              #37
+              _object
+                x
+              : C
+              a
+              (
+              )
+            : C
+            #37
+            _dispatch
+              #37
+              _object
+                x
+              : C
+              b
+              (
+              )
+            : C
+            #37
+            _dispatch
+              #37
+              _object
+                x
+              : C
+              c
+              (
+              )
+            : C
+            #37
+            _dispatch
+              #37
+              _object
+                x
+              : C
+              d
+              (
+              )
+            : C
+            #37
+            _dispatch
+              #37
+              _object
+                x
+              : C
+              e
+              (
+              )
+            : C
+          : C
+        : C
+        #38
+        _let
+          x
+          B
+          #38
+          _dispatch
+            #38
+            _new
+              B
+            : B
+            s
+            (
+            )
+          : B
+          #38
+          _block
+            #38
+            _dispatch
+              #38
+              _object
+                x
+              : B
+              a
+              (
+              )
+            : B
+            #38
+            _dispatch
+              #38
+              _object
+                x
+              : B
+              b
+              (
+              )
+            : B
+            #38
+            _dispatch
+              #38
+              _object
+                x
+              : B
+              c
+              (
+              )
+            : B
+            #38
+            _dispatch
+              #38
+              _object
+                x
+              : B
+              d
+              (
+              )
+            : B
+          : B
+        : B
+        #39
+        _let
+          x
+          A
+          #39
+          _dispatch
+            #39
+            _new
+              A
+            : A
+            s
+            (
+            )
+          : A
+          #39
+          _block
+            #39
+            _dispatch
+              #39
+              _object
+                x
+              : A
+              a
+              (
+              )
+            : A
+            #39
+            _dispatch
+              #39
+              _object
+                x
+              : A
+              b
+              (
+              )
+            : A
+            #39
+            _dispatch
+              #39
+              _object
+                x
+              : A
+              c
+              (
+              )
+            : A
+          : A
+        : A
+        #40
+        _let
+          x
+          C
+          #40
+          _dispatch
+            #40
+            _dispatch
+              #40
+              _dispatch
+                #40
+                _dispatch
+                  #40
+                  _dispatch
+                    #40
+                    _new
+                      C
+                    : C
+                    s
+                    (
+                    )
+                  : C
+                  s
+                  (
+                  )
+                : C
+                s
+                (
+                )
+              : C
+              s
+              (
+              )
+            : C
+            s
+            (
+            )
+          : C
+          #40
+          _block
+            #40
+            _dispatch
+              #40
+              _object
+                x
+              : C
+              a
+              (
+              )
+            : C
+            #40
+            _dispatch
+              #40
+              _object
+                x
+              : C
+              b
+              (
+              )
+            : C
+            #40
+            _dispatch
+              #40
+              _object
+                x
+              : C
+              c
+              (
+              )
+            : C
+          : C
+        : C
+        #41
+        _let
+          x
+          B
+          #41
+          _dispatch
+            #41
+            _dispatch
+              #41
+              _dispatch
+                #41
+                _dispatch
+                  #41
+                  _dispatch
+                    #41
+                    _new
+                      B
+                    : B
+                    s
+                    (
+                    )
+                  : B
+                  s
+                  (
+                  )
+                : B
+                s
+                (
+                )
+              : B
+              s
+              (
+              )
+            : B
+            s
+            (
+            )
+          : B
+          #41
+          _block
+            #41
+            _dispatch
+              #41
+              _object
+                x
+              : B
+              a
+              (
+              )
+            : B
+            #41
+            _dispatch
+              #41
+              _object
+                x
+              : B
+              b
+              (
+              )
+            : B
+            #41
+            _dispatch
+              #41
+              _object
+                x
+              : B
+              c
+              (
+              )
+            : B
+          : B
+        : B
+        #42
+        _let
+          x
+          A
+          #42
+          _dispatch
+            #42
+            _dispatch
+              #42
+              _dispatch
+                #42
+                _dispatch
+                  #42
+                  _dispatch
+                    #42
+                    _new
+                      A
+                    : A
+                    s
+                    (
+                    )
+                  : A
+                  s
+                  (
+                  )
+                : A
+                s
+                (
+                )
+              : A
+              s
+              (
+              )
+            : A
+            s
+            (
+            )
+          : A
+          #42
+          _block
+            #42
+            _dispatch
+              #42
+              _object
+                x
+              : A
+              a
+              (
+              )
+            : A
+            #42
+            _dispatch
+              #42
+              _object
+                x
+              : A
+              b
+              (
+              )
+            : A
+            #42
+            _dispatch
+              #42
+              _object
+                x
+              : A
+              c
+              (
+              )
+            : A
+          : A
+        : A
+      : A
+    )

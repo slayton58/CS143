@@ -1,0 +1,170 @@
+#1
+_program
+  #1
+  _class
+    Main
+    Object
+    "eq-base.cl"
+    (
+    #2
+    _method
+      main
+      Object
+      #2
+      _block
+        #3
+        _cond
+          #3
+          _eq
+            #3
+            _bool
+              1
+            : Bool
+            #3
+            _bool
+              0
+            : Bool
+          : Bool
+          #3
+          _dispatch
+            #3
+            _object
+              self
+            : SELF_TYPE
+            abort
+            (
+            )
+          : Object
+          #3
+          _int
+            0
+          : Int
+        : Object
+        #4
+        _cond
+          #4
+          _eq
+            #4
+            _bool
+              1
+            : Bool
+            #4
+            _bool
+              1
+            : Bool
+          : Bool
+          #4
+          _int
+            0
+          : Int
+          #4
+          _dispatch
+            #4
+            _object
+              self
+            : SELF_TYPE
+            abort
+            (
+            )
+          : Object
+        : Object
+        #5
+        _cond
+          #5
+          _eq
+            #5
+            _string
+              "hello"
+            : String
+            #5
+            _dispatch
+              #5
+              _string
+                "hello"
+              : String
+              copy
+              (
+              )
+            : String
+          : Bool
+          #5
+          _int
+            0
+          : Int
+          #5
+          _dispatch
+            #5
+            _object
+              self
+            : SELF_TYPE
+            abort
+            (
+            )
+          : Object
+        : Object
+        #6
+        _let
+          a
+          String
+          #0
+          _no_expr
+          : _no_type
+          #6
+          _cond
+            #6
+            _eq
+              #6
+              _object
+                a
+              : String
+              #6
+              _string
+                ""
+              : String
+            : Bool
+            #6
+            _int
+              0
+            : Int
+            #6
+            _dispatch
+              #6
+              _object
+                self
+              : SELF_TYPE
+              abort
+              (
+              )
+            : Object
+          : Object
+        : Object
+        #7
+        _cond
+          #7
+          _eq
+            #7
+            _int
+              5
+            : Int
+            #7
+            _int
+              6
+            : Int
+          : Bool
+          #7
+          _dispatch
+            #7
+            _object
+              self
+            : SELF_TYPE
+            abort
+            (
+            )
+          : Object
+          #7
+          _int
+            0
+          : Int
+        : Object
+      : Object
+    )

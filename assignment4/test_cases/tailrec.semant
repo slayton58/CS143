@@ -1,0 +1,256 @@
+#1
+_program
+  #1
+  _class
+    Main
+    IO
+    "tailrec.cl"
+    (
+    #2
+    _method
+      fact
+      #2
+      _formal
+        n
+        Int
+      Int
+      #2
+      _dispatch
+        #2
+        _object
+          self
+        : SELF_TYPE
+        fact_helper
+        (
+        #2
+        _object
+          n
+        : Int
+        #2
+        _int
+          1
+        : Int
+        )
+      : Int
+    #3
+    _method
+      fact_helper
+      #3
+      _formal
+        n
+        Int
+      #3
+      _formal
+        c
+        Int
+      Int
+      #3
+      _cond
+        #3
+        _lt
+          #3
+          _object
+            n
+          : Int
+          #3
+          _int
+            2
+          : Int
+        : Bool
+        #3
+        _object
+          c
+        : Int
+        #3
+        _dispatch
+          #3
+          _object
+            self
+          : SELF_TYPE
+          fact_helper
+          (
+          #3
+          _sub
+            #3
+            _object
+              n
+            : Int
+            #3
+            _int
+              1
+            : Int
+          : Int
+          #3
+          _mul
+            #3
+            _object
+              c
+            : Int
+            #3
+            _object
+              n
+            : Int
+          : Int
+          )
+        : Int
+      : Int
+    #4
+    _method
+      main
+      Object
+      #4
+      _block
+        #5
+        _dispatch
+          #5
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #5
+          _dispatch
+            #5
+            _object
+              self
+            : SELF_TYPE
+            fact
+            (
+            #5
+            _int
+              1
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #5
+        _dispatch
+          #5
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #5
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #6
+        _dispatch
+          #6
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #6
+          _dispatch
+            #6
+            _object
+              self
+            : SELF_TYPE
+            fact
+            (
+            #6
+            _int
+              3
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #6
+        _dispatch
+          #6
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #6
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #7
+        _dispatch
+          #7
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #7
+          _dispatch
+            #7
+            _object
+              self
+            : SELF_TYPE
+            fact
+            (
+            #7
+            _int
+              10
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #7
+        _dispatch
+          #7
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #7
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #8
+        _dispatch
+          #8
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #8
+          _dispatch
+            #8
+            _object
+              self
+            : SELF_TYPE
+            fact
+            (
+            #8
+            _int
+              12
+            : Int
+            )
+          : Int
+          )
+        : SELF_TYPE
+        #8
+        _dispatch
+          #8
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #8
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

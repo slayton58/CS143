@@ -1,0 +1,234 @@
+#5
+_program
+  #5
+  _class
+    Base
+    IO
+    "new-self-init.cl"
+    (
+    #7
+    _attr
+      baseAttr
+      Int
+      #7
+      _block
+        #7
+        _dispatch
+          #7
+          _object
+            self
+          : SELF_TYPE
+          report
+          (
+          #7
+          _int
+            1
+          : Int
+          )
+        : SELF_TYPE
+        #7
+        _int
+          1
+        : Int
+      : Int
+    #9
+    _method
+      report
+      #9
+      _formal
+        value
+        Int
+      SELF_TYPE
+      #11
+      _block
+        #12
+        _dispatch
+          #12
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #12
+          _object
+            value
+          : Int
+          )
+        : SELF_TYPE
+        #13
+        _dispatch
+          #13
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #13
+          _string
+            "\n"
+          : String
+          )
+        : SELF_TYPE
+        #14
+        _object
+          self
+        : SELF_TYPE
+      : SELF_TYPE
+    #18
+    _method
+      duplicate
+      Base
+      #20
+      _new
+        SELF_TYPE
+      : SELF_TYPE
+    )
+  #25
+  _class
+    Derived
+    Base
+    "new-self-init.cl"
+    (
+    #27
+    _attr
+      derivedAttr
+      Int
+      #27
+      _block
+        #27
+        _dispatch
+          #27
+          _object
+            self
+          : SELF_TYPE
+          report
+          (
+          #27
+          _int
+            2
+          : Int
+          )
+        : SELF_TYPE
+        #27
+        _int
+          2
+        : Int
+      : Int
+    #29
+    _method
+      report
+      #29
+      _formal
+        value
+        Int
+      SELF_TYPE
+      #31
+      _block
+        #32
+        _dispatch
+          #32
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #32
+          _string
+            "old: "
+          : String
+          )
+        : SELF_TYPE
+        #33
+        _dispatch
+          #33
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #33
+          _object
+            derivedAttr
+          : Int
+          )
+        : SELF_TYPE
+        #34
+        _dispatch
+          #34
+          _object
+            self
+          : SELF_TYPE
+          out_string
+          (
+          #34
+          _string
+            ".  new: "
+          : String
+          )
+        : SELF_TYPE
+        #35
+        _assign
+          derivedAttr
+          #35
+          _object
+            value
+          : Int
+        : Int
+        #36
+        _static_dispatch
+          #36
+          _object
+            self
+          : SELF_TYPE
+          Base
+          report
+          (
+          #36
+          _object
+            derivedAttr
+          : Int
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )
+  #42
+  _class
+    Main
+    Object
+    "new-self-init.cl"
+    (
+    #44
+    _method
+      main
+      Object
+      #47
+      _dispatch
+        #47
+        _dispatch
+          #46
+          _dispatch
+            #46
+            _new
+              Derived
+            : Derived
+            report
+            (
+            #46
+            _int
+              5
+            : Int
+            )
+          : Derived
+          duplicate
+          (
+          )
+        : Base
+        report
+        (
+        #47
+        _int
+          29
+        : Int
+        )
+      : Base
+    )

@@ -1,0 +1,203 @@
+#1
+_program
+  #1
+  _class
+    Main
+    IO
+    "sequence.cl"
+    (
+    #2
+    _attr
+      a
+      Int
+      #2
+      _int
+        0
+      : Int
+    #3
+    _attr
+      b
+      Int
+      #3
+      _int
+        1
+      : Int
+    #4
+    _method
+      main
+      Object
+      #4
+      _block
+        #5
+        _assign
+          a
+          #5
+          _plus
+            #5
+            _object
+              b
+            : Int
+            #5
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #6
+        _assign
+          b
+          #6
+          _plus
+            #6
+            _object
+              a
+            : Int
+            #6
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #7
+        _assign
+          a
+          #7
+          _plus
+            #7
+            _object
+              b
+            : Int
+            #7
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #8
+        _assign
+          b
+          #8
+          _plus
+            #8
+            _object
+              a
+            : Int
+            #8
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #9
+        _assign
+          a
+          #9
+          _plus
+            #9
+            _object
+              b
+            : Int
+            #9
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #10
+        _assign
+          b
+          #10
+          _plus
+            #10
+            _object
+              a
+            : Int
+            #10
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #11
+        _assign
+          a
+          #11
+          _plus
+            #11
+            _object
+              b
+            : Int
+            #11
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #12
+        _assign
+          b
+          #12
+          _plus
+            #12
+            _object
+              a
+            : Int
+            #12
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #13
+        _assign
+          a
+          #13
+          _plus
+            #13
+            _object
+              b
+            : Int
+            #13
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #14
+        _assign
+          b
+          #14
+          _plus
+            #14
+            _object
+              a
+            : Int
+            #14
+            _int
+              1
+            : Int
+          : Int
+        : Int
+        #15
+        _dispatch
+          #15
+          _object
+            self
+          : SELF_TYPE
+          out_int
+          (
+          #15
+          _plus
+            #15
+            _object
+              a
+            : Int
+            #15
+            _object
+              b
+            : Int
+          : Int
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

@@ -1,0 +1,362 @@
+#1
+_program
+  #1
+  _class
+    A
+    Object
+    "case.cl"
+    (
+    )
+  #2
+  _class
+    B
+    A
+    "case.cl"
+    (
+    )
+  #3
+  _class
+    C
+    A
+    "case.cl"
+    (
+    )
+  #4
+  _class
+    D
+    B
+    "case.cl"
+    (
+    )
+  #5
+  _class
+    E
+    B
+    "case.cl"
+    (
+    )
+  #6
+  _class
+    F
+    D
+    "case.cl"
+    (
+    )
+  #7
+  _class
+    G
+    E
+    "case.cl"
+    (
+    )
+  #9
+  _class
+    Main
+    IO
+    "case.cl"
+    (
+    #10
+    _method
+      docase
+      #10
+      _formal
+        x
+        Object
+      SELF_TYPE
+      #11
+      _typcase
+        #11
+        _object
+          x
+        : Object
+        #12
+        _branch
+          a
+          A
+          #12
+          _dispatch
+            #12
+            _dispatch
+              #12
+              _object
+                self
+              : SELF_TYPE
+              out_string
+              (
+              #12
+              _dispatch
+                #12
+                _object
+                  a
+                : A
+                type_name
+                (
+                )
+              : String
+              )
+            : SELF_TYPE
+            out_string
+            (
+            #12
+            _string
+              " <= A\n"
+            : String
+            )
+          : SELF_TYPE
+        #13
+        _branch
+          z
+          Object
+          #13
+          _dispatch
+            #13
+            _dispatch
+              #13
+              _object
+                self
+              : SELF_TYPE
+              out_string
+              (
+              #13
+              _dispatch
+                #13
+                _object
+                  z
+                : Object
+                type_name
+                (
+                )
+              : String
+              )
+            : SELF_TYPE
+            out_string
+            (
+            #13
+            _string
+              " <= Object\n"
+            : String
+            )
+          : SELF_TYPE
+        #14
+        _branch
+          z
+          C
+          #14
+          _dispatch
+            #14
+            _dispatch
+              #14
+              _object
+                self
+              : SELF_TYPE
+              out_string
+              (
+              #14
+              _dispatch
+                #14
+                _object
+                  z
+                : C
+                type_name
+                (
+                )
+              : String
+              )
+            : SELF_TYPE
+            out_string
+            (
+            #14
+            _string
+              " <= C\n"
+            : String
+            )
+          : SELF_TYPE
+        #15
+        _branch
+          z
+          E
+          #15
+          _dispatch
+            #15
+            _dispatch
+              #15
+              _object
+                self
+              : SELF_TYPE
+              out_string
+              (
+              #15
+              _dispatch
+                #15
+                _object
+                  z
+                : E
+                type_name
+                (
+                )
+              : String
+              )
+            : SELF_TYPE
+            out_string
+            (
+            #15
+            _string
+              " <= E\n"
+            : String
+            )
+          : SELF_TYPE
+        #16
+        _branch
+          z
+          F
+          #16
+          _dispatch
+            #16
+            _dispatch
+              #16
+              _object
+                self
+              : SELF_TYPE
+              out_string
+              (
+              #16
+              _dispatch
+                #16
+                _object
+                  z
+                : F
+                type_name
+                (
+                )
+              : String
+              )
+            : SELF_TYPE
+            out_string
+            (
+            #16
+            _string
+              " <= F\n"
+            : String
+            )
+          : SELF_TYPE
+      : SELF_TYPE
+    #19
+    _method
+      main
+      Object
+      #19
+      _block
+        #20
+        _dispatch
+          #20
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #20
+          _new
+            A
+          : A
+          )
+        : SELF_TYPE
+        #21
+        _dispatch
+          #21
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #21
+          _new
+            B
+          : B
+          )
+        : SELF_TYPE
+        #22
+        _dispatch
+          #22
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #22
+          _new
+            C
+          : C
+          )
+        : SELF_TYPE
+        #23
+        _dispatch
+          #23
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #23
+          _new
+            D
+          : D
+          )
+        : SELF_TYPE
+        #24
+        _dispatch
+          #24
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #24
+          _new
+            E
+          : E
+          )
+        : SELF_TYPE
+        #25
+        _dispatch
+          #25
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #25
+          _new
+            F
+          : F
+          )
+        : SELF_TYPE
+        #26
+        _dispatch
+          #26
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #26
+          _new
+            G
+          : G
+          )
+        : SELF_TYPE
+        #27
+        _dispatch
+          #27
+          _object
+            self
+          : SELF_TYPE
+          docase
+          (
+          #27
+          _object
+            self
+          : SELF_TYPE
+          )
+        : SELF_TYPE
+      : SELF_TYPE
+    )

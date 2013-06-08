@@ -1,0 +1,14 @@
+SPIM Version 6.5 of January 4, 2003
+Copyright 1990-2003 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/class/cs143/lib/trap.handler
+vT0.m79
+131
+vT0.m82
+vT0.m83
+vT1.m82
+vT1.m88
+No match in case statement for Class Bool
+Stats -- #instructions : 18580
+         #reads : 3452  #writes 3338  #branches 3611  #other 8179
