@@ -939,7 +939,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s, Environment *env_) :
    stringclasstag = 0;
 
    enterscope();
-   if (cgen_debug) //cout << "Building CgenClassTable" << endl;
+   if (cgen_debug) cout << "Building CgenClassTable" << endl;
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
